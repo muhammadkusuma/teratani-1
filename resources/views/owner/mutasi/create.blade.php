@@ -22,12 +22,16 @@
 
                 <div class="p-3 bg-red-50 border border-red-200">
                     <label class="block font-bold mb-1 text-red-800">Dari Toko (Asal)</label>
-                    <select name="id_toko_asal" class="w-full p-1 border border-gray-400" required>
+                    <select name="id_toko_asal" 
+                            class="w-full p-1 border border-gray-400" 
+                            required
+                            @change="fetchProduk($event.target.value)">
                         <option value="">-- Pilih Toko Asal --</option>
                         @foreach ($tokos as $toko)
                             <option value="{{ $toko->id_toko }}">{{ $toko->nama_toko }}</option>
                         @endforeach
                     </select>
+                    <p class="text-xs text-red-600 mt-1">*Pilih toko asal untuk memuat produk</p>
                 </div>
 
                 <div class="p-3 bg-green-50 border border-green-200">
@@ -42,11 +46,16 @@
             </div>
 
             <h3 class="font-bold mb-2 border-b border-gray-400 pb-1">Daftar Barang yang Ditransfer</h3>
-            <table class="w-full border-collapse border border-gray-400 mb-4">
+            
+            <div x-show="isLoading" class="text-center py-4 text-gray-500">
+                Memuat data produk...
+            </div>
+
+            <table class="w-full border-collapse border border-gray-400 mb-4" x-show="!isLoading">
                 <thead class="bg-gray-200">
                     <tr>
                         <th class="border border-gray-400 p-2 w-10">No</th>
-                        <th class="border border-gray-400 p-2">Nama Produk</th>
+                        <th class="border border-gray-400 p-2">Nama Produk (Stok Saat Ini)</th>
                         <th class="border border-gray-400 p-2 w-32">Qty Kirim</th>
                         <th class="border border-gray-400 p-2 w-20">Aksi</th>
                     </tr>
@@ -56,14 +65,20 @@
                         <tr>
                             <td class="border border-gray-300 p-2 text-center" x-text="index + 1"></td>
                             <td class="border border-gray-300 p-2">
-                                <select :name="'items[' + index + '][id_produk]'" class="w-full p-1 border border-gray-300"
-                                    required>
+                                <select :name="'items[' + index + '][id_produk]'" 
+                                        class="w-full p-1 border border-gray-300"
+                                        required>
                                     <option value="">-- Pilih Produk --</option>
-                                    @foreach ($produks as $prod)
-                                        <option value="{{ $prod->id_produk }}">{{ $prod->nama_produk }}
-                                            ({{ $prod->kode_produk }})</option>
-                                    @endforeach
+                                    
+                                    <template x-for="prod in listProduk" :key="prod.id_produk">
+                                        <option :value="prod.id_produk" 
+                                                x-text="prod.nama_produk + ' (' + prod.kode_produk + ') - Stok: ' + prod.stok_fisik">
+                                        </option>
+                                    </template>
                                 </select>
+                                <div x-show="listProduk.length === 0" class="text-xs text-red-500 mt-1">
+                                    Pilih Toko Asal terlebih dahulu / Produk kosong.
+                                </div>
                             </td>
                             <td class="border border-gray-300 p-2">
                                 <input type="number" :name="'items[' + index + '][qty]'"
@@ -97,10 +112,36 @@
     <script>
         function mutasiForm() {
             return {
+                isLoading: false,
+                listProduk: [], // Menyimpan daftar produk yang diambil via AJAX
                 rows: [{
                     id_produk: '',
                     qty: 1
                 }],
+                
+                // Fetch Produk saat Toko Asal berubah
+                async fetchProduk(idToko) {
+                    if (!idToko) {
+                        this.listProduk = [];
+                        return;
+                    }
+                    
+                    this.isLoading = true;
+                    // Reset rows saat ganti toko agar tidak error
+                    this.rows = [{ id_produk: '', qty: 1 }]; 
+
+                    try {
+                        const response = await fetch(`/owner/mutasi/get-produk/${idToko}`);
+                        const data = await response.json();
+                        this.listProduk = data;
+                    } catch (error) {
+                        console.error('Gagal mengambil produk:', error);
+                        alert('Gagal mengambil data produk dari toko terpilih.');
+                    } finally {
+                        this.isLoading = false;
+                    }
+                },
+
                 addRow() {
                     this.rows.push({
                         id_produk: '',

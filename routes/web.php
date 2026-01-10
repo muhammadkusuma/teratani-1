@@ -1,9 +1,10 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Owner\BisnisController;
-use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Owner\BisnisController;
+use App\Http\Controllers\Owner\MutasiController;
+use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\Owner\TokoController as OwnerTokoController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TenantController;
@@ -77,8 +78,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');
 
         Route::resource('toko.produk', ProdukController::class);
+// Tambahkan route ini untuk AJAX
+        Route::get('/mutasi/get-produk/{id_toko}', [MutasiController::class, 'getProdukByToko'])->name('mutasi.get-produk');
 
-        Route::resource('mutasi', \App\Http\Controllers\Owner\MutasiController::class);
+        // ... route resource mutasi yang sudah ada ...
+        Route::resource('mutasi', MutasiController::class);
     });
 
     // --- SUPERADMIN DASHBOARD ---
@@ -93,7 +97,6 @@ Route::middleware(['auth'])->group(function () {
     });
 
 });
-
 
 Route::post('/ajax/kategori', [App\Http\Controllers\KategoriController::class, 'storeAjax'])->name('ajax.kategori.store');
 Route::post('/ajax/satuan', [App\Http\Controllers\SatuanController::class, 'storeAjax'])->name('ajax.satuan.store');
