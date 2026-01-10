@@ -1,167 +1,172 @@
 @extends('layouts.owner')
 
 @section('content')
-    <div
-        style="font-family: 'MS Sans Serif', Arial, sans-serif; font-size: 11px; background-color: #c0c0c0; min-height: 100vh; padding-bottom: 50px;">
+    {{-- 
+        PERBAIKAN UTAMA:
+        Ganti 'min-height: 100vh' menjadi 'height: calc(100vh - 160px)'.
+        Angka '160px' adalah estimasi tinggi Header Hijau + Menu Biru + Breadcrumb.
+        Silakan sesuaikan angka 160px ini jika masih kurang pas (misal jadi 180px atau 140px).
+    --}}
+    <div class="w-full flex flex-col font-sans text-[11px] bg-[#c0c0c0]"
+        style="font-family: 'MS Sans Serif', Arial, sans-serif; height: calc(100vh - 160px); overflow: hidden;">
 
-        <div class="max-w-[1200px] mx-auto p-2">
-
-            {{-- HEADER KASIR --}}
-            <div class="mb-2 border-b border-gray-500 pb-1 flex justify-between items-end">
-                <div>
-                    <h1 class="font-bold text-lg text-blue-900 uppercase leading-none">Point of Sale (POS) v2.0</h1>
-                    <div class="text-gray-600 mt-1">
-                        Kasir: <span
-                            class="font-bold text-black bg-white px-1 border border-gray-400">{{ Auth::user()->name }}</span>
-                    </div>
-                </div>
-                <div
-                    class="text-right font-mono font-bold text-xl bg-black text-green-500 px-3 py-1 border-2 border-gray-500 border-b-white border-r-white">
-                    <span id="headerTotal">Rp 0</span>
+        {{-- 1. HEADER KASIR (Internal) --}}
+        <div class="shrink-0 p-2 border-b border-gray-500 flex justify-between items-end bg-[#c0c0c0]">
+            <div>
+                <h1 class="font-bold text-lg text-blue-900 uppercase leading-none">Point of Sale (POS) v2.0</h1>
+                <div class="text-gray-600 mt-1">
+                    Kasir: <span
+                        class="font-bold text-black bg-white px-1 border border-gray-400">{{ Auth::user()->name }}</span>
                 </div>
             </div>
+            <div
+                class="text-right font-mono font-bold text-xl bg-black text-green-500 px-3 py-1 border-2 border-gray-500 border-b-white border-r-white">
+                <span id="headerTotal">Rp 0</span>
+            </div>
+        </div>
 
-            <div class="flex flex-col md:flex-row gap-2 h-[85vh]">
+        {{-- 2. MAIN CONTENT (Mengisi sisa ruang dibawah header kasir) --}}
+        <div class="flex-1 flex gap-2 p-2 min-h-0 overflow-hidden">
 
-                {{-- KOLOM KIRI: DAFTAR PRODUK & PENCARIAN --}}
-                <div class="flex-1 flex flex-col h-full">
+            {{-- KOLOM KIRI: DAFTAR PRODUK --}}
+            <div class="flex-1 flex flex-col h-full min-h-0">
 
-                    {{-- Search Bar Retro --}}
-                    <div class="bg-[#d4d0c8] border-2 border-white border-r-black border-b-black p-2 mb-2 shadow-sm">
-                        <div class="flex gap-2 items-center">
-                            <span class="font-bold">CARI [F2]:</span>
-                            <div class="relative flex-1">
-                                <input type="text" id="searchProduct"
-                                    class="w-full px-2 py-1 border-2 border-gray-400 border-l-black border-t-black focus:outline-none focus:bg-yellow-50 uppercase font-bold"
-                                    placeholder="KETIK NAMA / SCAN BARCODE..." autofocus>
-                                <div id="loading"
-                                    class="absolute right-2 top-1 d-none text-red-600 font-bold text-[10px]">
-                                    LOADING...
-                                </div>
+                {{-- Search Bar (Fixed Height) --}}
+                <div class="shrink-0 bg-[#d4d0c8] border-2 border-white border-r-black border-b-black p-2 mb-2 shadow-sm">
+                    <div class="flex gap-2 items-center">
+                        <span class="font-bold whitespace-nowrap">CARI [F2]:</span>
+                        <div class="relative flex-1">
+                            <input type="text" id="searchProduct"
+                                class="w-full px-2 py-1 border-2 border-gray-400 border-l-black border-t-black focus:outline-none focus:bg-yellow-50 uppercase font-bold"
+                                placeholder="KETIK NAMA / SCAN BARCODE..." autofocus>
+                            <div id="loading" class="absolute right-2 top-1 d-none text-red-600 font-bold text-[10px]">
+                                LOADING...
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    {{-- Product Grid Container --}}
-                    <div class="flex-1 bg-white border-2 border-gray-400 border-l-black border-t-black overflow-y-auto p-2">
-                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2" id="productList">
-                            {{-- Loop Awal Produk --}}
-                            @foreach ($produk as $p)
-                                @php
-                                    $stok = $p->stokToko->stok_fisik ?? 0;
-                                    $harga = $p->harga_jual_umum ?? 0;
-                                @endphp
-                                <div class="cursor-pointer group product-item"
-                                    onclick="addToCart({{ $p->id_produk }}, '{{ addslashes($p->nama_produk) }}', {{ $harga }}, {{ $stok }})">
-                                    <div
-                                        class="bg-[#d4d0c8] border-2 border-white border-r-black border-b-black p-1 hover:bg-blue-100 active:border-t-black active:border-l-black h-full flex flex-col justify-between">
-                                        <div class="text-center leading-tight">
-                                            <div
-                                                class="font-bold text-[10px] text-blue-900 mb-1 line-clamp-2 h-8 overflow-hidden">
-                                                {{ $p->nama_produk }}</div>
-                                            <div
-                                                class="bg-black text-yellow-300 font-mono text-[11px] px-1 mb-1 border border-gray-500">
-                                                Rp {{ number_format($harga, 0, ',', '.') }}
-                                            </div>
-                                            <div
-                                                class="text-[9px] {{ $stok > 0 ? 'text-black' : 'text-red-600 font-bold bg-yellow-200' }}">
-                                                Stok: {{ $stok }}
-                                            </div>
+                {{-- Product Grid (Scrollable Area) --}}
+                <div
+                    class="flex-1 bg-white border-2 border-gray-400 border-l-black border-t-black overflow-y-auto p-2 custom-scrollbar">
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2" id="productList">
+                        @foreach ($produk as $p)
+                            @php
+                                $stok = $p->stokToko->stok_fisik ?? 0;
+                                $harga = $p->harga_jual_umum ?? 0;
+                            @endphp
+                            <div class="cursor-pointer group product-item h-full"
+                                onclick="addToCart({{ $p->id_produk }}, '{{ addslashes($p->nama_produk) }}', {{ $harga }}, {{ $stok }})">
+                                <div
+                                    class="bg-[#d4d0c8] border-2 border-white border-r-black border-b-black p-1 hover:bg-blue-100 active:border-t-black active:border-l-black h-full flex flex-col justify-between min-h-[80px]">
+                                    <div class="text-center leading-tight">
+                                        <div
+                                            class="font-bold text-[10px] text-blue-900 mb-1 line-clamp-2 h-8 overflow-hidden">
+                                            {{ $p->nama_produk }}
+                                        </div>
+                                        <div
+                                            class="bg-black text-yellow-300 font-mono text-[11px] px-1 mb-1 border border-gray-500">
+                                            Rp {{ number_format($harga, 0, ',', '.') }}
+                                        </div>
+                                        <div
+                                            class="text-[9px] {{ $stok > 0 ? 'text-black' : 'text-red-600 font-bold bg-yellow-200' }}">
+                                            Stok: {{ $stok }}
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
-
-                {{-- KOLOM KANAN: KERANJANG & PEMBAYARAN --}}
-                <div
-                    class="w-full md:w-[380px] flex flex-col h-full bg-[#d4d0c8] border-2 border-white border-r-black border-b-black shadow-lg p-1">
-
-                    {{-- Title Bar --}}
-                    <div
-                        class="bg-blue-800 text-white px-2 py-1 font-bold text-center mb-1 text-[11px] bg-gradient-to-r from-blue-800 to-blue-600">
-                        KERANJANG BELANJA
-                    </div>
-
-                    {{-- Tabel Keranjang --}}
-                    <div
-                        class="flex-1 bg-white border-2 border-gray-400 border-l-black border-t-black overflow-y-auto mb-1 relative h-64">
-                        <table class="w-full border-collapse">
-                            <thead class="sticky top-0 bg-gray-200 text-black text-[10px] border-b border-black z-10">
-                                <tr>
-                                    <th class="px-1 text-left">ITEM</th>
-                                    <th class="px-1 text-center w-10">QTY</th>
-                                    <th class="px-1 text-right w-20">SUB</th>
-                                    <th class="px-1 w-5"></th>
-                                </tr>
-                            </thead>
-                            <tbody id="cartTableBody" class="text-[11px] font-mono"></tbody>
-                        </table>
-                    </div>
-
-                    {{-- Panel Kalkulasi (Form Pembayaran) --}}
-                    <div class="border-t border-white pt-1 space-y-1">
-
-                        {{-- Total Box VFD Style --}}
-                        <div
-                            class="bg-black text-green-500 p-2 font-mono text-right border-2 border-gray-500 border-b-white border-r-white mb-2">
-                            <div class="text-[9px] text-green-700">TOTAL TAGIHAN</div>
-                            <div class="text-3xl font-bold leading-none" id="displayTotal">0</div>
-                        </div>
-
-                        {{-- Form Input --}}
-                        <div class="grid grid-cols-3 gap-1 items-center mb-1">
-                            <label class="font-bold text-right col-span-1">Pelanggan:</label>
-                            <select id="pelanggan"
-                                class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black bg-white">
-                                <option value="">- UMUM -</option>
-                                @foreach ($pelanggan as $plg)
-                                    <option value="{{ $plg->id_pelanggan }}">{{ $plg->nama_pelanggan }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-1 items-center mb-1">
-                            <label class="font-bold text-right col-span-1">Metode:</label>
-                            <select id="metodeBayar" onchange="hitungKembalian()"
-                                class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black bg-white">
-                                <option value="Tunai">TUNAI (CASH)</option>
-                                <option value="Transfer">TRANSFER / QRIS</option>
-                                <option value="Hutang">HUTANG (TEMPO)</option>
-                            </select>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-1 items-center mb-1">
-                            <label class="font-bold text-right col-span-1">BAYAR [F4]:</label>
-                            <input type="number" id="inputBayar" oninput="hitungKembalian()"
-                                class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black font-bold text-right focus:bg-yellow-50 focus:outline-none text-blue-900"
-                                placeholder="0">
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-1 items-center mb-2">
-                            <label class="font-bold text-right col-span-1" id="labelKembalian">KEMBALI:</label>
-                            <div id="textKembalian"
-                                class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black font-bold text-right bg-gray-200 text-black">
-                                Rp 0
                             </div>
-                        </div>
-
-                        {{-- Tombol Aksi --}}
-                        <button onclick="prosesBayar()"
-                            class="w-full py-3 bg-[#d4d0c8] border-2 border-white border-r-black border-b-black active:border-t-black active:border-l-black active:bg-gray-400 font-bold text-lg flex items-center justify-center gap-2 hover:bg-green-100 text-green-900 transition-colors shadow-sm">
-                            <i class="fas fa-print"></i> PROSES BAYAR [F10]
-                        </button>
-
+                        @endforeach
                     </div>
                 </div>
-
             </div>
+
+            {{-- KOLOM KANAN: KERANJANG --}}
+            <div
+                class="w-[380px] flex flex-col h-full bg-[#d4d0c8] border-2 border-white border-r-black border-b-black shadow-lg p-1 shrink-0 min-h-0">
+
+                {{-- Title (Fixed) --}}
+                <div
+                    class="shrink-0 bg-blue-800 text-white px-2 py-1 font-bold text-center mb-1 text-[11px] bg-gradient-to-r from-blue-800 to-blue-600">
+                    KERANJANG BELANJA
+                </div>
+
+                {{-- Tabel Keranjang (Scrollable - Mengisi sisa ruang vertikal) --}}
+                <div
+                    class="flex-1 bg-white border-2 border-gray-400 border-l-black border-t-black overflow-y-auto mb-1 relative custom-scrollbar">
+                    <table class="w-full border-collapse">
+                        <thead class="sticky top-0 bg-gray-200 text-black text-[10px] border-b border-black z-10">
+                            <tr>
+                                <th class="px-1 text-left w-5">#</th>
+                                <th class="px-1 text-left">ITEM</th>
+                                <th class="px-1 text-center w-8">QTY</th>
+                                <th class="px-1 text-right w-16">TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartTableBody" class="text-[11px] font-mono">
+                            {{-- JS akan mengisi ini --}}
+                        </tbody>
+                    </table>
+                </div>
+
+                {{-- Panel Pembayaran (Fixed Bottom - Selalu terlihat) --}}
+                <div class="shrink-0 border-t border-white pt-1 space-y-1">
+
+                    {{-- Total Box --}}
+                    <div
+                        class="bg-black text-green-500 p-2 font-mono text-right border-2 border-gray-500 border-b-white border-r-white mb-2">
+                        <div class="text-[9px] text-green-700">TOTAL TAGIHAN</div>
+                        <div class="text-3xl font-bold leading-none" id="displayTotal">0</div>
+                    </div>
+
+                    {{-- Inputs --}}
+                    <div class="grid grid-cols-3 gap-1 items-center mb-1">
+                        <label class="font-bold text-right col-span-1">Pelanggan:</label>
+                        <select id="pelanggan"
+                            class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black bg-white focus:outline-none">
+                            <option value="">- UMUM -</option>
+                            @foreach ($pelanggan as $plg)
+                                <option value="{{ $plg->id_pelanggan }}">{{ $plg->nama_pelanggan }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1 items-center mb-1">
+                        <label class="font-bold text-right col-span-1">Metode:</label>
+                        <select id="metodeBayar" onchange="hitungKembalian()"
+                            class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black bg-white focus:outline-none">
+                            <option value="Tunai">TUNAI (CASH)</option>
+                            <option value="Transfer">TRANSFER / QRIS</option>
+                            <option value="Hutang">HUTANG (TEMPO)</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1 items-center mb-1">
+                        <label class="font-bold text-right col-span-1">BAYAR [F4]:</label>
+                        <input type="number" id="inputBayar" oninput="hitungKembalian()"
+                            class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black font-bold text-right focus:bg-yellow-50 focus:outline-none text-blue-900"
+                            placeholder="0">
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1 items-center mb-2">
+                        <label class="font-bold text-right col-span-1" id="labelKembalian">KEMBALI:</label>
+                        <div id="textKembalian"
+                            class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black font-bold text-right bg-gray-200 text-black">
+                            Rp 0
+                        </div>
+                    </div>
+
+                    <button onclick="prosesBayar()"
+                        class="w-full py-3 bg-[#d4d0c8] border-2 border-white border-r-black border-b-black active:border-t-black active:border-l-black active:bg-gray-400 font-bold text-lg flex items-center justify-center gap-2 hover:bg-green-100 text-green-900 transition-colors shadow-sm cursor-pointer">
+                        <i class="fas fa-print"></i> PROSES BAYAR [F10]
+                    </button>
+
+                </div>
+            </div>
+
         </div>
     </div>
 
-    {{-- Script JavaScript --}}
+    {{-- Script JavaScript (Tetap Sama) --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         let cart = [];
@@ -221,18 +226,16 @@
                     total += sub;
                     html += `
                     <tr class="border-b border-gray-300 hover:bg-blue-50 group">
-                        <td class="px-1 py-1 truncate max-w-[120px]" title="${item.nama}">
-                            ${item.nama}
+                        <td class="px-1 py-1 text-center"><button class="text-red-600 font-bold hover:bg-red-200 px-1" onclick="hapusItem(${idx})">x</button></td>
+                        <td class="px-1 py-1 truncate max-w-[120px]" title="${item.name}">
+                            ${item.name}
                             <div class="text-[9px] text-gray-500">@ ${new Intl.NumberFormat('id-ID').format(item.harga)}</div>
                         </td>
                         <td class="px-1 py-1 text-center">
-                            <input type="number" class="w-10 text-center border border-gray-400 text-[10px] focus:bg-yellow-100 p-0" 
+                            <input type="number" class="w-8 text-center border border-gray-400 text-[10px] focus:bg-yellow-100 p-0" 
                                 value="${item.qty}" onchange="updateQty(${idx}, this.value)">
                         </td>
                         <td class="px-1 py-1 text-right font-mono">${new Intl.NumberFormat('id-ID').format(sub)}</td>
-                        <td class="px-1 py-1 text-center">
-                            <button class="text-red-600 font-bold hover:bg-red-200 px-1 border border-transparent hover:border-red-400" onclick="hapusItem(${idx})">x</button>
-                        </td>
                     </tr>`;
                 });
             }
@@ -262,7 +265,6 @@
             renderCart();
         }
 
-        // --- LOGIC HITUNG BAYAR ---
         function hitungKembalian() {
             let total = cart.reduce((a, b) => a + (b.harga * b.qty), 0);
             let bayar = parseFloat($('#inputBayar').val()) || 0;
@@ -288,7 +290,6 @@
             }
         }
 
-        // --- LOGIC AJAX SEARCH ---
         let timer;
         $('#searchProduct').on('keyup', function() {
             clearTimeout(timer);
@@ -307,22 +308,20 @@
                     if (data.length === 0) {
                         $('#productList').html(
                             '<div class="col-span-full text-center text-gray-500 italic py-4">-- PRODUK TIDAK DITEMUKAN --</div>'
-                        );
+                            );
                     } else {
                         data.forEach(p => {
                             let stok = p.stok_toko ? p.stok_toko.stok_fisik : 0;
-                            let safeName = p.nama_produk.replace(/'/g,
-                                "\\'"); // Escape single quotes
+                            let safeName = p.nama_produk.replace(/'/g, "\\'");
                             let hargaFmt = new Intl.NumberFormat('id-ID').format(p
                                 .harga_jual_umum);
                             let stokClass = stok > 0 ? 'text-black' :
                                 'text-red-600 font-bold bg-yellow-200';
 
-                            // TEMPLATE HTML GENERATOR (Sesuai Gaya Retro)
                             let card = `
-                                <div class="cursor-pointer group product-item"
+                                <div class="cursor-pointer group product-item h-full"
                                      onclick="addToCart(${p.id_produk}, '${safeName}', ${p.harga_jual_umum}, ${stok})">
-                                    <div class="bg-[#d4d0c8] border-2 border-white border-r-black border-b-black p-1 hover:bg-blue-100 active:border-t-black active:border-l-black h-full flex flex-col justify-between">
+                                    <div class="bg-[#d4d0c8] border-2 border-white border-r-black border-b-black p-1 hover:bg-blue-100 active:border-t-black active:border-l-black h-full flex flex-col justify-between min-h-[80px]">
                                         <div class="text-center leading-tight">
                                             <div class="font-bold text-[10px] text-blue-900 mb-1 line-clamp-2 h-8 overflow-hidden">${p.nama_produk}</div>
                                             <div class="bg-black text-yellow-300 font-mono text-[11px] px-1 mb-1 border border-gray-500">
@@ -341,10 +340,8 @@
             }, 300);
         });
 
-        // --- PROSES TRANSAKSI ---
         function prosesBayar() {
             if (cart.length === 0) return alert('KERANJANG KOSONG!');
-
             let total = cart.reduce((a, b) => a + (b.harga * b.qty), 0);
             let bayar = parseFloat($('#inputBayar').val()) || 0;
             let metode = $('#metodeBayar').val();
@@ -355,7 +352,6 @@
                 return;
             }
 
-            // Disable button
             let btn = $('button[onclick="prosesBayar()"]');
             let oriText = btn.html();
             btn.prop('disabled', true).text('MEMPROSES...');
@@ -368,10 +364,8 @@
                     metode_bayar: metode
                 })
                 .done(res => {
-                    // Open Print Window
                     let printUrl = "{{ url('owner/kasir/cetak') }}/" + res.id_penjualan;
                     window.open(printUrl, 'Struk', 'width=400,height=600');
-
                     alert('TRANSAKSI BERHASIL!');
                     location.reload();
                 })
@@ -381,4 +375,23 @@
                 });
         }
     </script>
+
+    {{-- Style Tambahan --}}
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #e0e0e0;
+            border-left: 1px solid #808080;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            border: 2px solid #fff;
+            border-right: 2px solid #404040;
+            border-bottom: 2px solid #404040;
+        }
+    </style>
 @endsection
