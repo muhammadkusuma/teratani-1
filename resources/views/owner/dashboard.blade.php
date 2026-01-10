@@ -11,7 +11,7 @@
             <div class="flex items-center gap-2">
                 <div class="bg-white text-teal-700 font-bold px-1 border border-gray-600">SYS</div>
                 <div>
-                    <h1 class="text-sm font-bold tracking-wider uppercase">Executive Information System</h1>
+                    <h1 class="text-sm font-bold tracking-wider uppercase">{{ session('toko_active_nama') ?? 'NaN' }}</h1>
                     <p class="text-[9px] text-teal-200">Panel Kontrol Utama - {{ session('toko_active_nama') ?? 'Pusat' }}
                     </p>
                 </div>

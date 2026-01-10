@@ -6,7 +6,7 @@ use App\Models\KartuPiutang;
 use App\Models\LogStok;
 use App\Models\Pelanggan;
 use App\Models\Penjualan;
-use App\Models\PenjualanDetail; // Pastikan model ini di-use
+use App\Models\PenjualanDetail;
 use App\Models\Produk;
 use App\Models\StokToko;
 use App\Models\Toko;
@@ -16,22 +16,40 @@ use Illuminate\Support\Facades\DB;
 
 class KasirController extends Controller
 {
+    /**
+     * Mendapatkan ID Toko yang sedang aktif.
+     * Logika: Session -> Toko Pusat -> Toko Pertama
+     */
     private function getTokoAktif()
     {
-        if (session()->has('id_toko_aktif')) {
-            return session('id_toko_aktif');
+        // 1. Cek apakah sudah ada di session (Prioritas Utama)
+        if (session()->has('toko_active_id')) {
+            return session('toko_active_id');
         }
 
-        $user   = Auth::user();
+        $user = Auth::user();
+
+        // 2. Ambil tenant user (menggunakan properti tenants, bukan method tenants() untuk lazy loading jika memungkinkan, tapi tenants()->first() lebih aman di sini)
         $tenant = $user->tenants()->first();
 
-        if ($tenant) {
-            $toko = Toko::where('id_tenant', $tenant->id_tenant)->first();
-            if ($toko) {
-                session(['id_toko_aktif' => $toko->id_toko]);
-                return $toko->id_toko;
-            }
+        // VALIDASI: Pastikan user memiliki tenant
+        if (! $tenant) {
+            return null;
         }
+
+        // 3. Cari Toko berdasarkan Tenant
+        // Perbaikan: Prioritaskan toko yang 'is_pusat' = 1, jika tidak ada baru ambil berdasarkan ID terlama
+        $toko = Toko::where('id_tenant', $tenant->id_tenant)
+            ->orderBy('is_pusat', 'desc') // Prioritas Toko Pusat
+            ->orderBy('id_toko', 'asc')   // Fallback ke toko pertama dibuat
+            ->first();
+
+        if ($toko) {
+            // Simpan ke session agar request berikutnya tidak perlu query DB lagi
+            session(['id_toko_aktif' => $toko->id_toko]);
+            return $toko->id_toko;
+        }
+
         return null;
     }
 
@@ -40,13 +58,15 @@ class KasirController extends Controller
         $id_toko = $this->getTokoAktif();
 
         if (! $id_toko) {
-            return redirect()->back()->with('error', 'Anda belum memiliki toko.');
+            // Ubah redirect agar lebih informatif jika tenant/toko tidak ditemukan
+            return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan Toko/Cabang manapun.');
         }
 
         $toko      = Toko::find($id_toko);
         $nama_toko = $toko ? $toko->nama_toko : 'Toko Tidak Diketahui';
 
         // Load awal: Hanya produk dengan stok > 0 agar rapi
+        // Menggunakan id_toko yang sudah dipastikan valid
         $produk = Produk::whereHas('stokToko', function ($q) use ($id_toko) {
             $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
         })->with(['stokToko' => function ($q) use ($id_toko) {
@@ -98,7 +118,7 @@ class KasirController extends Controller
 
         $id_toko = $this->getTokoAktif();
         if (! $id_toko) {
-            return response()->json(['status' => 'error', 'message' => 'Sesi toko kadaluarsa.'], 403);
+            return response()->json(['status' => 'error', 'message' => 'Sesi toko kadaluarsa atau tidak valid.'], 403);
         }
 
         $user = Auth::user();
@@ -110,6 +130,7 @@ class KasirController extends Controller
 
             // 1. Cek Stok & Hitung
             foreach ($request->items as $item) {
+                // Pastikan stok dicek berdasarkan toko yang aktif
                 $produk = Produk::with(['stokToko' => function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko);
                 }])->find($item['id']);
@@ -152,7 +173,6 @@ class KasirController extends Controller
                 }
 
                 if ($bayar >= $total_netto) {
-                    // Jika pilih hutang tapi bayar lunas, anggap Tunai/Lunas tapi metode tetap tercatat
                     $status_bayar = 'Lunas';
                 } else {
                     $status_bayar = 'Belum Lunas';
@@ -183,16 +203,14 @@ class KasirController extends Controller
                 'status_bayar'     => $status_bayar,
             ]);
 
-            // 4. [FIX] Simpan Kartu Piutang jika Hutang
+            // 4. Simpan Kartu Piutang jika Hutang
             if ($metode == 'Hutang' && $status_bayar == 'Belum Lunas') {
-                // Pastikan Anda memiliki model KartuPiutang dan tabelnya
-                // Sesuaikan nama kolom dengan database Anda
                 KartuPiutang::create([
                     'id_toko'         => $id_toko,
                     'id_pelanggan'    => $request->id_pelanggan,
                     'id_penjualan'    => $penjualan->id_penjualan,
                     'tanggal_piutang' => now(),
-                    'jumlah_piutang'  => $total_netto - $bayar, // Sisa yang belum dibayar
+                    'jumlah_piutang'  => $total_netto - $bayar,
                     'sisa_piutang'    => $total_netto - $bayar,
                     'status'          => 'Belum Lunas',
                     'keterangan'      => 'Penjualan Kasir ' . $penjualan->no_faktur,
@@ -211,6 +229,7 @@ class KasirController extends Controller
                     'subtotal'              => $data['subtotal'],
                 ]);
 
+                // Update Stok pada Toko yang Aktif
                 $stokToko = StokToko::where('id_toko', $id_toko)
                     ->where('id_produk', $data['produk']->id_produk)
                     ->first();
@@ -251,23 +270,20 @@ class KasirController extends Controller
         }
     }
 
-    /**
-     * [FIX] Method Cetak Struk
-     */
     public function print($id)
     {
         $id_toko = $this->getTokoAktif();
         if (! $id_toko) {
-            abort(403);
+            abort(403, 'Akses Toko Ditolak');
         }
 
+        // Pastikan penjualan milik toko yang sedang aktif
         $penjualan = Penjualan::with(['details.produk', 'pelanggan', 'user'])
             ->where('id_toko', $id_toko)
             ->findOrFail($id);
 
         $toko = Toko::find($id_toko);
 
-        // Pastikan Anda membuat view ini
         return view('owner.kasir.struk', compact('penjualan', 'toko'));
     }
 }

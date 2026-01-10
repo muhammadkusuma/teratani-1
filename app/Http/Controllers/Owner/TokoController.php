@@ -167,6 +167,8 @@ class TokoController extends Controller
     {
         $toko = Toko::findOrFail($id_toko);
 
+        // dd($toko->id_tenant);
+
         // Validasi apakah toko ini milik tenant user yang login
         $user   = Auth::user();
         $tenant = $user->tenants->first();
@@ -182,7 +184,7 @@ class TokoController extends Controller
 
         // Simpan ID toko ke dalam SESSION
         session([
-            'toko_active_id'   => $toko->id_toko,
+            'toko_active_id'   => $toko->id_tenant,
             'toko_active_nama' => $toko->nama_toko,
         ]);
 
