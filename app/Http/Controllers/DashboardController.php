@@ -1,39 +1,42 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\SaasInvoice;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Tenant;
-use App\Models\User;
+use App\Models\Toko;
 
 class DashboardController extends Controller
 {
+    // Dashboard Superadmin
     public function index()
     {
-        // 1. Statistik Utama
-        $totalUsers    = User::count();
-        $activeTenants = Tenant::where('status_langganan', 'Aktif')->count();
+        // Logika dashboard admin (misal: hitung total tenant, total user)
+        return view('dashboard');
+    }
 
-        // Menghitung estimasi pendapatan dari invoice yang statusnya 'Paid'
-        // Jika tabel kosong, default ke 0
-        $revenue = SaasInvoice::where('status_bayar', 'Paid')->sum('total_tagihan');
+    // Dashboard Owner (Pemilik Toko)
+    public function ownerIndex()
+    {
+        $user = Auth::user();
+        
+        // Ambil tenant yang terhubung dengan user ini
+        // Asumsi: 1 User bisa punya banyak Tenant, kita ambil yang pertama atau aktif
+        $tenant = $user->tenants()->first(); 
+        
+        $stats = [
+            'total_toko' => 0,
+            'total_produk' => 0, // Placeholder jika model belum diload
+            'penjualan_hari_ini' => 0,
+        ];
 
-        // Menghitung Isu/Tiket (Jika ada tabel tiket, ganti logic ini. Sementara hardcode 0)
-        $pendingIssues = 0;
+        if ($tenant) {
+            // Contoh pengambilan data real jika relasi sudah ada
+            // $stats['total_toko'] = $tenant->toko()->count();
+            // $stats['total_produk'] = $tenant->produk()->count();
+        }
 
-        // 2. Data Grafik / Aktivitas Terbaru
-        // Mengambil 5 tenant yang baru bergabung
-        $recentTenants = Tenant::orderBy('created_at', 'desc')->take(5)->get();
-
-        // Mengambil 5 user yang baru daftar
-        $recentUsers = User::orderBy('created_at', 'desc')->take(5)->get();
-
-        return view('dashboard', compact(
-            'totalUsers',
-            'activeTenants',
-            'revenue',
-            'pendingIssues',
-            'recentTenants',
-            'recentUsers'
-        ));
+        return view('owner.dashboard', compact('tenant', 'stats'));
     }
 }
