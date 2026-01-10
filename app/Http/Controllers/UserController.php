@@ -1,36 +1,24 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     /**
      * Menampilkan daftar user.
      */
-    public function index(Request $request)
+    public function index()
     {
-        // Fitur pencarian sederhana
-        $query = User::query();
-        if ($request->has('search')) {
-            $search = $request->search;
-            $query->where('nama_lengkap', 'like', "%{$search}%")
-                  ->orWhere('username', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-        }
-
-        // Pagination 10 item per halaman
-        $users = $query->orderBy('created_at', 'desc')->paginate(10);
-
+        // Mengambil semua user, diurutkan terbaru
+        $users = User::orderBy('created_at', 'desc')->get();
         return view('users.index', compact('users'));
     }
 
     /**
-     * Menampilkan form tambah user.
+     * Menampilkan form tambah user manual.
      */
     public function create()
     {
@@ -38,86 +26,80 @@ class UserController extends Controller
     }
 
     /**
-     * Menyimpan user baru ke database.
+     * Menyimpan user baru dari admin.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'username'      => 'required|string|max:50|unique:users,username',
-            'password'      => 'required|string|min:6',
-            'nama_lengkap'  => 'nullable|string|max:100',
-            'email'         => 'nullable|email|max:100|unique:users,email',
-            'no_hp'         => 'nullable|string|max:20',
-            'role'          => 'required|in:admin,user', // Mapping is_superadmin
-            'status'        => 'required|in:active,inactive', // Mapping is_active
+            'nama_lengkap' => 'required|string|max:100',
+            'username'     => 'required|string|unique:users,username|max:50',
+            'email'        => 'nullable|email|unique:users,email|max:100',
+            'password'     => 'required|string|min:6',
+            'no_hp'        => 'nullable|string|max:20',
         ]);
 
         User::create([
-            'username'      => $request->username,
-            'password'      => Hash::make($request->password),
             'nama_lengkap'  => $request->nama_lengkap,
+            'username'      => $request->username,
             'email'         => $request->email,
             'no_hp'         => $request->no_hp,
-            'is_superadmin' => $request->role === 'admin',
-            'is_active'     => $request->status === 'active',
+            'password'      => Hash::make($request->password),
+            'is_superadmin' => $request->has('is_superadmin'),
+            'is_active'     => true,
         ]);
 
-        return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
+        return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan');
     }
 
     /**
-     * Menampilkan form edit user.
+     * Menampilkan form edit.
      */
-    public function edit(User $user)
+    public function edit($id)
     {
+        $user = User::findOrFail($id);
         return view('users.edit', compact('user'));
     }
 
     /**
-     * Memperbarui data user.
+     * Update data user.
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
+        $user = User::findOrFail($id);
+
         $request->validate([
-            'username'      => ['required', 'string', 'max:50', Rule::unique('users')->ignore($user->id_user, 'id_user')],
-            'nama_lengkap'  => 'nullable|string|max:100',
-            'email'         => ['nullable', 'email', 'max:100', Rule::unique('users')->ignore($user->id_user, 'id_user')],
-            'no_hp'         => 'nullable|string|max:20',
-            'role'          => 'required|in:admin,user',
-            'status'        => 'required|in:active,inactive',
-            'password'      => 'nullable|string|min:6', // Password opsional saat update
+            'nama_lengkap' => 'required|string|max:100',
+            'username'     => 'required|string|max:50|unique:users,username,' . $id . ',id_user',
+            'email'        => 'nullable|email|max:100|unique:users,email,' . $id . ',id_user',
         ]);
 
-        $data = [
-            'username'      => $request->username,
+        $dataToUpdate = [
             'nama_lengkap'  => $request->nama_lengkap,
+            'username'      => $request->username,
             'email'         => $request->email,
             'no_hp'         => $request->no_hp,
-            'is_superadmin' => $request->role === 'admin',
-            'is_active'     => $request->status === 'active',
+            'is_superadmin' => $request->has('is_superadmin'),
+            'is_active'     => $request->has('is_active'),
         ];
 
-        // Hanya update password jika diisi
+        // Update password hanya jika diisi
         if ($request->filled('password')) {
-            $data['password'] = Hash::make($request->password);
+            $dataToUpdate['password'] = Hash::make($request->password);
         }
 
-        $user->update($data);
+        $user->update($dataToUpdate);
 
-        return redirect()->route('users.index')->with('success', 'Data user berhasil diperbarui.');
+        return redirect()->route('users.index')->with('success', 'Data user berhasil diperbarui');
     }
 
     /**
-     * Menghapus user.
+     * Hapus user.
      */
-    public function destroy(User $user)
+    public function destroy($id)
     {
-        // Mencegah menghapus diri sendiri
-        if (auth()->id() == $user->id_user) {
-            return back()->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
-        }
-
+        $user = User::findOrFail($id);
         $user->delete();
-        return redirect()->route('users.index')->with('success', 'User berhasil dihapus.');
+
+        return redirect()->route('users.index')->with('success', 'User berhasil dihapus');
     }
 }

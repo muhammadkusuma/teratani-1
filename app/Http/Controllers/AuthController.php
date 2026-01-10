@@ -1,8 +1,10 @@
 <?php
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -63,5 +65,44 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect('/login');
+    }
+
+    /**
+     * Menampilkan form register.
+     */
+    public function showRegisterForm()
+    {
+        return view('auth.register');
+    }
+
+    /**
+     * Proses register user baru (Calon Manajer Toko).
+     */
+    public function register(Request $request)
+    {
+        // 1. Validasi Input
+        $validated = $request->validate([
+            'name'     => ['required', 'string', 'max:100'],
+            'username' => ['required', 'string', 'max:50', 'unique:users'],
+            'email'    => ['required', 'string', 'email', 'max:100', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'terms'    => ['required'], // Checkbox syarat & ketentuan
+        ]);
+
+        // 2. Simpan ke Database
+        $user = User::create([
+            'nama_lengkap'  => $validated['name'], // Mapping dari input 'name' ke kolom 'nama_lengkap'
+            'username'      => $validated['username'],
+            'email'         => $validated['email'],
+            'password'      => Hash::make($validated['password']),
+            'is_superadmin' => false, // Default user biasa/manajer toko
+            'is_active'     => true,
+        ]);
+
+        // 3. Login otomatis setelah register
+        Auth::login($user);
+
+        // 4. Redirect ke dashboard
+        return redirect()->intended('dashboard')->with('success', 'Registrasi berhasil! Selamat datang.');
     }
 }
