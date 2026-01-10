@@ -227,10 +227,13 @@
                     html += `
                     <tr class="border-b border-gray-300 hover:bg-blue-50 group">
                         <td class="px-1 py-1 text-center"><button class="text-red-600 font-bold hover:bg-red-200 px-1" onclick="hapusItem(${idx})">x</button></td>
-                        <td class="px-1 py-1 truncate max-w-[120px]" title="${item.name}">
-                            ${item.name}
+                        
+                        {{-- PERBAIKAN DISINI: Ganti item.name menjadi item.nama --}}
+                        <td class="px-1 py-1 truncate max-w-[120px]" title="${item.nama}">
+                            ${item.nama}
                             <div class="text-[9px] text-gray-500">@ ${new Intl.NumberFormat('id-ID').format(item.harga)}</div>
                         </td>
+                        
                         <td class="px-1 py-1 text-center">
                             <input type="number" class="w-8 text-center border border-gray-400 text-[10px] focus:bg-yellow-100 p-0" 
                                 value="${item.qty}" onchange="updateQty(${idx}, this.value)">
