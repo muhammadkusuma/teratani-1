@@ -82,6 +82,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/ajax/mutasi-produk/{id_toko}', [MutasiController::class, 'getProdukByToko'])
             ->name('mutasi.get-produk');
 
+        // Route Mutasi Custom (Letakkan SEBELUM resource mutasi)
+        Route::post('/mutasi/{id}/terima', [MutasiController::class, 'terima'])->name('mutasi.terima');
         // ... route resource mutasi yang sudah ada ...
         Route::resource('mutasi', MutasiController::class);
     });

@@ -135,21 +135,21 @@ class MutasiController extends Controller
                 'id_toko_asal'     => $request->id_toko_asal,
                 'id_toko_tujuan'   => $request->id_toko_tujuan,
                 'tgl_kirim'        => $request->tgl_kirim,
-                'status'           => 'Proses',
+                'status'           => 'Proses', // Barang masih di jalan (Transit)
                 'keterangan'       => $request->keterangan,
                 'id_user_pengirim' => Auth::id(),
             ]);
 
             foreach ($request->items as $item) {
-                // 2. Simpan Detail Mutasi
+                // 2. Simpan Detail
                 MutasiDetail::create([
                     'id_mutasi'  => $mutasi->id_mutasi,
                     'id_produk'  => $item['id_produk'],
                     'qty_kirim'  => $item['qty'],
-                    'qty_terima' => 0,
+                    'qty_terima' => 0, // Belum diterima
                 ]);
 
-                // 3. Kurangi Stok Fisik di Toko Asal
+                // 3. PENGIRIMAN: Kurangi Stok Toko ASAL
                 $stokAsal = StokToko::where('id_toko', $request->id_toko_asal)
                     ->where('id_produk', $item['id_produk'])
                     ->first();
@@ -157,15 +157,75 @@ class MutasiController extends Controller
                 if ($stokAsal) {
                     $stokAsal->decrement('stok_fisik', $item['qty']);
                 } else {
+                    // Handle jika stok minus (opsional)
                     StokToko::create([
                         'id_toko'    => $request->id_toko_asal,
                         'id_produk'  => $item['id_produk'],
                         'stok_fisik' => -($item['qty']),
+                        // Pastikan kolom id_tenant ada di tabel stok_toko jika struktur DB memintanya
                     ]);
                 }
             }
         });
 
-        return redirect()->route('owner.mutasi.index')->with('success', 'Transfer stok berhasil dibuat!');
+        return redirect()->route('owner.mutasi.index')->with('success', 'Transfer stok berhasil dibuat! Menunggu konfirmasi penerimaan.');
+    }
+
+    public function show($id)
+    {
+        $idTenant = $this->getActiveTenantId();
+
+        $mutasi = MutasiStok::with(['tokoAsal', 'tokoTujuan', 'pengirim', 'details.produk'])
+            ->where('id_tenant', $idTenant)
+            ->findOrFail($id);
+
+        return view('owner.mutasi.show', compact('mutasi'));
+    }
+
+    public function terima($id)
+    {
+        $idTenant = $this->getActiveTenantId();
+
+        DB::transaction(function () use ($id, $idTenant) {
+            // Ambil data mutasi beserta detailnya
+            $mutasi = MutasiStok::with('details')
+                ->where('id_tenant', $idTenant)
+                ->where('status', 'Proses') // Hanya bisa terima jika status Proses
+                ->lockForUpdate()           // Kunci row agar tidak double submit
+                ->findOrFail($id);
+
+            // Update Header
+            $mutasi->update([
+                'status'           => 'Selesai',
+                'tgl_diterima'     => now(),
+                'id_user_penerima' => Auth::id(),
+            ]);
+
+            foreach ($mutasi->details as $detail) {
+                // 1. Update Qty Terima di tabel detail (Asumsi terima semua sesuai kiriman)
+                // Jika ingin parsial, logic ini harus diubah menerima input dari user
+                $detail->update([
+                    'qty_terima' => $detail->qty_kirim,
+                ]);
+
+                // 2. PENERIMAAN: Tambah Stok Toko TUJUAN
+                $stokTujuan = StokToko::where('id_toko', $mutasi->id_toko_tujuan)
+                    ->where('id_produk', $detail->id_produk)
+                    ->first();
+
+                if ($stokTujuan) {
+                    $stokTujuan->increment('stok_fisik', $detail->qty_kirim);
+                } else {
+                    // Jika produk belum ada di toko tujuan, buat baris baru
+                    StokToko::create([
+                        'id_toko'    => $mutasi->id_toko_tujuan,
+                        'id_produk'  => $detail->id_produk,
+                        'stok_fisik' => $detail->qty_kirim,
+                    ]);
+                }
+            }
+        });
+
+        return redirect()->route('owner.mutasi.index')->with('success', 'Barang berhasil diterima & Stok tujuan bertambah!');
     }
 }
