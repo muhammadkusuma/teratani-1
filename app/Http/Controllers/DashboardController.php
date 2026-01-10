@@ -1,11 +1,9 @@
 <?php
-
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Tenant;
 use App\Models\Toko;
+use App\Models\Tenant;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -17,25 +15,54 @@ class DashboardController extends Controller
     }
 
     // Dashboard Owner (Pemilik Toko)
+    // Dashboard Owner (Pemilik Toko)
     public function ownerIndex()
     {
         $user = Auth::user();
-        
+
         // Ambil tenant yang terhubung dengan user ini
-        // Asumsi: 1 User bisa punya banyak Tenant, kita ambil yang pertama atau aktif
-        $tenant = $user->tenants()->first(); 
-        
+        $tenant = $user->tenants()->first();
+
+        // --- FIX: Cek apakah Tenant ada? ---
+        if (! $tenant) {
+            // Jika tidak ada tenant, tampilkan dashboard kosong atau arahkan buat tenant
+            return view('owner.dashboard', [
+                'tenant' => null,
+                'stats'  => [
+                    'nama_toko_aktif'    => 'Belum Ada Bisnis',
+                    'penjualan_hari_ini' => 0,
+                ],
+            ]);
+        }
+        // -----------------------------------
+
+        // Logika Pilih Toko Otomatis
+        if (! session()->has('toko_active_id')) {
+            // Cek jumlah toko milik tenant ini
+            // (Sekarang aman diakses karena $tenant dipastikan ada)
+            $jumlahToko = Toko::where('id_tenant', $tenant->id_tenant)->count();
+
+            if ($jumlahToko == 1) {
+                // Jika cuma 1, otomatis set session
+                $tokoSatu = Toko::where('id_tenant', $tenant->id_tenant)->first();
+                session([
+                    'toko_active_id'   => $tokoSatu->id_toko,
+                    'toko_active_nama' => $tokoSatu->nama_toko,
+                ]);
+            } elseif ($jumlahToko > 1) {
+                // Jika lebih dari 1, redirect ke halaman list toko untuk memilih
+                return redirect()->route('owner.toko.index')->with('info', 'Silakan pilih toko untuk dikelola.');
+            }
+            // Jika toko 0, biarkan lolos ke dashboard agar user bisa melihat tombol "Buat Toko"
+        }
+
+        // Ambil Data Statistik Dashboard
+        $activeTokoId = session('toko_active_id');
+
         $stats = [
-            'total_toko' => 0,
-            'total_produk' => 0, // Placeholder jika model belum diload
+            'nama_toko_aktif'    => session('toko_active_nama', 'Belum Pilih Toko'),
             'penjualan_hari_ini' => 0,
         ];
-
-        if ($tenant) {
-            // Contoh pengambilan data real jika relasi sudah ada
-            // $stats['total_toko'] = $tenant->toko()->count();
-            // $stats['total_produk'] = $tenant->produk()->count();
-        }
 
         return view('owner.dashboard', compact('tenant', 'stats'));
     }

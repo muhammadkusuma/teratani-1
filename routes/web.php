@@ -2,10 +2,11 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\Owner\TokoController as OwnerTokoController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\UserController;
-use App\Http\Middleware\EnsureSuperAdmin; // <--- Import Middleware yang baru dibuat
+use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -52,6 +53,20 @@ Route::middleware(['auth'])->group(function () {
     // --- OWNER / TOKO DASHBOARD ---
     Route::prefix('owner')->name('owner.')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'ownerIndex'])->name('dashboard');
+    });
+
+    // --- OWNER / TOKO DASHBOARD ---
+    Route::prefix('owner')->name('owner.')->group(function () {
+
+        Route::get('/dashboard', [DashboardController::class, 'ownerIndex'])->name('dashboard');
+
+        // Route Manajemen Toko
+        Route::get('/toko', [OwnerTokoController::class, 'index'])->name('toko.index');
+        Route::get('/toko/create', [OwnerTokoController::class, 'create'])->name('toko.create');
+        Route::post('/toko', [OwnerTokoController::class, 'store'])->name('toko.store');
+
+        // Route Pilih Toko
+        Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');
     });
 
     // --- SUPERADMIN DASHBOARD ---
