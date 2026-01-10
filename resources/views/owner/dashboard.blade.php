@@ -1,166 +1,95 @@
 @extends('layouts.owner')
 
-@section('title', 'Dashboard Toko')
-
 @section('content')
-    <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-        <div>
-            <h1 class="text-xl md:text-2xl font-bold text-gray-800">Halo, {{ Auth::user()->nama_lengkap }}! 👋</h1>
-            <p class="text-sm text-gray-500 mt-1">Berikut adalah ringkasan performa tokomu hari ini.</p>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Dashboard Owner</h1>
+
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item active">Selamat Datang, {{ Auth::user()->name }}</li>
+        </ol>
+
+        {{-- Alert Success Flash Message --}}
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        {{-- Status Toko Aktif --}}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Toko Aktif Saat Ini</h5>
+                                @if (session('toko_active_nama'))
+                                    <h2 class="display-6 fw-bold">{{ session('toko_active_nama') }}</h2>
+                                @else
+                                    <p class="mb-0">Belum ada toko yang dipilih.</p>
+                                    <small>Silakan pilih toko untuk mulai mengelola transaksi.</small>
+                                @endif
+                            </div>
+                            <i class="fas fa-store fa-4x opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex align-items-center justify-content-between">
+                        <a class="small text-white stretched-link" href="{{ route('owner.toko.index') }}">
+                            @if (session('toko_active_id'))
+                                Ganti Toko
+                            @else
+                                Pilih Toko
+                            @endif
+                        </a>
+                        <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div
-            class="inline-flex items-center bg-white border px-4 py-2 rounded-lg text-xs md:text-sm text-gray-600 shadow-sm">
-            📅 {{ now()->translatedFormat('l, d F Y') }}
-        </div>
+
+        {{-- Menu Cepat (Hanya muncul jika toko sudah dipilih) --}}
+        @if (session('toko_active_id'))
+            <div class="row">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-success text-white mb-4">
+                        <div class="card-body">Penjualan Kasir</div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small text-white stretched-link" href="#">Buka POS</a>
+                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-warning text-white mb-4">
+                        <div class="card-body">Stok Produk</div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small text-white stretched-link" href="#">Kelola Stok</a>
+                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-danger text-white mb-4">
+                        <div class="card-body">Laporan Harian</div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small text-white stretched-link" href="#">Lihat Laporan</a>
+                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-md-6">
+                    <div class="card bg-info text-white mb-4">
+                        <div class="card-body">Pengaturan Toko</div>
+                        <div class="card-footer d-flex align-items-center justify-content-between">
+                            <a class="small text-white stretched-link"
+                                href="{{ route('owner.toko.edit', session('toko_active_id')) }}">Edit Info</a>
+                            <div class="small text-white"><i class="fas fa-angle-right"></i></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
+
     </div>
-
-    @if (!$tenant)
-        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6 rounded shadow-sm">
-            <div class="flex">
-                <div class="flex-shrink-0 text-yellow-400">
-                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <div class="ml-3 text-sm text-yellow-700">
-                    Akun belum terhubung. <a href="{{ route('tenants.create') }}" class="font-bold underline">Daftarkan
-                        tokomu</a>.
-                </div>
-            </div>
-        </div>
-    @else
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="bg-green-100 p-2 md:p-3 rounded-lg text-green-600">
-                        <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                </div>
-                <h3 class="text-gray-500 text-[10px] md:text-sm font-medium uppercase tracking-wider">Penjualan</h3>
-                <p class="text-lg md:text-2xl font-bold text-gray-800 mt-1">Rp 2.45Jt</p>
-                <p class="text-[10px] text-green-500 font-semibold mt-1">+12% naik</p>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="bg-red-100 p-2 md:p-3 rounded-lg text-red-600">
-                        <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4" />
-                        </svg>
-                    </div>
-                </div>
-                <h3 class="text-gray-500 text-[10px] md:text-sm font-medium uppercase tracking-wider">Stok Tipis</h3>
-                <p class="text-lg md:text-2xl font-bold text-gray-800 mt-1">5 Item</p>
-                <p class="text-[10px] text-red-500 font-semibold mt-1">Butuh Restock</p>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="bg-blue-100 p-2 md:p-3 rounded-lg text-blue-600">
-                        <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a1 1 0 11-2 0 1 1 0 012 0z" />
-                        </svg>
-                    </div>
-                </div>
-                <h3 class="text-gray-500 text-[10px] md:text-sm font-medium uppercase tracking-wider">Piutang</h3>
-                <p class="text-lg md:text-2xl font-bold text-gray-800 mt-1">850rb</p>
-                <p class="text-[10px] text-gray-400 mt-1">3 Pelanggan</p>
-            </div>
-
-            <div class="bg-white rounded-xl shadow-sm p-4 md:p-6 border border-gray-100">
-                <div class="flex items-center justify-between mb-2">
-                    <div class="bg-purple-100 p-2 md:p-3 rounded-lg text-purple-600">
-                        <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                </div>
-                <h3 class="text-gray-500 text-[10px] md:text-sm font-medium uppercase tracking-wider">Cabang</h3>
-                <p class="text-lg md:text-2xl font-bold text-gray-800 mt-1">{{ $tenant->toko_count ?? 0 }} Toko</p>
-                <p class="text-[10px] text-gray-400 mt-1 truncate">{{ $tenant->nama_bisnis ?? '-' }}</p>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
-            <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                <div class="flex items-center justify-between p-4 md:p-6 border-b border-gray-100">
-                    <h2 class="text-lg font-bold text-gray-800">Transaksi Terakhir</h2>
-                    <a href="#" class="text-xs md:text-sm text-green-600 hover:text-green-700 font-medium">Lihat
-                        Semua</a>
-                </div>
-                <div class="overflow-x-auto min-w-full">
-                    <table class="w-full text-left">
-                        <thead>
-                            <tr class="bg-gray-50 text-gray-500 text-[10px] uppercase tracking-wider">
-                                <th class="p-3 md:p-4 font-medium">No Faktur</th>
-                                <th class="p-3 md:p-4 font-medium">Pelanggan</th>
-                                <th class="p-3 md:p-4 font-medium">Total</th>
-                                <th class="p-3 md:p-4 font-medium text-right">Waktu</th>
-                            </tr>
-                        </thead>
-                        <tbody class="text-xs md:text-sm divide-y divide-gray-100">
-                            <tr>
-                                <td class="p-3 md:p-4 font-medium text-gray-800 uppercase">TRX-001</td>
-                                <td class="p-3 md:p-4 text-gray-600 truncate max-w-[100px] md:max-w-none">Bpk. Budi (Umum)
-                                </td>
-                                <td class="p-3 md:p-4 font-bold text-gray-800 whitespace-nowrap">Rp 150rb</td>
-                                <td class="p-3 md:p-4 text-gray-500 text-right">10:45</td>
-                            </tr>
-                            <tr>
-                                <td class="p-3 md:p-4 font-medium text-gray-800 uppercase">TRX-002</td>
-                                <td class="p-3 md:p-4 text-gray-600 truncate max-w-[100px] md:max-w-none">Klp. Tani Makmur
-                                </td>
-                                <td class="p-3 md:p-4 font-bold text-gray-800 whitespace-nowrap">Rp 2.1Jt</td>
-                                <td class="p-3 md:p-4 text-gray-500 text-right">11:20</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div class="space-y-6">
-                <div class="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-6 text-white shadow-lg">
-                    <h2 class="text-lg font-bold mb-2">Mulai Jualan?</h2>
-                    <p class="text-green-100 text-sm mb-4">Catat transaksi baru dengan cepat di halaman kasir.</p>
-                    <a href="#"
-                        class="block w-full bg-white text-green-700 text-center font-bold py-3 rounded-lg hover:bg-green-50 transition shadow">
-                        Buka Kasir
-                    </a>
-                </div>
-
-                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-bold text-gray-800 mb-4">Shortcut</h2>
-                    <div class="grid grid-cols-2 gap-4">
-                        <a href="#"
-                            class="flex flex-col items-center justify-center p-4 border rounded-lg hover:border-green-500 hover:bg-green-50 transition group">
-                            <svg class="w-6 h-6 text-gray-400 group-hover:text-green-600 mb-2" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 4v16m8-8H4" />
-                            </svg>
-                            <span
-                                class="text-[10px] md:text-xs font-medium text-gray-600 group-hover:text-green-700 text-center">Produk
-                                Baru</span>
-                        </a>
-                        <a href="#"
-                            class="flex flex-col items-center justify-center p-4 border rounded-lg hover:border-green-500 hover:bg-green-50 transition group">
-                            <svg class="w-6 h-6 text-gray-400 group-hover:text-green-600 mb-2" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0" />
-                            </svg>
-                            <span
-                                class="text-[10px] md:text-xs font-medium text-gray-600 group-hover:text-green-700 text-center">Pelanggan</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
 @endsection

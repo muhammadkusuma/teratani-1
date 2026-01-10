@@ -59,12 +59,14 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('owner')->name('owner.')->group(function () {
 
         Route::get('/dashboard', [DashboardController::class, 'ownerIndex'])->name('dashboard');
-
-        // Route Manajemen Toko
+        // Route Manajemen Toko (Lengkap CRUD)
         Route::get('/toko', [OwnerTokoController::class, 'index'])->name('toko.index');
         Route::get('/toko/create', [OwnerTokoController::class, 'create'])->name('toko.create');
         Route::post('/toko', [OwnerTokoController::class, 'store'])->name('toko.store');
-
+        // Tambahan Route Edit, Update, Destroy
+        Route::get('/toko/{id}/edit', [OwnerTokoController::class, 'edit'])->name('toko.edit');
+        Route::put('/toko/{id}', [OwnerTokoController::class, 'update'])->name('toko.update');
+        Route::delete('/toko/{id}', [OwnerTokoController::class, 'destroy'])->name('toko.destroy');
         // Route Pilih Toko
         Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');
     });
