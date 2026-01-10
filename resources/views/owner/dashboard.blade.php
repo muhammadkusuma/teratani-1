@@ -3,166 +3,230 @@
 @section('title', 'Dashboard Operasional')
 
 @section('content')
-    <div class="max-w-7xl mx-auto">
+    <div style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; min-height: 100vh; background-color: #e0e0e0;">
 
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard Operasional</h1>
-            <p class="text-gray-500 text-sm mt-1">Selamat datang kembali, {{ Auth::user()->name }}</p>
+        {{-- 1. HEADER UTAMA --}}
+        <div
+            class="bg-teal-700 text-white px-2 py-2 border-b-2 border-white border-t-2 border-t-teal-500 shadow-md flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <div class="bg-white text-teal-700 font-bold px-1 border border-gray-600">SYS</div>
+                <div>
+                    <h1 class="text-sm font-bold tracking-wider uppercase">Executive Information System</h1>
+                    <p class="text-[9px] text-teal-200">Panel Kontrol Utama - {{ session('toko_active_nama') ?? 'Pusat' }}
+                    </p>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="block font-bold text-yellow-300">{{ Auth::user()->name }} [OWNER]</span>
+                <span class="block text-[9px]">{{ date('d M Y') }} | <span id="clock">{{ date('H:i') }}</span>
+                    WIB</span>
+            </div>
         </div>
 
-        @if (session('success'))
-            <div
-                class="mb-6 flex items-center gap-3 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-xl shadow-sm">
-                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="text-sm font-medium">{{ session('success') }}</span>
-            </div>
-        @endif
+        {{-- 2. NAVIGASI BAR (Tab Style) --}}
+        <div class="bg-gray-200 pt-1 px-1 border-b border-gray-600 flex gap-1 select-none">
+            <a href="#"
+                class="bg-white border-t border-l border-r border-gray-600 px-4 py-1 font-bold text-black relative top-[1px] z-10">
+                DASHBOARD
+            </a>
+            <a href="#"
+                class="bg-gray-300 border-t border-l border-r border-gray-500 px-4 py-1 text-gray-600 hover:bg-gray-100">
+                KASIR / POS
+            </a>
+            @if (session('toko_active_id'))
+                <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}"
+                    class="bg-gray-300 border-t border-l border-r border-gray-500 px-4 py-1 text-gray-600 hover:bg-gray-100">
+                    INVENTORY
+                </a>
+                <a href="#"
+                    class="bg-gray-300 border-t border-l border-r border-gray-500 px-4 py-1 text-gray-600 hover:bg-gray-100">
+                    LAPORAN KEUANGAN
+                </a>
+            @endif
+            <a href="{{ route('owner.toko.index') }}"
+                class="ml-auto bg-red-700 text-white px-3 py-1 font-bold text-[10px] border border-black hover:bg-red-600">
+                LOG OUT / GANTI TOKO
+            </a>
+        </div>
 
-        @if (session('toko_active_id'))
-            <div
-                class="bg-white rounded-2xl p-5 shadow-sm border border-l-4 border-gray-200 border-l-green-600 mb-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center gap-5">
-                    <div
-                        class="w-16 h-16 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center shadow-inner">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">UNIT BISNIS AKTIF</p>
-                        <h2 class="text-2xl font-bold text-gray-900 leading-none">
-                            {{ session('toko_active_nama') }}
-                        </h2>
-                        <div class="flex items-center gap-2 mt-2">
-                            <span
-                                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                <span class="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span>
-                                Online
-                            </span>
-                            <span class="text-xs text-gray-400">• ID: {{ session('toko_active_id') }}</span>
+        {{-- 3. KONTEN UTAMA --}}
+        <div class="p-2">
+
+            @if (!session('toko_active_id'))
+                <div class="bg-yellow-100 border border-red-500 p-4 text-center text-red-600 font-bold mb-4">
+                    [!] PERHATIAN: ANDA BELUM MEMILIH UNIT BISNIS. DATA TIDAK DAPAT DITAMPILKAN.
+                    <br>
+                    <a href="{{ route('owner.toko.index') }}" class="text-blue-700 underline">Klik disini untuk memilih
+                        toko</a>
+                </div>
+            @else
+                {{-- A. KPI CARDS (Key Performance Indicators) --}}
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2">
+
+                    {{-- Card 1: Omset --}}
+                    <div class="bg-white border-2 border-white border-r-gray-500 border-b-gray-500 p-2 shadow-sm">
+                        <p class="text-[9px] text-gray-500 font-bold uppercase">Omset Hari Ini</p>
+                        <div class="flex justify-between items-end">
+                            <h3 class="text-lg font-bold text-blue-800">Rp 0,-</h3>
+                            <span class="text-[9px] text-green-600 font-bold">▲ 0% vs kmrn</span>
                         </div>
                     </div>
-                </div>
 
-                <a href="{{ route('owner.toko.index') }}"
-                    class="w-full md:w-auto px-5 py-2.5 bg-gray-50 hover:bg-white text-gray-600 hover:text-green-600 border border-gray-200 hover:border-green-200 rounded-xl font-medium transition shadow-sm flex items-center justify-center gap-2 group">
-                    <svg class="w-4 h-4 text-gray-400 group-hover:text-green-500 transition" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                    </svg>
-                    Ganti Unit
-                </a>
-            </div>
-
-            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                Menu Utama
-            </h3>
-
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-
-                <a href="#"
-                    class="group relative bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-green-500 hover:-translate-y-1 transition-all duration-300">
-                    <div
-                        class="w-14 h-14 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                        </svg>
+                    {{-- Card 2: Profit --}}
+                    <div class="bg-white border-2 border-white border-r-gray-500 border-b-gray-500 p-2 shadow-sm">
+                        <p class="text-[9px] text-gray-500 font-bold uppercase">Estimasi Laba Kotor</p>
+                        <div class="flex justify-between items-end">
+                            <h3 class="text-lg font-bold text-green-700">Rp 0,-</h3>
+                            <span class="text-[9px] text-gray-400">Margin: 0%</span>
+                        </div>
                     </div>
-                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-green-700 transition-colors">Kasir (POS)
-                    </h4>
-                    <p class="text-xs text-gray-500 mt-1">Input transaksi penjualan</p>
-                </a>
 
-                <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}"
-                    class="group relative bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-blue-500 hover:-translate-y-1 transition-all duration-300">
-                    <div
-                        class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                        </svg>
+                    {{-- Card 3: Transaksi --}}
+                    <div class="bg-white border-2 border-white border-r-gray-500 border-b-gray-500 p-2 shadow-sm">
+                        <p class="text-[9px] text-gray-500 font-bold uppercase">Total Transaksi</p>
+                        <div class="flex justify-between items-end">
+                            <h3 class="text-lg font-bold text-gray-800">0 Nota</h3>
+                            <span class="text-[9px] bg-blue-100 text-blue-800 px-1 border border-blue-300">AVG: Rp 0</span>
+                        </div>
                     </div>
-                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-blue-700 transition-colors">Stok Barang</h4>
-                    <p class="text-xs text-gray-500 mt-1">Manajemen produk & harga</p>
-                </a>
 
-                <a href="#"
-                    class="group relative bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-purple-500 hover:-translate-y-1 transition-all duration-300">
+                    {{-- Card 4: Alert Stok --}}
                     <div
-                        class="w-14 h-14 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                    </div>
-                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-purple-700 transition-colors">Laporan</h4>
-                    <p class="text-xs text-gray-500 mt-1">Rekap keuangan harian</p>
-                </a>
-
-                <a href="{{ route('owner.toko.edit', session('toko_active_id')) }}"
-                    class="group relative bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-orange-500 hover:-translate-y-1 transition-all duration-300">
-                    <div
-                        class="w-14 h-14 bg-orange-50 text-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                    <h4 class="text-lg font-bold text-gray-900 group-hover:text-orange-700 transition-colors">Pengaturan
-                    </h4>
-                    <p class="text-xs text-gray-500 mt-1">Ubah identitas toko</p>
-                </a>
-            </div>
-
-            <div class="mt-8 pt-8 border-t border-dashed border-gray-200">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                        <div class="p-3 bg-gray-50 text-gray-600 rounded-full">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        class="bg-white border-2 border-white border-r-gray-500 border-b-gray-500 p-2 shadow-sm relative overflow-hidden">
+                        <div class="absolute right-0 top-0 p-4 opacity-10">
+                            <svg class="w-12 h-12 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12zm-1-5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm0-4a1 1 0 011-1h0a1 1 0 110 2H10a1 1 0 01-1-1z" />
                             </svg>
                         </div>
-                        <div>
-                            <p class="text-xs text-gray-500 font-medium uppercase">Omset Hari Ini</p>
-                            <p class="text-xl font-bold text-gray-900">Rp 0</p>
+                        <p class="text-[9px] text-red-600 font-bold uppercase">Peringatan Stok</p>
+                        <div class="flex justify-between items-end">
+                            <h3 class="text-lg font-bold text-red-600">0 Item</h3>
+                            <a href="#" class="text-[9px] underline text-blue-600">Lihat Detail >></a>
                         </div>
                     </div>
                 </div>
-            </div>
-        @else
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-12 text-center max-w-2xl mx-auto mt-10">
-                <div class="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-900 mb-2">Pilih Unit Bisnis</h3>
-                <p class="text-gray-500 mb-8">Anda belum memilih toko untuk dikelola. Silakan masuk ke salah satu cabang
-                    toko untuk memulai operasional.</p>
-                <a href="{{ route('owner.toko.index') }}"
-                    class="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition shadow-lg shadow-green-200">
-                    Buka Daftar Toko
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                </a>
-            </div>
-        @endif
 
+                <div class="grid grid-cols-12 gap-2">
+
+                    {{-- B. KOLOM KIRI (7 Kolom) - Laporan Keuangan & Grafik --}}
+                    <div class="col-span-12 md:col-span-7">
+                        <fieldset class="border border-gray-400 p-2 bg-gray-50 h-full">
+                            <legend
+                                class="px-1 text-[10px] font-bold text-blue-900 border border-gray-400 bg-white shadow-[1px_1px_0_0_rgba(0,0,0,0.2)]">
+                                ANALISA PENJUALAN
+                            </legend>
+
+                            {{-- Target Bar --}}
+                            <div class="mb-3">
+                                <div class="flex justify-between text-[10px] mb-1">
+                                    <span>Pencapaian Target Harian</span>
+                                    <span class="font-bold">0% (Target: Rp 2.000.000)</span>
+                                </div>
+                                <div class="w-full bg-gray-300 border border-gray-500 h-3 relative">
+                                    <div class="bg-blue-600 h-full absolute left-0 top-0" style="width: 0%;"></div>
+                                    {{-- Garis-garis grid kecil --}}
+                                    <div class="absolute left-1/4 top-0 bottom-0 w-px bg-gray-400"></div>
+                                    <div class="absolute left-2/4 top-0 bottom-0 w-px bg-gray-400"></div>
+                                    <div class="absolute left-3/4 top-0 bottom-0 w-px bg-gray-400"></div>
+                                </div>
+                            </div>
+
+                            {{-- Tabel Transaksi Terakhir --}}
+                            <div class="border border-gray-400 bg-white">
+                                <div
+                                    class="bg-gray-200 px-2 py-1 border-b border-gray-400 font-bold text-[10px] flex justify-between">
+                                    <span>5 Transaksi Terakhir</span>
+                                    <button class="text-blue-700 hover:text-red-600">[Refresh]</button>
+                                </div>
+                                <table class="w-full text-left">
+                                    <thead class="bg-blue-50 text-blue-900 border-b border-gray-300">
+                                        <tr>
+                                            <th class="px-2 py-1 w-16">Waktu</th>
+                                            <th class="px-2 py-1">No. Faktur</th>
+                                            <th class="px-2 py-1 text-right">Total</th>
+                                            <th class="px-2 py-1 w-20 text-center">Kasir</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{-- Data Dummy / Placeholder --}}
+                                        <tr class="border-b border-gray-100 hover:bg-yellow-50">
+                                            <td class="px-2 py-0.5 text-gray-500 font-mono">-</td>
+                                            <td class="px-2 py-0.5 font-mono italic text-gray-400">Belum ada transaksi</td>
+                                            <td class="px-2 py-0.5 text-right font-mono text-gray-400">0</td>
+                                            <td class="px-2 py-0.5 text-center text-gray-400">-</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </fieldset>
+                    </div>
+
+                    {{-- C. KOLOM KANAN (5 Kolom) - Produk & Peringatan --}}
+                    <div class="col-span-12 md:col-span-5 flex flex-col gap-2">
+
+                        {{-- Top Produk --}}
+                        <fieldset class="border border-gray-400 p-2 bg-white flex-1">
+                            <legend
+                                class="px-1 text-[10px] font-bold text-green-900 border border-gray-400 bg-white shadow-[1px_1px_0_0_rgba(0,0,0,0.2)]">
+                                TOP 5 PRODUK LARIS
+                            </legend>
+                            <table class="w-full text-[10px]">
+                                <tr class="border-b border-gray-300">
+                                    <th class="text-left py-1">Nama Barang</th>
+                                    <th class="text-right py-1 w-10">Qty</th>
+                                </tr>
+                                {{-- Placeholder Data --}}
+                                <tr>
+                                    <td colspan="2" class="py-4 text-center text-gray-400 italic">Data penjualan belum
+                                        tersedia hari ini.</td>
+                                </tr>
+                            </table>
+                        </fieldset>
+
+                        {{-- Fast Actions --}}
+                        <fieldset class="border border-gray-400 p-2 bg-gray-100">
+                            <legend
+                                class="px-1 text-[10px] font-bold text-gray-700 border border-gray-400 bg-white shadow-[1px_1px_0_0_rgba(0,0,0,0.2)]">
+                                AKSI CEPAT
+                            </legend>
+                            <div class="grid grid-cols-2 gap-2">
+                                <a href="#"
+                                    class="border border-gray-400 bg-white px-2 py-2 hover:bg-blue-50 text-center shadow-sm active:translate-y-px">
+                                    <span class="block font-bold text-blue-800">+ Produk Baru</span>
+                                </a>
+                                <a href="#"
+                                    class="border border-gray-400 bg-white px-2 py-2 hover:bg-blue-50 text-center shadow-sm active:translate-y-px">
+                                    <span class="block font-bold text-blue-800">Stok Opname</span>
+                                </a>
+                                <a href="#"
+                                    class="border border-gray-400 bg-white px-2 py-2 hover:bg-blue-50 text-center shadow-sm active:translate-y-px">
+                                    <span class="block font-bold text-blue-800">Laporan Shift</span>
+                                </a>
+                                <a href="#"
+                                    class="border border-gray-400 bg-white px-2 py-2 hover:bg-blue-50 text-center shadow-sm active:translate-y-px">
+                                    <span class="block font-bold text-blue-800">Retur Barang</span>
+                                </a>
+                            </div>
+                        </fieldset>
+
+                    </div>
+                </div>
+            @endif
+
+            {{-- Footer Status Bar --}}
+            <div
+                class="bg-gray-300 border-t border-gray-500 mt-2 p-1 text-[10px] text-gray-700 flex justify-between select-none shadow-inner">
+                <div class="flex gap-4">
+                    <span>Status Server: <b class="text-green-700">ONLINE (12ms)</b></span>
+                    <span>Database: <b>Connected</b></span>
+                    <span>User ID: <b>{{ Auth::id() }}</b></span>
+                </div>
+                <div>
+                    &copy; {{ date('Y') }} Sistem Operasional Toko v1.0
+                </div>
+            </div>
+
+        </div>
     </div>
 @endsection

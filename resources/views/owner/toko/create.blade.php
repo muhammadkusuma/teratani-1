@@ -3,117 +3,133 @@
 @section('title', 'Buat Cabang Baru')
 
 @section('content')
-    <div class="max-w-3xl mx-auto">
+    <div style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; max-width: 800px; margin: 0 auto;">
 
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-900">Buka Cabang Baru</h1>
-            <nav class="flex text-sm text-gray-500 mt-1">
-                <ol class="flex items-center space-x-2">
-                    <li>
-                        <a href="{{ route('owner.toko.index') }}" class="hover:text-green-600 hover:underline transition">
-                            Daftar Toko
-                        </a>
-                    </li>
-                    <li><span class="text-gray-300">/</span></li>
-                    <li class="font-medium text-gray-800">Form Tambah</li>
-                </ol>
-            </nav>
-        </div>
-
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-
-            <div class="px-8 py-5 border-b bg-gray-50/50 flex items-center gap-3">
-                <div class="bg-green-100 text-green-600 p-2 rounded-lg">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                </div>
-                <div>
-                    <h2 class="font-bold text-gray-900">Informasi Toko</h2>
-                    <p class="text-xs text-gray-500">Lengkapi data identitas toko cabang baru.</p>
+        {{-- 1. BREADCRUMB / NAVIGASI ATAS --}}
+        <div class="mb-2 pb-1 border-b border-gray-400 flex justify-between items-end">
+            <div>
+                <h1 class="font-bold text-lg text-blue-900 uppercase leading-none">Form Tambah Cabang</h1>
+                <div class="mt-1 text-gray-500">
+                    <a href="{{ route('owner.toko.index') }}" class="text-blue-700 hover:text-red-600 hover:underline">Daftar
+                        Toko</a>
+                    <span>&gt;</span>
+                    <span class="font-bold text-gray-800">Input Baru</span>
                 </div>
             </div>
+            <div class="text-[10px] text-gray-400">
+                Form ID: FRM-ADD-TOKO-V1
+            </div>
+        </div>
 
-            <div class="p-8">
-                @if ($errors->any())
-                    <div
-                        class="mb-6 bg-red-50 border border-red-100 text-red-600 rounded-xl p-4 text-sm flex items-start gap-3">
-                        <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <div>
-                            <p class="font-semibold mb-1">Terjadi Kesalahan:</p>
-                            <ul class="list-disc list-inside opacity-90">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    </div>
-                @endif
+        {{-- 2. ERROR HANDLER (Kotak Merah Klasik) --}}
+        @if ($errors->any())
+            <div class="mb-4 bg-red-100 border-2 border-red-600 p-2 text-red-900">
+                <div class="font-bold border-b border-red-400 mb-1 pb-1">(!) TERJADI KESALAHAN VALIDASI:</div>
+                <ul class="list-square list-inside pl-1">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
 
+        {{-- 3. CONTAINER FORM (Gaya Window) --}}
+        <div class="bg-gray-100 border-2 border-white border-r-gray-500 border-b-gray-500 shadow-[1px_1px_0_0_black]">
+
+            {{-- Header Form --}}
+            <div
+                class="bg-blue-800 text-white px-2 py-1 font-bold flex justify-between items-center bg-gradient-to-r from-blue-800 to-blue-600">
+                <span>ENTRI DATA TOKO</span>
+                <span class="cursor-pointer hover:bg-red-600 px-1 border border-white leading-none">x</span>
+            </div>
+
+            <div class="p-4">
                 <form action="{{ route('owner.toko.store') }}" method="POST">
                     @csrf
 
-                    <div class="space-y-6">
-                        <div>
-                            <label for="nama_toko" class="block text-sm font-semibold text-gray-700 mb-2">
-                                Nama Toko / Cabang <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" id="nama_toko" name="nama_toko" required value="{{ old('nama_toko') }}"
-                                placeholder="Contoh: Teratani Cabang Surabaya"
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition outline-none placeholder:text-gray-300">
-                        </div>
+                    {{-- GROUP 1: IDENTITAS UTAMA --}}
+                    <fieldset class="border border-gray-400 p-3 mb-4 bg-white relative">
+                        <legend
+                            class="px-1 bg-white text-blue-800 font-bold border border-gray-400 absolute -top-2.5 left-2 text-[10px]">
+                            A. IDENTITAS UNIT BISNIS
+                        </legend>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 gap-3 mt-1">
+                            {{-- Nama Toko --}}
                             <div>
-                                <label for="kota" class="block text-sm font-semibold text-gray-700 mb-2">
-                                    Kota Lokasi
+                                <label for="nama_toko" class="block font-bold text-gray-700 mb-1">
+                                    Nama Toko / Cabang <span class="text-red-600">*</span>
                                 </label>
+                                <input type="text" id="nama_toko" name="nama_toko" required
+                                    value="{{ old('nama_toko') }}"
+                                    class="w-full px-2 py-1 border-2 border-gray-300 border-l-gray-500 border-t-gray-500 bg-yellow-50 focus:bg-white focus:outline-none focus:border-blue-600"
+                                    placeholder="Wajib Diisi...">
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    {{-- GROUP 2: LOKASI & KONTAK --}}
+                    <fieldset class="border border-gray-400 p-3 mb-4 bg-white relative">
+                        <legend
+                            class="px-1 bg-white text-blue-800 font-bold border border-gray-400 absolute -top-2.5 left-2 text-[10px]">
+                            B. LOKASI & KONTAK
+                        </legend>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
+                            {{-- Kota --}}
+                            <div>
+                                <label for="kota" class="block font-bold text-gray-700 mb-1">Kota / Kabupaten</label>
                                 <input type="text" id="kota" name="kota" value="{{ old('kota') }}"
-                                    placeholder="Nama Kota"
-                                    class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition outline-none placeholder:text-gray-300">
+                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50">
                             </div>
 
+                            {{-- Telepon --}}
                             <div>
-                                <label for="no_telp" class="block text-sm font-semibold text-gray-700 mb-2">
-                                    No. Telepon / WA
-                                </label>
-                                <div class="relative">
-                                    <span class="absolute left-4 top-2.5 text-gray-400 font-medium text-sm">+62</span>
+                                <label for="no_telp" class="block font-bold text-gray-700 mb-1">No. Telepon / WA</label>
+                                <div class="flex">
+                                    <span
+                                        class="bg-gray-200 border border-gray-400 border-r-0 px-2 py-1 text-gray-600 font-mono">+62</span>
                                     <input type="text" id="no_telp" name="no_telp" value="{{ old('no_telp') }}"
-                                        placeholder="812xxxx"
-                                        class="w-full pl-12 pr-4 py-2.5 rounded-xl border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition outline-none placeholder:text-gray-300">
+                                        class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50">
                                 </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <label for="alamat" class="block text-sm font-semibold text-gray-700 mb-2">
-                                Alamat Lengkap
-                            </label>
-                            <textarea id="alamat" name="alamat" rows="3" placeholder="Jalan, RT/RW, Kecamatan, Kelurahan..."
-                                class="w-full px-4 py-2.5 rounded-xl border border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200 transition outline-none placeholder:text-gray-300">{{ old('alamat') }}</textarea>
+                            {{-- Alamat (Full Width) --}}
+                            <div class="col-span-1 md:col-span-2">
+                                <label for="alamat" class="block font-bold text-gray-700 mb-1">Alamat Lengkap</label>
+                                <textarea id="alamat" name="alamat" rows="2"
+                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50 font-mono text-[10px]">{{ old('alamat') }}</textarea>
+                                <p class="text-[9px] text-gray-500 mt-0.5">* Masukkan nama jalan, RT/RW, dan Kode Pos.</p>
+                            </div>
                         </div>
-                    </div>
+                    </fieldset>
 
-                    <div class="mt-8 pt-6 border-t border-gray-100 flex items-center justify-end gap-3">
+                    {{-- ACTION BUTTONS --}}
+                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-300">
+                        {{-- Tombol Batal --}}
                         <a href="{{ route('owner.toko.index') }}"
-                            class="px-5 py-2.5 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition">
-                            Batal
+                            class="px-4 py-1 bg-gray-200 text-black border-2 border-white border-r-gray-600 border-b-gray-600 hover:bg-gray-300 active:border-gray-600 active:border-r-white active:border-b-white text-[11px] font-bold no-underline text-center w-24">
+                            BATAL
                         </a>
+
+                        {{-- Tombol Simpan --}}
                         <button type="submit"
-                            class="px-5 py-2.5 rounded-xl text-sm font-semibold text-white bg-green-600 hover:bg-green-700 shadow-md shadow-green-200 transition flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                            class="px-4 py-1 bg-gray-200 text-black border-2 border-white border-r-black border-b-black hover:bg-gray-300 active:border-gray-600 active:border-r-white active:border-b-white text-[11px] font-bold flex items-center justify-center gap-1 w-32 shadow-md">
+                            <svg class="w-3 h-3 text-blue-800" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M0 0h24v24H0z" fill="none" />
+                                <path
+                                    d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
                             </svg>
-                            Simpan Data
+                            SIMPAN
                         </button>
                     </div>
 
                 </form>
+            </div>
+
+            {{-- Footer Window --}}
+            <div class="bg-gray-200 border-t border-gray-400 p-1 text-[9px] text-gray-500">
+                Ready.
             </div>
         </div>
     </div>

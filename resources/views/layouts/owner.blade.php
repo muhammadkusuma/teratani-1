@@ -4,159 +4,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') - Teratani Owner</title>
+    <title>@yield('title') - SIS-TERATANI</title>
 
-    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Alpine -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <style>
+        /* Paksa Font Klasik */
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
+            background-color: #e0e0e0;
+            /* Background abu-abu windows lama */
         }
 
-        [x-cloak] {
-            display: none !important;
+        /* Reset semua rounded default tailwind jika ada yang terlewat */
+        * {
+            border-radius: 0 !important;
+        }
+
+        /* Scrollbar gaya lama (Chrome/Webkit) */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border: 2px solid #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
     </style>
 </head>
 
-<body class="bg-gray-100 text-gray-800" x-data="{ sidebarOpen: false }">
+<body class="flex flex-col min-h-screen">
 
-    <!-- Overlay Mobile -->
-    <div x-show="sidebarOpen" @click="sidebarOpen = false" x-transition.opacity
-        class="fixed inset-0 bg-black/50 z-40 md:hidden" x-cloak>
-    </div>
-
-    <!-- Mobile Header -->
-    <header class="md:hidden sticky top-0 z-30 bg-white border-b">
-        <div class="flex items-center justify-between px-4 py-3">
-            <div class="flex items-center gap-2">
-                <div class="bg-green-600 p-2 rounded-lg text-white">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                </div>
-                <span class="font-semibold text-lg">Teratani</span>
-            </div>
-
-            <button @click="sidebarOpen = !sidebarOpen" class="p-2 rounded-lg hover:bg-gray-100">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path x-show="!sidebarOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6h16M4 12h16M4 18h16" />
-                    <path x-show="sidebarOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M6 18L18 6M6 6l12 12" x-cloak />
+    <header
+        class="bg-teal-700 text-white border-b-4 border-yellow-500 px-3 py-2 flex justify-between items-center shadow-md">
+        <div class="flex items-center gap-3">
+            <div class="bg-white p-1 border border-gray-600">
+                <svg class="w-6 h-6 text-teal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-            </button>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg leading-none tracking-wider">SISTEM INFORMASI TERATANI</h1>
+                <p class="text-[10px] text-teal-100 opacity-80">Enterprise Resource Planning v.2.0</p>
+            </div>
+        </div>
+
+        <div class="text-right hidden md:block">
+            <table class="text-[10px] text-white">
+                <tr>
+                    <td class="text-right pr-2">Pengguna :</td>
+                    <td class="font-bold bg-teal-800 px-1 border border-teal-600">{{ Auth::user()->name ?? 'User' }}
+                    </td>
+                </tr>
+                <tr>
+                    <td class="text-right pr-2">Akses :</td>
+                    <td class="font-bold text-yellow-300">OWNER</td>
+                </tr>
+            </table>
         </div>
     </header>
 
-    <div class="flex min-h-screen">
+    <nav class="bg-blue-900 text-white border-b border-black shadow-sm">
+        <div class="flex flex-wrap items-center">
 
-        <!-- Sidebar -->
-        <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-            class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-white border-r transform transition-transform duration-300 md:translate-x-0">
+            <a href="{{ route('owner.dashboard') }}"
+                class="px-4 py-2 hover:bg-orange-500 border-r border-blue-700 flex items-center gap-1 transition-colors {{ request()->routeIs('owner.dashboard') ? 'bg-orange-600 font-bold' : '' }}">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                DASHBOARD
+            </a>
 
-            <!-- Logo -->
-            <div class="h-16 flex items-center px-6 border-b">
-                <div class="bg-green-600 p-2 rounded-lg text-white mr-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            @if (session('toko_active_id'))
+                <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}"
+                    class="px-4 py-2 hover:bg-orange-500 border-r border-blue-700 flex items-center gap-1 transition-colors {{ request()->routeIs('owner.toko.produk.*') ? 'bg-orange-600 font-bold' : '' }}">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
-                </div>
-                <span class="text-xl font-bold">Teratani</span>
-            </div>
+                    DATA BARANG
+                </a>
 
-            <!-- Sidebar Content -->
-            <div class="p-4 space-y-6 pb-28 overflow-y-auto">
+                <a href="#"
+                    class="px-4 py-2 hover:bg-orange-500 border-r border-blue-700 flex items-center gap-1 transition-colors">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    LAPORAN
+                </a>
 
-                <!-- Toko Aktif -->
-                @if (session('toko_active_nama'))
-                    <div class="bg-green-50 border border-green-200 rounded-xl p-4">
-                        <p class="text-xs text-green-700 font-semibold mb-1">TOKO AKTIF</p>
-                        <p class="font-semibold text-green-900">
-                            {{ session('toko_active_nama') }}
-                        </p>
-                        <a href="{{ route('owner.toko.index') }}"
-                            class="inline-block mt-3 text-sm text-green-700 hover:underline">
-                            Ganti Toko →
-                        </a>
-                    </div>
-                @endif
+                <a href="#"
+                    class="px-4 py-2 hover:bg-orange-500 border-r border-blue-700 flex items-center gap-1 transition-colors">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    UTILITAS
+                </a>
+            @endif
 
-                <!-- Menu -->
-                <div>
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 px-2">
-                        Menu Utama
-                    </p>
+            <div class="flex-grow"></div>
 
-                    <nav class="space-y-1">
-                        <a href="{{ route('owner.dashboard') }}"
-                            class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('owner.dashboard') ? 'bg-gray-100 text-blue-600 font-medium' : 'hover:bg-gray-100 text-gray-700' }}">
-                            <svg class="w-5 h-5 {{ request()->routeIs('owner.dashboard') ? 'text-blue-600' : 'text-gray-400' }}"
-                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                            </svg>
-                            Dashboard
-                        </a>
+            <form action="{{ route('logout') }}" method="POST" class="m-0">
+                @csrf
+                <button type="submit"
+                    class="px-4 py-2 bg-red-800 hover:bg-red-600 border-l border-red-900 text-white font-bold flex items-center gap-1 text-[10px]">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    KELUAR (LOGOUT)
+                </button>
+            </form>
+        </div>
+    </nav>
 
-                        @if (session('toko_active_id'))
-                            <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}"
-                                class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('owner.toko.produk.*') ? 'bg-gray-100 text-blue-600 font-medium' : 'hover:bg-gray-100 text-gray-700' }}">
-                                <svg class="w-5 h-5 {{ request()->routeIs('owner.toko.produk.*') ? 'text-blue-600' : 'text-gray-400' }}"
-                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                                </svg>
-                                Produk / Stok
-                            </a>
-                        @endif
-                    </nav>
-                </div>
-            </div>
+    <div class="bg-gray-200 border-b border-gray-400 p-1 px-3 flex items-center gap-2 text-gray-600 shadow-inner">
+        <span class="font-bold text-gray-800">Posisi:</span>
+        <span>Owner Area</span>
+        <span>&gt;</span>
+        <span class="text-blue-700 font-bold">@yield('title')</span>
 
-            <!-- User Footer -->
-            <div class="absolute bottom-0 w-full border-t bg-white p-4">
-                <div class="flex items-center gap-3">
-                    <div
-                        class="w-10 h-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center font-bold">
-                        {{ substr(Auth::user()->nama_lengkap ?? 'User', 0, 2) }}
-                    </div>
-
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-semibold truncate">
-                            {{ Auth::user()->nama_lengkap }}
-                        </p>
-                        <p class="text-xs text-gray-500">Owner</p>
-                    </div>
-
-                    <form action="{{ route('logout') }}" method="POST">
-                        @csrf
-                        <button class="p-2 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                            </svg>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-4 md:p-8 bg-gray-100">
-            @yield('content')
-        </main>
-
+        @if (session('toko_active_nama'))
+            <span class="ml-auto border-l border-gray-400 pl-3 flex items-center gap-1">
+                Unit Bisnis: <b class="text-green-700">{{ session('toko_active_nama') }}</b>
+            </span>
+        @endif
     </div>
+
+    <main class="flex-1 p-2 bg-[#f0f0f0]">
+        <div class="bg-white border border-gray-400 p-3 min-h-[400px]">
+            @yield('content')
+        </div>
+    </main>
+
+    <footer
+        class="bg-gray-300 border-t border-gray-500 p-1 px-3 text-[10px] text-gray-700 flex justify-between select-none">
+        <div class="flex gap-4">
+            <span>Waktu: <b>{{ date('H:i:s') }}</b></span>
+        </div>
+        <div>
+            &copy; {{ date('Y') }} PT. TERATANI SISTEM. Hak Cipta Dilindungi.
+        </div>
+    </footer>
 
 </body>
 
