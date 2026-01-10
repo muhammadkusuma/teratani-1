@@ -79,7 +79,8 @@ Route::middleware(['auth'])->group(function () {
 
         Route::resource('toko.produk', ProdukController::class);
 // Tambahkan route ini untuk AJAX
-        Route::get('/mutasi/get-produk/{id_toko}', [MutasiController::class, 'getProdukByToko'])->name('mutasi.get-produk');
+        Route::get('/ajax/mutasi-produk/{id_toko}', [MutasiController::class, 'getProdukByToko'])
+            ->name('mutasi.get-produk');
 
         // ... route resource mutasi yang sudah ada ...
         Route::resource('mutasi', MutasiController::class);

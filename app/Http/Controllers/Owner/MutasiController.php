@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Owner;
 use App\Http\Controllers\Controller;
 use App\Models\MutasiDetail;
 use App\Models\MutasiStok;
-use App\Models\Produk;
 use App\Models\StokToko;
 use App\Models\Toko;
 use Illuminate\Http\Request;
@@ -19,20 +18,20 @@ class MutasiController extends Controller
         $user = Auth::user();
 
         // 1. Coba ambil properti id_tenant langsung dari tabel users
-        if (!empty($user->id_tenant)) {
+        if (! empty($user->id_tenant)) {
             return $user->id_tenant;
         }
 
         // 2. Jika tidak ada, ambil dari relasi tenants (ambil yang pertama/primary)
         // Karena di User.php relasinya belongsToMany
-        $tenant = $user->tenants()->first(); 
-        
+        $tenant = $user->tenants()->first();
+
         if ($tenant) {
             return $tenant->id_tenant;
         }
 
         // 3. Fallback (Hanya untuk dev/debug, kembalikan 1 atau null)
-        return 1; 
+        return 1;
     }
 
     public function index()
@@ -52,47 +51,67 @@ class MutasiController extends Controller
         $idTenant = $this->getActiveTenantId();
 
         // Debugging: Uncomment baris di bawah ini jika masih kosong untuk melihat ID tenant yang didapat
-        // dd($idTenant); 
+        // dd($idTenant);
 
         // Ambil daftar toko berdasarkan tenant yang valid
         $tokos = Toko::where('id_tenant', $idTenant)->get();
-        
+
         // Debugging: Pastikan ada data tokonya
         // if($tokos->isEmpty()) { dd("Data Toko Kosong untuk Tenant ID: " . $idTenant); }
 
         return view('owner.mutasi.create', compact('tokos'));
     }
 
+    // Ganti method getProdukByToko dengan versi debug ini
     public function getProdukByToko($id_toko)
     {
-        $idTenant = $this->getActiveTenantId();
+        try {
+            $user = Auth::user();
 
-        // Validasi: Pastikan toko milik tenant user ini
-        $cekToko = Toko::where('id_toko', $id_toko)
-            ->where('id_tenant', $idTenant)
-            ->exists();
+            // 1. Ambil Tenant ID (Logika deteksi tenant yang aman)
+            $idTenant = $user->id_tenant;
+            if (empty($idTenant)) {
+                if (method_exists($user, 'tenants')) {
+                    $tenantRelasi = $user->tenants()->first();
+                    $idTenant     = $tenantRelasi ? $tenantRelasi->id_tenant : 1;
+                } else {
+                    $idTenant = 1;
+                }
+            }
 
-        if (!$cekToko) {
-            return response()->json([]);
+            // 2. Validasi Toko
+            $cekToko = Toko::where('id_toko', $id_toko)
+                ->where('id_tenant', $idTenant)
+                ->exists();
+
+            if (! $cekToko) {
+                return response()->json([]);
+            }
+
+            // 3. Query Produk (PERBAIKAN: Ganti 'kode_produk' jadi 'sku')
+            $produks = DB::table('produk')
+                ->leftJoin('stok_toko', function ($join) use ($id_toko) {
+                    $join->on('produk.id_produk', '=', 'stok_toko.id_produk')
+                        ->where('stok_toko.id_toko', '=', $id_toko);
+                })
+                ->where('produk.id_tenant', $idTenant)
+                ->select(
+                    'produk.id_produk',
+                    'produk.nama_produk',
+                    'produk.sku', // <-- INI YANG DIUBAH (sebelumnya kode_produk)
+                    DB::raw('COALESCE(stok_toko.stok_fisik, 0) as stok_fisik')
+                )
+                ->get();
+
+            return response()->json($produks);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+                'line'    => $e->getLine(),
+            ], 500);
         }
-
-        // Ambil produk JOIN dengan stok_toko agar bisa melihat stok fisik saat ini
-        $produks = DB::table('produk')
-            ->leftJoin('stok_toko', function($join) use ($id_toko) {
-                $join->on('produk.id_produk', '=', 'stok_toko.id_produk')
-                     ->where('stok_toko.id_toko', '=', $id_toko);
-            })
-            ->where('produk.id_tenant', $idTenant)
-            ->select(
-                'produk.id_produk', 
-                'produk.nama_produk', 
-                'produk.kode_produk', 
-                // Coalesce agar jika null (belum ada record stok) dianggap 0
-                DB::raw('COALESCE(stok_toko.stok_fisik, 0) as stok_fisik')
-            )
-            ->get();
-
-        return response()->json($produks);
     }
 
     public function store(Request $request)
@@ -127,7 +146,7 @@ class MutasiController extends Controller
                     'id_mutasi'  => $mutasi->id_mutasi,
                     'id_produk'  => $item['id_produk'],
                     'qty_kirim'  => $item['qty'],
-                    'qty_terima' => 0, 
+                    'qty_terima' => 0,
                 ]);
 
                 // 3. Kurangi Stok Fisik di Toko Asal

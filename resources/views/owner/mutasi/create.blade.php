@@ -22,10 +22,8 @@
 
                 <div class="p-3 bg-red-50 border border-red-200">
                     <label class="block font-bold mb-1 text-red-800">Dari Toko (Asal)</label>
-                    <select name="id_toko_asal" 
-                            class="w-full p-1 border border-gray-400" 
-                            required
-                            @change="fetchProduk($event.target.value)">
+                    <select name="id_toko_asal" class="w-full p-1 border border-gray-400" required
+                        @change="fetchProduk($event.target.value)">
                         <option value="">-- Pilih Toko Asal --</option>
                         @foreach ($tokos as $toko)
                             <option value="{{ $toko->id_toko }}">{{ $toko->nama_toko }}</option>
@@ -46,7 +44,7 @@
             </div>
 
             <h3 class="font-bold mb-2 border-b border-gray-400 pb-1">Daftar Barang yang Ditransfer</h3>
-            
+
             <div x-show="isLoading" class="text-center py-4 text-gray-500">
                 Memuat data produk...
             </div>
@@ -65,14 +63,13 @@
                         <tr>
                             <td class="border border-gray-300 p-2 text-center" x-text="index + 1"></td>
                             <td class="border border-gray-300 p-2">
-                                <select :name="'items[' + index + '][id_produk]'" 
-                                        class="w-full p-1 border border-gray-300"
-                                        required>
+                                <select :name="'items[' + index + '][id_produk]'" class="w-full p-1 border border-gray-300"
+                                    required>
                                     <option value="">-- Pilih Produk --</option>
-                                    
+
                                     <template x-for="prod in listProduk" :key="prod.id_produk">
-                                        <option :value="prod.id_produk" 
-                                                x-text="prod.nama_produk + ' (' + prod.kode_produk + ') - Stok: ' + prod.stok_fisik">
+                                        <option :value="prod.id_produk"
+                                            x-text="prod.nama_produk + ' (' + (prod.sku || '-') + ') - Stok: ' + prod.stok_fisik">
                                         </option>
                                     </template>
                                 </select>
@@ -113,30 +110,65 @@
         function mutasiForm() {
             return {
                 isLoading: false,
-                listProduk: [], // Menyimpan daftar produk yang diambil via AJAX
+                listProduk: [],
                 rows: [{
                     id_produk: '',
                     qty: 1
                 }],
-                
-                // Fetch Produk saat Toko Asal berubah
+
                 async fetchProduk(idToko) {
+                    // Jika user memilih "Pilih Toko Asal" (value kosong), reset list
                     if (!idToko) {
                         this.listProduk = [];
                         return;
                     }
-                    
+
                     this.isLoading = true;
-                    // Reset rows saat ganti toko agar tidak error
-                    this.rows = [{ id_produk: '', qty: 1 }]; 
+                    // Reset baris item saat toko berubah untuk mencegah data tidak valid
+                    this.rows = [{
+                        id_produk: '',
+                        qty: 1
+                    }];
 
                     try {
-                        const response = await fetch(`/owner/mutasi/get-produk/${idToko}`);
+                        // URL Generator (Sudah benar pakai false)
+                        let url = "{{ route('owner.mutasi.get-produk', '000', false) }}";
+                        url = url.replace('000', idToko);
+
+                        const response = await fetch(url, {
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        // --- PERBAIKAN HANDLING ERROR ---
+                        // Jika status bukan 200 OK (misal 500 Error)
+                        if (!response.ok) {
+                            // Coba ambil respon sebagai text/json
+                            let errorDetail = "Server Error";
+                            try {
+                                const errJson = await response.json();
+                                // Ambil pesan error dari controller (message, line, file)
+                                if (errJson.message) {
+                                    errorDetail = `${errJson.message} \n(Line: ${errJson.line})`;
+                                }
+                            } catch (e) {
+                                // Jika bukan JSON (misal HTML Laravel error page), ambil teksnya
+                                errorDetail = await response.text();
+                            }
+
+                            console.error("DEBUG ERROR:", errorDetail); // Cek Console Browser (F12)
+                            throw new Error(errorDetail);
+                        }
+
                         const data = await response.json();
                         this.listProduk = data;
+
                     } catch (error) {
                         console.error('Gagal mengambil produk:', error);
-                        alert('Gagal mengambil data produk dari toko terpilih.');
+                        // Tampilkan pesan error asli dari PHP ke layar User
+                        alert('Gagal mengambil data produk:\n' + error.message);
                     } finally {
                         this.isLoading = false;
                     }
