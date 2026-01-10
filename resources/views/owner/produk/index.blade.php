@@ -146,7 +146,11 @@
 
                                             {{-- Tombol Edit Retro --}}
                                             <a href="{{ route('owner.toko.produk.edit', [$toko->id_toko, $item->id_produk]) }}"
-                                                class="w-6 h-6 flex items-center justify-center bg-[#d4d0c8] border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black active:border-b-white active:border-r-white hover:bg-gray-300 text-blue-800"
+                                                class="w-6 h-6 flex items-center justify-center
+                   bg-[#d4d0c8]
+                   border-2 border-t-white border-l-white border-b-black border-r-black
+                   active:border-t-black active:border-l-black active:border-b-white active:border-r-white
+                   hover:bg-gray-300 text-blue-800"
                                                 title="Edit Data">
                                                 <i class="fas fa-pencil-alt text-[11px]"></i>
                                             </a>
@@ -154,12 +158,16 @@
                                             {{-- Tombol Hapus Retro --}}
                                             <form
                                                 action="{{ route('owner.toko.produk.destroy', [$toko->id_toko, $item->id_produk]) }}"
-                                                method="POST" onsubmit="return confirm('Yakin hapus produk ini?')"
-                                                class="inline">
+                                                method="POST" onsubmit="return confirm('Yakin hapus produk ini?')">
                                                 @csrf
                                                 @method('DELETE')
+
                                                 <button type="submit"
-                                                    class="w-6 h-6 flex items-center justify-center bg-[#d4d0c8] border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black active:border-b-white active:border-r-white hover:bg-gray-300 text-red-600"
+                                                    class="w-6 h-6 flex items-center justify-center
+                       bg-[#d4d0c8]
+                       border-2 border-t-white border-l-white border-b-black border-r-black
+                       active:border-t-black active:border-l-black active:border-b-white active:border-r-white
+                       hover:bg-gray-300 text-red-600"
                                                     title="Hapus Data">
                                                     <i class="fas fa-times text-[12px] font-bold"></i>
                                                 </button>
