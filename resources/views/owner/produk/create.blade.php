@@ -5,7 +5,8 @@
         <div class="max-w-2xl mx-auto bg-white p-6 rounded shadow">
             <h2 class="text-xl font-bold mb-4">Tambah Produk Baru</h2>
 
-            <form action="{{ route('owner.toko.produk.store', $toko->id) }}" method="POST" enctype="multipart/form-data">
+            {{-- PERBAIKAN: Ganti $toko->id menjadi $toko->id_toko --}}
+            <form action="{{ route('owner.toko.produk.store', $toko->id_toko) }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
                 <div class="mb-4">
@@ -21,18 +22,22 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Kategori</label>
+                        {{-- PERBAIKAN: Name harus sesuai Controller (kategori_id) --}}
                         <select name="kategori_id" class="w-full border p-2 rounded">
                             <option value="">Pilih Kategori</option>
                             @foreach ($kategoris as $cat)
-                                <option value="{{ $cat->id }}">{{ $cat->nama }}</option>
+                                {{-- PERBAIKAN: Gunakan id_kategori dan nama_kategori --}}
+                                <option value="{{ $cat->id_kategori }}">{{ $cat->nama_kategori }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Satuan</label>
+                        {{-- PERBAIKAN: Name harus sesuai Controller (satuan_id) --}}
                         <select name="satuan_id" class="w-full border p-2 rounded">
                             @foreach ($satuans as $sat)
-                                <option value="{{ $sat->id }}">{{ $sat->nama }}</option>
+                                {{-- PERBAIKAN: Gunakan id_satuan dan nama_satuan --}}
+                                <option value="{{ $sat->id_satuan }}">{{ $sat->nama_satuan }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -63,7 +68,9 @@
                 </div>
 
                 <div class="flex justify-end mt-6">
-                    <a href="{{ route('owner.toko.produk.index', $toko->id) }}" class="text-gray-600 mr-4 py-2">Batal</a>
+                    {{-- PERBAIKAN: Ganti $toko->id menjadi $toko->id_toko --}}
+                    <a href="{{ route('owner.toko.produk.index', $toko->id_toko) }}"
+                        class="text-gray-600 mr-4 py-2">Batal</a>
                     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700">Simpan
                         Produk</button>
                 </div>

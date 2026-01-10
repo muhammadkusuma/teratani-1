@@ -83,7 +83,7 @@
                     <p class="text-xs text-gray-500 mt-1">Input transaksi penjualan</p>
                 </a>
 
-                <a href="#"
+                <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}"
                     class="group relative bg-white p-6 rounded-2xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-blue-500 hover:-translate-y-1 transition-all duration-300">
                     <div
                         class="w-14 h-14 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">

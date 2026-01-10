@@ -3,8 +3,9 @@
 @section('content')
     <div class="container-fluid px-4">
         <div class="flex justify-between items-center mb-4">
-            <h1 class="mt-4 text-2xl font-bold">Produk Toko: {{ $toko->nama }}</h1>
-            <a href="{{ route('owner.toko.produk.create', $toko->id) }}"
+            <h1 class="mt-4 text-2xl font-bold">Produk Toko: {{ $toko->nama_toko }}</h1>
+            {{-- PERBAIKAN: Gunakan id_toko --}}
+            <a href="{{ route('owner.toko.produk.create', $toko->id_toko) }}"
                 class="btn btn-primary bg-blue-600 text-white px-4 py-2 rounded">
                 + Tambah Produk
             </a>
@@ -36,26 +37,37 @@
                         @forelse($produks as $produk)
                             <tr class="border-b hover:bg-gray-50">
                                 <td class="p-3">
-                                    @if ($produk->foto)
-                                        <img src="{{ asset('storage/' . $produk->foto) }}"
+                                    {{-- Sesuaikan nama kolom gambar di database: gambar_produk --}}
+                                    @if ($produk->gambar_produk)
+                                        <img src="{{ asset('storage/' . $produk->gambar_produk) }}"
                                             class="w-12 h-12 object-cover rounded" alt="Foto">
                                     @else
                                         <span class="text-gray-400">No Img</span>
                                     @endif
                                 </td>
-                                <td class="p-3 font-medium">{{ $produk->nama }}</td>
-                                <td class="p-3">{{ $produk->kategori->nama ?? '-' }}</td>
-                                <td class="p-3">Rp {{ number_format($produk->harga_jual, 0, ',', '.') }}</td>
+                                {{-- Sesuaikan nama kolom: nama_produk --}}
+                                <td class="p-3 font-medium">{{ $produk->nama_produk }}</td>
+                                <td class="p-3">{{ $produk->kategori->nama_kategori ?? '-' }}</td>
+                                {{-- Sesuaikan nama kolom: harga_jual_umum --}}
+                                <td class="p-3">Rp {{ number_format($produk->harga_jual_umum, 0, ',', '.') }}</td>
                                 <td class="p-3">
+                                    {{-- Mengambil stok dari relasi stokToko yang diload di Controller --}}
+                                    @php
+                                        // Ambil stok pertama (karena kita sudah filter di controller) atau 0
+                                        $stokFisik = $produk->stokTokos->first()->stok_fisik ?? 0;
+                                    @endphp
                                     <span
-                                        class="px-2 py-1 rounded text-xs {{ $produk->stok > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                        {{ $produk->stok }} {{ $produk->satuan->nama ?? 'Unit' }}
+                                        class="px-2 py-1 rounded text-xs {{ $stokFisik > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ $stokFisik }} {{ $produk->satuanKecil->nama_satuan ?? 'Unit' }}
                                     </span>
                                 </td>
                                 <td class="p-3 text-center">
-                                    <a href="{{ route('owner.toko.produk.edit', [$toko->id, $produk->id]) }}"
+                                    {{-- PERBAIKAN: Gunakan id_toko dan id_produk --}}
+                                    <a href="{{ route('owner.toko.produk.edit', [$toko->id_toko, $produk->id_produk]) }}"
                                         class="text-yellow-600 hover:text-yellow-800 mr-2">Edit</a>
-                                    <form action="{{ route('owner.toko.produk.destroy', [$toko->id, $produk->id]) }}"
+
+                                    <form
+                                        action="{{ route('owner.toko.produk.destroy', [$toko->id_toko, $produk->id_produk]) }}"
                                         method="POST" class="inline" onsubmit="return confirm('Hapus produk ini?')">
                                         @csrf
                                         @method('DELETE')

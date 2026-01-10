@@ -100,7 +100,6 @@
                     <nav class="space-y-1">
                         <a href="{{ route('owner.dashboard') }}"
                             class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('owner.dashboard') ? 'bg-gray-100 text-blue-600 font-medium' : 'hover:bg-gray-100 text-gray-700' }}">
-
                             <svg class="w-5 h-5 {{ request()->routeIs('owner.dashboard') ? 'text-blue-600' : 'text-gray-400' }}"
                                 fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -108,6 +107,18 @@
                             </svg>
                             Dashboard
                         </a>
+
+                        @if (session('toko_active_id'))
+                            <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}"
+                                class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors {{ request()->routeIs('owner.toko.produk.*') ? 'bg-gray-100 text-blue-600 font-medium' : 'hover:bg-gray-100 text-gray-700' }}">
+                                <svg class="w-5 h-5 {{ request()->routeIs('owner.toko.produk.*') ? 'text-blue-600' : 'text-gray-400' }}"
+                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                                Produk / Stok
+                            </a>
+                        @endif
                     </nav>
                 </div>
             </div>
