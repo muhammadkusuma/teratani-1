@@ -7,6 +7,12 @@ class Tenant extends Model
 {
     protected $table      = 'tenants';
     protected $primaryKey = 'id_tenant';
+    
+    // Karena di migrasi $table->id('id_tenant'), maka ini adalah Auto Increment
+    public $incrementing = true; 
+    protected $keyType = 'int';
+
+    // Sesuaikan guarded agar create() bisa mengisi kolom lain selain id_tenant
     protected $guarded    = ['id_tenant'];
 
     public function tokos()

@@ -15,7 +15,7 @@
 
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2">Nama Tenant</label>
-                <input type="text" name="nama_tenant" value="{{ old('nama_tenant', $tenant->nama_tenant) }}"
+                <input type="text" name="nama_tenant" value="{{ old('nama_tenant', $tenant->nama_bisnis) }}"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
                 @error('nama_tenant')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -23,8 +23,8 @@
             </div>
 
             <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">Domain</label>
-                <input type="text" name="domain" value="{{ old('domain', $tenant->domain) }}"
+                <label class="block text-gray-700 text-sm font-bold mb-2">Domain (Kode Unik)</label>
+                <input type="text" name="domain" value="{{ old('domain', $tenant->kode_unik_tenant) }}"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
                 @error('domain')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
@@ -35,9 +35,16 @@
                 <label class="block text-gray-700 text-sm font-bold mb-2">Status</label>
                 <select name="status"
                     class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500">
-                    <option value="active" {{ $tenant->status == 'active' ? 'selected' : '' }}>Active</option>
-                    <option value="inactive" {{ $tenant->status == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    <option value="active"
+                        {{ old('status') == 'active' || $tenant->status_langganan == 'Aktif' ? 'selected' : '' }}>Active
+                    </option>
+                    <option value="inactive"
+                        {{ old('status') == 'inactive' || $tenant->status_langganan != 'Aktif' ? 'selected' : '' }}>
+                        Inactive</option>
                 </select>
+                @error('status')
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="flex items-center justify-end">

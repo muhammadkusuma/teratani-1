@@ -54,10 +54,10 @@
                                 {{ $tenant->id_tenant }}
                             </td>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm font-bold text-gray-800">
-                                {{ $tenant->nama_tenant }}
+                                {{ $tenant->nama_bisnis }}
                             </td>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-blue-600">
-                                {{ $tenant->domain ?? '-' }}
+                                {{ $tenant->kode_unik_tenant ?? 'NaN' }}
                             </td>
                             <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                 @if ($tenant->status === 'active')
