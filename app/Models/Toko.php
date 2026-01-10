@@ -9,7 +9,7 @@ class Toko extends Model
     protected $primaryKey = 'id_toko';
 
     // --- PERBAIKAN: Matikan timestamps ---
-    public $timestamps    = false; 
+    public $timestamps = false;
     // -------------------------------------
 
     protected $fillable = [
@@ -26,5 +26,10 @@ class Toko extends Model
     public function tenant()
     {
         return $this->belongsTo(Tenant::class, 'id_tenant', 'id_tenant');
+    }
+
+    public function produks()
+    {
+        return $this->hasMany(Produk::class);
     }
 }

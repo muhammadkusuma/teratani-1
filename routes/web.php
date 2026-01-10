@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Owner\BisnisController;
+use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Owner\TokoController as OwnerTokoController;
 use App\Http\Controllers\SettingController;
@@ -74,6 +75,8 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/toko/{id}', [OwnerTokoController::class, 'update'])->name('toko.update');
         Route::delete('/toko/{id}', [OwnerTokoController::class, 'destroy'])->name('toko.destroy');
         Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');
+
+        Route::resource('toko.produk', ProdukController::class);
     });
 
     // --- SUPERADMIN DASHBOARD ---
