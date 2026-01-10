@@ -7,6 +7,23 @@ use App\Http\Controllers\TenantController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+Route::get("/", function () {
+    return view('welcome');
+});
+
+Route::get('/register', function () {
+    return "Under Development";
+})->name('register');
+
+Route::get('/fitur', function () {return view('landing.fitur');});
+Route::get('/harga', function () {return view('landing.harga');});
+Route::get('/studi-kasus', function () {return view('landing.studi-kasus');});
+Route::get('/tentang-kami', function () {return view('landing.tentang');});
+Route::get('/karir', function () {return view('landing.karir');});
+Route::get('/kontak', function () {return view('landing.kontak');});
+Route::get('/privasi', function () {return view('landing.privasi');});
+Route::get('/syarat-ketentuan', function () {return view('landing.syarat');});
+
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
