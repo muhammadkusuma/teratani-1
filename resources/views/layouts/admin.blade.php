@@ -52,7 +52,7 @@
                     </li>
 
                     <li>
-                        <a href="#"
+                        <a href="{{ route('tenants.index') }}"
                             class="flex items-center px-6 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition">
                             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
