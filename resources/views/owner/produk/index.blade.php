@@ -19,7 +19,7 @@
 
                 {{-- Tombol Tambah (Gaya 3D) --}}
                 <a href="{{ route('owner.toko.produk.create', $toko->id_toko) }}"
-                    class="inline-flex items-center px-3 py-1 bg-[#d4d0c8] text-black border-2 border-white border-r-black border-b-black active:border-t-black active:border-l-black hover:bg-gray-300 font-bold text-[11px] gap-1 no-underline">
+                    class="inline-flex items-center px-3 py-1 bg-[#d4d0c8] text-black border-2 border-white border-r-black border-b-black active:border-t-black active:border-l-black hover:bg-gray-300 font-bold text-[11px] gap-1 no-underline shadow-sm">
                     <i class="fas fa-plus text-blue-800"></i> TAMBAH PRODUK
                 </a>
             </div>
@@ -44,18 +44,32 @@
                     </div>
 
                     {{-- Search Bar Retro --}}
-                    <div class="flex items-center gap-1">
+                    {{-- FORM PENCARIAN DIMULAI DISINI --}}
+                    <form action="{{ route('owner.toko.produk.index', $toko->id_toko) }}" method="GET"
+                        class="flex items-center gap-1">
                         <label class="font-bold text-gray-600">Filter:</label>
                         <div class="relative">
-                            <input type="text"
+                            {{-- Input dengan name="search" dan value lama --}}
+                            <input type="text" name="search" value="{{ request('search') }}"
                                 class="w-48 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black focus:outline-none focus:bg-yellow-50"
                                 placeholder="Cari SKU / Nama...">
-                            <button
-                                class="absolute right-0 top-0 h-full px-2 bg-gray-300 border-l border-gray-400 text-gray-600 hover:text-black">
+
+                            {{-- Button type="submit" --}}
+                            <button type="submit"
+                                class="absolute right-0 top-0 h-full px-2 bg-gray-300 border-l border-gray-400 text-gray-600 hover:text-black cursor-pointer">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
-                    </div>
+
+                        {{-- Tombol Reset Search (opsional, muncul jika sedang mencari) --}}
+                        @if (request('search'))
+                            <a href="{{ route('owner.toko.produk.index', $toko->id_toko) }}"
+                                class="px-2 py-0.5 bg-red-200 border border-red-400 text-red-800 text-[10px] font-bold no-underline hover:bg-red-300 ml-1"
+                                title="Reset Pencarian">
+                                X
+                            </a>
+                        @endif
+                    </form>
                 </div>
 
                 {{-- TABLE CONTENT (DataGrid Style) --}}
@@ -126,14 +140,18 @@
                                         Rp {{ number_format($item->harga_jual_umum, 0, ',', '.') }}
                                     </td>
 
-                                    {{-- Aksi --}}
+                                    {{-- Aksi (DIPERBAIKI) --}}
                                     <td class="px-1 py-1 align-middle text-center">
                                         <div class="flex justify-center gap-1">
+
+                                            {{-- Tombol Edit Retro --}}
                                             <a href="{{ route('owner.toko.produk.edit', [$toko->id_toko, $item->id_produk]) }}"
-                                                class="bg-gray-100 border border-gray-500 hover:bg-white hover:border-blue-500 text-blue-700 px-1.5 py-0.5 shadow-sm"
-                                                title="Edit">
-                                                <i class="fas fa-edit"></i>
+                                                class="w-6 h-6 flex items-center justify-center bg-[#d4d0c8] border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black active:border-b-white active:border-r-white hover:bg-gray-300 text-blue-800"
+                                                title="Edit Data">
+                                                <i class="fas fa-pencil-alt text-[11px]"></i>
                                             </a>
+
+                                            {{-- Tombol Hapus Retro --}}
                                             <form
                                                 action="{{ route('owner.toko.produk.destroy', [$toko->id_toko, $item->id_produk]) }}"
                                                 method="POST" onsubmit="return confirm('Yakin hapus produk ini?')"
@@ -141,11 +159,12 @@
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit"
-                                                    class="bg-gray-100 border border-gray-500 hover:bg-red-600 hover:text-white hover:border-red-800 text-red-600 px-1.5 py-0.5 shadow-sm"
-                                                    title="Hapus">
-                                                    <i class="fas fa-trash"></i>
+                                                    class="w-6 h-6 flex items-center justify-center bg-[#d4d0c8] border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black active:border-b-white active:border-r-white hover:bg-gray-300 text-red-600"
+                                                    title="Hapus Data">
+                                                    <i class="fas fa-times text-[12px] font-bold"></i>
                                                 </button>
                                             </form>
+
                                         </div>
                                     </td>
                                 </tr>

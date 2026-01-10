@@ -15,18 +15,27 @@ use Illuminate\Validation\Rule;
 class ProdukController extends Controller
 {
     // Menampilkan daftar produk per toko
-    public function index(Toko $toko)
+    public function index(Request $request, $id_toko)
     {
-        // Ambil produk milik tenant yang sama dengan toko ini
-        $produks = Produk::where('id_tenant', $toko->id_tenant)
-            ->with(['kategori', 'satuanKecil', 'satuanBesar'])
-            ->with(['stokTokos' => function ($query) use ($toko) {
-                $query->where('id_toko', $toko->id_toko);
-            }])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $toko = Toko::find($id_toko);
 
-        return view('owner.produk.index', compact('toko', 'produks'));
+        // Query Dasar
+        $query = Produk::where('toko_id', $id_toko);
+
+        // LOGIKA PENCARIAN
+        if ($request->has('search') && $request->search != null) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_produk', 'LIKE', "%{$search}%")
+                    ->orWhere('sku', 'LIKE', "%{$search}%")
+                    ->orWhere('barcode', 'LIKE', "%{$search}%");
+            });
+        }
+
+        // Pagination (append query string agar search tidak hilang saat pindah halaman)
+        $produks = $query->paginate(10)->withQueryString();
+
+        return view('owner.toko.produk.index', compact('toko', 'produks'));
     }
 
     // Form Tambah Produk
