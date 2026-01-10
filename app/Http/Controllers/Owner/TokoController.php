@@ -15,6 +15,14 @@ class TokoController extends Controller
         $user   = Auth::user();
         $tenant = $user->tenants->first(); // Asumsi 1 user 1 tenant utama
 
+        // --- FIX: Cek apakah tenant ada ---
+        if (! $tenant) {
+            // Jika tidak ada tenant, kembalikan collection kosong agar view tidak error
+            // Atau bisa redirect ke halaman pembuatan tenant
+            return view('owner.toko.index', ['toko' => collect([])]);
+        }
+        // ----------------------------------
+
         $toko = Toko::where('id_tenant', $tenant->id_tenant)->get();
 
         return view('owner.toko.index', compact('toko'));
@@ -36,6 +44,12 @@ class TokoController extends Controller
 
         $user   = Auth::user();
         $tenant = $user->tenants->first();
+
+        // --- FIX: Cek tenant sebelum proses ---
+        if (! $tenant) {
+            return redirect()->back()->with('error', 'Anda belum memiliki bisnis (Tenant). Silakan buat terlebih dahulu.');
+        }
+        // --------------------------------------
 
         DB::transaction(function () use ($request, $user, $tenant) {
             // 1. Buat Toko
@@ -68,6 +82,12 @@ class TokoController extends Controller
         // Security Check: Pastikan toko milik tenant user
         $user   = Auth::user();
         $tenant = $user->tenants->first();
+
+        // --- FIX: Cek tenant ---
+        if (! $tenant) {
+            abort(403, 'Akses ditolak: User tidak memiliki tenant.');
+        }
+
         if ($toko->id_tenant !== $tenant->id_tenant) {
             abort(403, 'Akses ditolak');
         }
@@ -91,6 +111,12 @@ class TokoController extends Controller
         // Security Check
         $user   = Auth::user();
         $tenant = $user->tenants->first();
+
+        // --- FIX: Cek tenant ---
+        if (! $tenant) {
+            abort(403, 'Akses ditolak: User tidak memiliki tenant.');
+        }
+
         if ($toko->id_tenant !== $tenant->id_tenant) {
             abort(403, 'Akses ditolak');
         }
@@ -115,6 +141,12 @@ class TokoController extends Controller
         // Security Check
         $user   = Auth::user();
         $tenant = $user->tenants->first();
+
+        // --- FIX: Cek tenant ---
+        if (! $tenant) {
+            abort(403, 'Akses ditolak: User tidak memiliki tenant.');
+        }
+
         if ($toko->id_tenant !== $tenant->id_tenant) {
             abort(403, 'Akses ditolak');
         }
@@ -138,6 +170,11 @@ class TokoController extends Controller
         // Validasi apakah toko ini milik tenant user yang login
         $user   = Auth::user();
         $tenant = $user->tenants->first();
+
+        // --- FIX: Cek tenant ---
+        if (! $tenant) {
+            abort(403, 'Akses ditolak: User tidak memiliki tenant.');
+        }
 
         if ($toko->id_tenant !== $tenant->id_tenant) {
             abort(403, 'Akses ditolak');
