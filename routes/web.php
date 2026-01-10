@@ -78,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');
 
         Route::resource('toko.produk', ProdukController::class);
-// Tambahkan route ini untuk AJAX
+        // Tambahkan route ini untuk AJAX
         Route::get('/ajax/mutasi-produk/{id_toko}', [MutasiController::class, 'getProdukByToko'])
             ->name('mutasi.get-produk');
 
@@ -86,6 +86,8 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/mutasi/{id}/terima', [MutasiController::class, 'terima'])->name('mutasi.terima');
         // ... route resource mutasi yang sudah ada ...
         Route::resource('mutasi', MutasiController::class);
+
+        Route::resource('pelanggan', App\Http\Controllers\Owner\PelangganController::class);
     });
 
     // --- SUPERADMIN DASHBOARD ---
