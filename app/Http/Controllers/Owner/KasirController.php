@@ -177,10 +177,13 @@ class KasirController extends Controller
     }
 
     // --- TAMBAHAN BARU: Method Search AJAX ---
+    // --- TAMBAHAN BARU: Method Search AJAX (DIPERBAIKI) ---
     public function searchProduk(Request $request)
     {
         $keyword = $request->get('keyword');
-        $id_toko = $this->getTokoAktif();
+        
+        // REVISI: Mengambil ID Toko langsung dari session, karena getTokoAktif() tidak ada
+        $id_toko = session('id_toko_aktif');
 
         if (! $id_toko) {
             return response()->json([]);
