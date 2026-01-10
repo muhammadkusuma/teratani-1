@@ -1,12 +1,12 @@
 <?php
-
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\KartuPiutang;
 use App\Models\LogStok;
 use App\Models\Pelanggan;
 use App\Models\Penjualan;
-use App\Models\PenjualanDetail;
+use App\Models\PenjualanDetail; // Pastikan model ini di-use
 use App\Models\Produk;
 use App\Models\StokToko;
 use App\Models\Toko;
@@ -16,106 +16,78 @@ use Illuminate\Support\Facades\DB;
 
 class KasirController extends Controller
 {
-    /**
-     * Helper: Mendapatkan ID Toko yang sedang aktif.
-     * Mengambil dari session, atau mencari default toko pertama milik user.
-     */
     private function getTokoAktif()
     {
-        // 1. Cek session
         if (session()->has('id_toko_aktif')) {
             return session('id_toko_aktif');
         }
 
-        // 2. Jika tidak ada di session, cari toko user dari database
-        $user = Auth::user();
-        $tenant = $user->tenants()->first(); // Asumsi user punya tenant
+        $user   = Auth::user();
+        $tenant = $user->tenants()->first();
 
         if ($tenant) {
             $toko = Toko::where('id_tenant', $tenant->id_tenant)->first();
             if ($toko) {
-                // Simpan ke session agar request selanjutnya lebih ringan
                 session(['id_toko_aktif' => $toko->id_toko]);
                 return $toko->id_toko;
             }
         }
-
-        return null; // Tidak ada toko
+        return null;
     }
 
-    /**
-     * Halaman Utama Kasir
-     */
     public function index()
     {
         $id_toko = $this->getTokoAktif();
 
-        if (!$id_toko) {
-            return redirect()->back()->with('error', 'Anda belum memiliki toko. Silakan buat toko terlebih dahulu di menu Bisnis.');
+        if (! $id_toko) {
+            return redirect()->back()->with('error', 'Anda belum memiliki toko.');
         }
 
-        // Ambil Nama Toko untuk ditampilkan di UI
-        $toko = Toko::find($id_toko);
+        $toko      = Toko::find($id_toko);
         $nama_toko = $toko ? $toko->nama_toko : 'Toko Tidak Diketahui';
 
-        // Ambil 20 Produk Terbaru untuk tampilan awal
-        // Kita filter stok > 0 untuk tampilan awal agar rapi, 
-        // tapi di pencarian (searchProduk) kita akan tampilkan semua.
+        // Load awal: Hanya produk dengan stok > 0 agar rapi
         $produk = Produk::whereHas('stokToko', function ($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko)
-              ->where('stok_fisik', '>', 0);
+            $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
         })->with(['stokToko' => function ($q) use ($id_toko) {
             $q->where('id_toko', $id_toko);
-        }, 'satuanKecil'])
-        ->limit(20)
-        ->get();
+        }, 'satuanKecil'])->limit(20)->get();
 
-        // Ambil data pelanggan untuk dropdown
         $pelanggan = Pelanggan::where('id_tenant', Auth::user()->tenants()->first()->id_tenant ?? 0)->get();
 
         return view('owner.kasir.index', compact('produk', 'pelanggan', 'nama_toko'));
     }
 
-    /**
-     * Pencarian Produk Realtime (AJAX)
-     */
     public function searchProduk(Request $request)
     {
         $id_toko = $this->getTokoAktif();
-        if (!$id_toko) return response()->json([]);
+        if (! $id_toko) {
+            return response()->json([]);
+        }
 
         $keyword = $request->get('keyword');
 
-        // Query dasar: Produk harus terdaftar di toko ini (ada record di stok_toko)
         $query = Produk::whereHas('stokToko', function ($q) use ($id_toko) {
             $q->where('id_toko', $id_toko);
-            // CATATAN: Kita HAPUS 'where stok_fisik > 0' disini 
-            // agar produk yang stoknya 0 tetap muncul saat dicari (biar kasir tau barangnya ada tapi habis)
         });
 
-        if (!empty($keyword)) {
+        if (! empty($keyword)) {
             $query->where(function ($q) use ($keyword) {
                 $q->where('nama_produk', 'LIKE', "%{$keyword}%")
-                  ->orWhere('sku', 'LIKE', "%{$keyword}%")
-                  ->orWhere('barcode', 'LIKE', "%{$keyword}%");
+                    ->orWhere('sku', 'LIKE', "%{$keyword}%")
+                    ->orWhere('barcode', 'LIKE', "%{$keyword}%");
             });
         }
 
         $produk = $query->with(['stokToko' => function ($q) use ($id_toko) {
             $q->where('id_toko', $id_toko);
-        }, 'satuanKecil'])
-        ->limit(20) // Batasi hasil agar tidak berat
-        ->get();
+        }, 'satuanKecil'])->limit(20)->get();
 
         return response()->json($produk);
     }
 
-    /**
-     * Proses Simpan Transaksi (Checkout)
-     */
     public function store(Request $request)
     {
-        // 1. Validasi Input
         $request->validate([
             'items'        => 'required|array',
             'items.*.id'   => 'required|exists:produk,id_produk',
@@ -125,8 +97,8 @@ class KasirController extends Controller
         ]);
 
         $id_toko = $this->getTokoAktif();
-        if (!$id_toko) {
-            return response()->json(['status' => 'error', 'message' => 'Sesi toko kadaluarsa. Silakan refresh halaman.'], 403);
+        if (! $id_toko) {
+            return response()->json(['status' => 'error', 'message' => 'Sesi toko kadaluarsa.'], 403);
         }
 
         $user = Auth::user();
@@ -136,23 +108,22 @@ class KasirController extends Controller
             $total_bruto = 0;
             $items_fix   = [];
 
-            // 2. Loop Items untuk Cek Stok & Hitung Total
+            // 1. Cek Stok & Hitung
             foreach ($request->items as $item) {
-                // Ambil produk beserta stok di toko ini
                 $produk = Produk::with(['stokToko' => function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko);
-                }, 'satuanKecil'])->find($item['id']);
+                }])->find($item['id']);
 
-                if (!$produk) continue;
+                if (! $produk) {
+                    continue;
+                }
 
                 $stok_sekarang = $produk->stokToko->stok_fisik ?? 0;
 
-                // Cek Ketersediaan Stok
                 if ($stok_sekarang < $item['qty']) {
-                    throw new \Exception("Stok produk '{$produk->nama_produk}' tidak mencukupi (Tersedia: $stok_sekarang).");
+                    throw new \Exception("Stok {$produk->nama_produk} kurang (Sisa: $stok_sekarang).");
                 }
 
-                // Hitung Subtotal
                 $harga    = $produk->harga_jual_umum;
                 $subtotal = $harga * $item['qty'];
                 $total_bruto += $subtotal;
@@ -165,42 +136,39 @@ class KasirController extends Controller
                 ];
             }
 
-            // 3. Logika Pembayaran
-            $pajak       = 0; 
+            // 2. Hitung Pembayaran
             $diskon      = $request->diskon ?? 0;
+            $pajak       = 0;
             $total_netto = ($total_bruto - $diskon) + $pajak;
             $bayar       = $request->bayar;
-            $kembalian   = $bayar - $total_netto;
             $metode      = $request->metode_bayar;
-            
-            $status_bayar = 'Lunas'; // Default
+
+            $status_bayar = 'Lunas';
+            $kembalian    = $bayar - $total_netto;
 
             if ($metode == 'Hutang') {
-                // Validasi Hutang
                 if (empty($request->id_pelanggan)) {
-                    throw new \Exception("Transaksi Hutang WAJIB memilih data Pelanggan.");
+                    throw new \Exception("Transaksi Hutang WAJIB memilih Pelanggan.");
                 }
-                
-                // Status Lunas jika bayar >= total, selain itu Belum Lunas
+
                 if ($bayar >= $total_netto) {
+                    // Jika pilih hutang tapi bayar lunas, anggap Tunai/Lunas tapi metode tetap tercatat
                     $status_bayar = 'Lunas';
-                    // Kembalian tetap dihitung
                 } else {
                     $status_bayar = 'Belum Lunas';
-                    $kembalian = 0; // Tidak ada kembalian untuk hutang
+                    $kembalian    = 0;
                 }
             } else {
-                // Tunai / Transfer
                 if ($kembalian < 0) {
-                    throw new \Exception("Uang pembayaran kurang Rp " . number_format(abs($kembalian), 0, ',', '.'));
+                    throw new \Exception("Uang kurang Rp " . number_format(abs($kembalian), 0, ',', '.'));
                 }
             }
 
-            // 4. Simpan Header Penjualan
+            // 3. Simpan Penjualan
             $penjualan = Penjualan::create([
                 'id_toko'          => $id_toko,
                 'id_user'          => $user->id_user,
-                'id_pelanggan'     => $request->id_pelanggan, // Nullable
+                'id_pelanggan'     => $request->id_pelanggan,
                 'no_faktur'        => 'INV/' . date('Ymd') . '/' . rand(1000, 9999),
                 'tgl_transaksi'    => now(),
                 'tgl_jatuh_tempo'  => ($metode == 'Hutang') ? now()->addDays(30) : null,
@@ -215,20 +183,34 @@ class KasirController extends Controller
                 'status_bayar'     => $status_bayar,
             ]);
 
-            // 5. Simpan Detail & Potong Stok
+            // 4. [FIX] Simpan Kartu Piutang jika Hutang
+            if ($metode == 'Hutang' && $status_bayar == 'Belum Lunas') {
+                // Pastikan Anda memiliki model KartuPiutang dan tabelnya
+                // Sesuaikan nama kolom dengan database Anda
+                KartuPiutang::create([
+                    'id_toko'         => $id_toko,
+                    'id_pelanggan'    => $request->id_pelanggan,
+                    'id_penjualan'    => $penjualan->id_penjualan,
+                    'tanggal_piutang' => now(),
+                    'jumlah_piutang'  => $total_netto - $bayar, // Sisa yang belum dibayar
+                    'sisa_piutang'    => $total_netto - $bayar,
+                    'status'          => 'Belum Lunas',
+                    'keterangan'      => 'Penjualan Kasir ' . $penjualan->no_faktur,
+                ]);
+            }
+
+            // 5. Simpan Detail & Update Stok
             foreach ($items_fix as $data) {
-                // Simpan Detail
                 PenjualanDetail::create([
                     'id_penjualan'          => $penjualan->id_penjualan,
                     'id_produk'             => $data['produk']->id_produk,
                     'qty'                   => $data['qty'],
                     'satuan_jual'           => $data['produk']->satuanKecil->nama_satuan ?? 'Pcs',
-                    'harga_modal_saat_jual' => 0, // Bisa diisi $data['produk']->harga_beli_terakhir
+                    'harga_modal_saat_jual' => 0,
                     'harga_jual_satuan'     => $data['harga'],
                     'subtotal'              => $data['subtotal'],
                 ]);
 
-                // Update Stok Fisik
                 $stokToko = StokToko::where('id_toko', $id_toko)
                     ->where('id_produk', $data['produk']->id_produk)
                     ->first();
@@ -237,7 +219,6 @@ class KasirController extends Controller
                     $stok_awal = $stokToko->stok_fisik;
                     $stokToko->decrement('stok_fisik', $data['qty']);
 
-                    // Catat Log Stok
                     LogStok::create([
                         'id_toko'         => $id_toko,
                         'id_produk'       => $data['produk']->id_produk,
@@ -258,15 +239,35 @@ class KasirController extends Controller
                 'status'       => 'success',
                 'message'      => 'Transaksi Berhasil Disimpan',
                 'id_penjualan' => $penjualan->id_penjualan,
-                'kembalian'    => $kembalian
+                'kembalian'    => $kembalian,
             ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'status'  => 'error', 
-                'message' => $e->getMessage()
+                'status'  => 'error',
+                'message' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * [FIX] Method Cetak Struk
+     */
+    public function print($id)
+    {
+        $id_toko = $this->getTokoAktif();
+        if (! $id_toko) {
+            abort(403);
+        }
+
+        $penjualan = Penjualan::with(['details.produk', 'pelanggan', 'user'])
+            ->where('id_toko', $id_toko)
+            ->findOrFail($id);
+
+        $toko = Toko::find($id_toko);
+
+        // Pastikan Anda membuat view ini
+        return view('owner.kasir.struk', compact('penjualan', 'toko'));
     }
 }
