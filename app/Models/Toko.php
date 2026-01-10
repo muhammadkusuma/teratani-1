@@ -8,7 +8,10 @@ class Toko extends Model
     protected $table      = 'toko';
     protected $primaryKey = 'id_toko';
 
-    // Tambahkan fillable sesuai migration
+    // --- PERBAIKAN: Matikan timestamps ---
+    public $timestamps    = false; 
+    // -------------------------------------
+
     protected $fillable = [
         'id_tenant',
         'kode_toko',

@@ -52,7 +52,7 @@
                         </label>
                         <input type="text" id="nama_toko" name="nama_toko" required
                             value="{{ old('nama_toko', $toko->nama_toko) }}"
-                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                            class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
                     </div>
 
                     {{-- Kota & No Telp --}}
@@ -62,7 +62,7 @@
                                 Kota
                             </label>
                             <input type="text" id="kota" name="kota" value="{{ old('kota', $toko->kota) }}"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
                         </div>
 
                         <div>
@@ -70,7 +70,7 @@
                                 No. Telepon
                             </label>
                             <input type="text" id="no_telp" name="no_telp" value="{{ old('no_telp', $toko->no_telp) }}"
-                                class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
+                                class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-500 px-4 py-2">
                         </div>
                     </div>
 
@@ -80,7 +80,7 @@
                             Alamat Lengkap
                         </label>
                         <textarea id="alamat" name="alamat" rows="3"
-                            class="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('alamat', $toko->alamat) }}</textarea>
+                            class="w-full rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-500 px-4 py-2">{{ old('alamat', $toko->alamat) }}</textarea>
                     </div>
 
                     {{-- Status Aktif --}}
