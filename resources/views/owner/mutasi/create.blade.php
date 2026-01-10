@@ -3,6 +3,30 @@
 @section('title', 'Buat Transfer Stok')
 
 @section('content')
+    {{-- TAMBAHAN: Menampilkan Flash Message Error/Success dari Controller --}}
+    @if (session('success'))
+        <div class="p-4 mb-4 text-green-800 bg-green-100 border border-green-300 rounded">
+            <strong>Berhasil!</strong> {{ session('success') }}
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="p-4 mb-4 text-red-800 bg-red-100 border border-red-300 rounded">
+            <strong>Gagal!</strong> {{ session('error') }}
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="p-4 mb-4 text-red-800 bg-red-100 border border-red-300 rounded">
+            <ul class="list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+    {{-- END TAMBAHAN --}}
+
     <div x-data="mutasiForm()">
         <form action="{{ route('owner.mutasi.store') }}" method="POST">
             @csrf
@@ -117,22 +141,20 @@
                 }],
 
                 async fetchProduk(idToko) {
-                    // Jika user memilih "Pilih Toko Asal" (value kosong), reset list
                     if (!idToko) {
                         this.listProduk = [];
                         return;
                     }
 
                     this.isLoading = true;
-                    // Reset baris item saat toko berubah untuk mencegah data tidak valid
+                    // Reset baris saat toko berubah
                     this.rows = [{
                         id_produk: '',
                         qty: 1
                     }];
 
                     try {
-                        // URL Generator (Sudah benar pakai false)
-                        let url = "{{ route('owner.mutasi.get-produk', '000', false) }}";
+                        let url = "{{ route('owner.mutasi.get-produk', '000') }}";
                         url = url.replace('000', idToko);
 
                         const response = await fetch(url, {
@@ -142,23 +164,15 @@
                             }
                         });
 
-                        // --- PERBAIKAN HANDLING ERROR ---
-                        // Jika status bukan 200 OK (misal 500 Error)
                         if (!response.ok) {
-                            // Coba ambil respon sebagai text/json
                             let errorDetail = "Server Error";
                             try {
                                 const errJson = await response.json();
-                                // Ambil pesan error dari controller (message, line, file)
-                                if (errJson.message) {
-                                    errorDetail = `${errJson.message} \n(Line: ${errJson.line})`;
-                                }
+                                if (errJson.message) errorDetail = errJson.message;
                             } catch (e) {
-                                // Jika bukan JSON (misal HTML Laravel error page), ambil teksnya
                                 errorDetail = await response.text();
                             }
-
-                            console.error("DEBUG ERROR:", errorDetail); // Cek Console Browser (F12)
+                            console.error("DEBUG ERROR:", errorDetail);
                             throw new Error(errorDetail);
                         }
 
@@ -167,7 +181,6 @@
 
                     } catch (error) {
                         console.error('Gagal mengambil produk:', error);
-                        // Tampilkan pesan error asli dari PHP ke layar User
                         alert('Gagal mengambil data produk:\n' + error.message);
                     } finally {
                         this.isLoading = false;

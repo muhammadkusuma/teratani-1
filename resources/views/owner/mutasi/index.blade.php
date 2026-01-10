@@ -3,6 +3,19 @@
 @section('title', 'Transfer Stok Antar Toko')
 
 @section('content')
+    {{-- TAMBAHAN: Flash Message --}}
+    @if (session('success'))
+        <div class="p-4 mb-4 text-green-800 bg-green-100 border border-green-300 rounded">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="p-4 mb-4 text-red-800 bg-red-100 border border-red-300 rounded">
+            {{ session('error') }}
+        </div>
+    @endif
+    {{-- END TAMBAHAN --}}
+
     <div class="flex justify-between items-center mb-4">
         <h2 class="text-xl font-bold text-gray-800">Riwayat Transfer Barang</h2>
         <a href="{{ route('owner.mutasi.create') }}"
@@ -33,12 +46,25 @@
                         <td class="p-2 border-r border-gray-200 text-green-600">{{ $m->tokoTujuan->nama_toko ?? '-' }}</td>
                         <td class="p-2 border-r border-gray-200">{{ $m->pengirim->name ?? '-' }}</td>
                         <td class="p-2 border-r border-gray-200">
-                            <span class="px-2 py-0.5 bg-yellow-200 text-yellow-800 border border-yellow-400 text-xs">
+                            @php
+                                $badgeColor = match ($m->status) {
+                                    'Proses' => 'bg-yellow-200 text-yellow-800 border-yellow-400',
+                                    'Dikirim' => 'bg-blue-200 text-blue-800 border-blue-400',
+                                    'Diterima' => 'bg-green-200 text-green-800 border-green-400',
+                                    'Batal' => 'bg-red-200 text-red-800 border-red-400',
+                                    default => 'bg-gray-200 text-gray-800 border-gray-400',
+                                };
+                            @endphp
+                            <span class="px-2 py-0.5 border text-xs {{ $badgeColor }}">
                                 {{ $m->status }}
                             </span>
                         </td>
                         <td class="p-2">
-                            <button class="text-blue-600 hover:underline">Detail</button>
+                            {{-- PERBAIKAN: Tombol link ke Show --}}
+                            <a href="{{ route('owner.mutasi.show', $m->id_mutasi) }}"
+                                class="text-blue-600 hover:underline font-bold">
+                                Detail
+                            </a>
                         </td>
                     </tr>
                 @empty
