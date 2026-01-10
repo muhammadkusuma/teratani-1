@@ -77,6 +77,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');
 
         Route::resource('toko.produk', ProdukController::class);
+
+        Route::resource('mutasi', \App\Http\Controllers\Owner\MutasiController::class);
     });
 
     // --- SUPERADMIN DASHBOARD ---
