@@ -15,12 +15,14 @@ use Illuminate\Validation\Rule;
 class ProdukController extends Controller
 {
     // Menampilkan daftar produk per toko
+    // Menampilkan daftar produk per toko
     public function index(Request $request, $id_toko)
     {
         $toko = Toko::find($id_toko);
 
-        // Query Dasar
-        $query = Produk::where('toko_id', $id_toko);
+        // PERBAIKAN DISINI:
+        // Gunakan 'id_tenant' dari toko tersebut, bukan 'toko_id'
+        $query = Produk::where('id_tenant', $toko->id_tenant);
 
         // LOGIKA PENCARIAN
         if ($request->has('search') && $request->search != null) {
@@ -35,7 +37,7 @@ class ProdukController extends Controller
         // Pagination (append query string agar search tidak hilang saat pindah halaman)
         $produks = $query->paginate(10)->withQueryString();
 
-        return view('owner.toko.produk.index', compact('toko', 'produks'));
+        return view('owner.produk.index', compact('toko', 'produks'));
     }
 
     // Form Tambah Produk
