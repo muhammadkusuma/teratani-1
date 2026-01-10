@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk - Teratani</title>
+    <title>Daftar Akun - Teratani</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -43,14 +43,14 @@
     <div class="flex min-h-full">
         <div class="relative hidden w-0 flex-1 lg:block">
             <img class="absolute inset-0 h-full w-full object-cover"
-                src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
-                alt="Sawah Hijau">
+                src="https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80"
+                alt="Tanaman Tumbuh">
 
             <div class="absolute inset-0 bg-green-900/40 mix-blend-multiply"></div>
             <div class="absolute inset-0 flex flex-col justify-end p-12 text-white">
-                <h2 class="text-4xl font-bold mb-4">Kelola Usaha Tani Lebih Cerdas</h2>
-                <p class="text-lg text-green-100 max-w-lg">Sistem manajemen stok dan kasir terintegrasi untuk kemajuan
-                    toko pertanian Anda.</p>
+                <h2 class="text-4xl font-bold mb-4">Mulai Perjalanan Digital Anda</h2>
+                <p class="text-lg text-green-100 max-w-lg">Bergabunglah dengan ribuan pemilik toko tani yang telah
+                    beralih ke manajemen modern bersama Teratani.</p>
             </div>
         </div>
 
@@ -68,13 +68,13 @@
                         <span class="text-2xl font-bold text-gray-900 tracking-tight">Teratani</span>
                     </a>
 
-                    <h2 class="text-2xl font-bold leading-9 tracking-tight text-gray-900">Selamat Datang Kembali</h2>
+                    <h2 class="text-2xl font-bold leading-9 tracking-tight text-gray-900">Buat Akun Baru</h2>
                     <p class="mt-2 text-sm leading-6 text-gray-500">
-                        Silakan masuk ke akun Anda
+                        Lengkapi data diri untuk mengelola toko Anda
                     </p>
                 </div>
 
-                <div class="mt-10">
+                <div class="mt-8">
                     @if ($errors->any())
                         <div class="rounded-md bg-red-50 p-4 mb-6 border border-red-100">
                             <div class="flex">
@@ -86,7 +86,7 @@
                                     </svg>
                                 </div>
                                 <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-red-800">Login Gagal</h3>
+                                    <h3 class="text-sm font-medium text-red-800">Terdapat Kesalahan</h3>
                                     <div class="mt-2 text-sm text-red-700">
                                         <ul class="list-disc pl-5 space-y-1">
                                             @foreach ($errors->all() as $error)
@@ -99,58 +99,85 @@
                         </div>
                     @endif
 
-                    <form action="{{ route('login') }}" method="POST" class="space-y-6">
+                    <form action="{{ route('register') }}" method="POST" class="space-y-5">
                         @csrf
+
+                        <div>
+                            <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Nama Lengkap
+                                / Pemilik Toko</label>
+                            <div class="mt-2">
+                                <input id="name" name="name" type="text" autocomplete="name" required
+                                    value="{{ old('name') }}"
+                                    class="block w-full rounded-md border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6">
+                            </div>
+                        </div>
 
                         <div>
                             <label for="username"
                                 class="block text-sm font-medium leading-6 text-gray-900">Username</label>
                             <div class="mt-2">
-                                <input id="username" name="username" type="text" autocomplete="username" required
+                                <input id="username" name="username" type="text" required
                                     value="{{ old('username') }}"
                                     class="block w-full rounded-md border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6">
                             </div>
                         </div>
 
                         <div>
-                            <div class="flex items-center justify-between">
-                                <label for="password"
-                                    class="block text-sm font-medium leading-6 text-gray-900">Password</label>
-                            </div>
+                            <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Alamat
+                                Email</label>
                             <div class="mt-2">
-                                <input id="password" name="password" type="password" autocomplete="current-password"
+                                <input id="email" name="email" type="email" autocomplete="email" required
+                                    value="{{ old('email') }}"
+                                    class="block w-full rounded-md border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="password"
+                                class="block text-sm font-medium leading-6 text-gray-900">Password</label>
+                            <div class="mt-2">
+                                <input id="password" name="password" type="password" autocomplete="new-password"
                                     required
                                     class="block w-full rounded-md border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6">
                             </div>
                         </div>
 
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center">
-                                <input id="remember-me" name="remember" type="checkbox"
-                                    class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-600">
-                                <label for="remember-me" class="ml-3 block text-sm leading-6 text-gray-700">Ingat
-                                    saya</label>
+                        <div>
+                            <label for="password_confirmation"
+                                class="block text-sm font-medium leading-6 text-gray-900">Ulangi Password</label>
+                            <div class="mt-2">
+                                <input id="password_confirmation" name="password_confirmation" type="password"
+                                    autocomplete="new-password" required
+                                    class="block w-full rounded-md border-0 py-2.5 px-3 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-green-600 sm:text-sm sm:leading-6">
                             </div>
-                            <div class="text-sm">
-                                <a href="#" class="font-semibold text-green-600 hover:text-green-500">Lupa
-                                    password?</a>
-                            </div>
+                        </div>
+
+                        <div class="flex items-center">
+                            <input id="terms" name="terms" type="checkbox" required
+                                class="h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-600">
+                            <label for="terms" class="ml-3 block text-sm leading-6 text-gray-700">
+                                Saya setuju dengan <a href="{{ url('/syarat-ketentuan') }}"
+                                    class="font-semibold text-green-600 hover:text-green-500">Syarat & Ketentuan</a>
+                            </label>
                         </div>
 
                         <div>
                             <button type="submit"
                                 class="flex w-full justify-center rounded-md bg-green-600 px-3 py-2.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-green-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600 transition duration-150">
-                                Masuk
+                                Daftar Sekarang
                             </button>
                         </div>
                     </form>
 
                     <p class="mt-8 text-center text-sm text-gray-500">
-                        Belum punya akun?
-                        <a href="{{ route('register') }}"
-                            class="font-semibold leading-6 text-green-600 hover:text-green-500">Daftar sekarang</a>
+                        Sudah memiliki akun?
+                        <a href="{{ route('login') }}"
+                            class="font-semibold leading-6 text-green-600 hover:text-green-500">Masuk disini</a>
                     </p>
 
+                    <div class="mt-10 border-t border-gray-100 pt-6 text-center text-xs text-gray-400">
+                        &copy; 2026 Teratani. All rights reserved.
+                    </div>
                 </div>
             </div>
         </div>

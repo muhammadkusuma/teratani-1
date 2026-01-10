@@ -12,7 +12,7 @@ Route::get("/", function () {
 });
 
 Route::get('/register', function () {
-    return "Under Development";
+    return view('auth.register');
 })->name('register');
 
 Route::get('/fitur', function () {return view('landing.fitur');});
