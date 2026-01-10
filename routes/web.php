@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Owner\BisnisController;
 use App\Http\Controllers\Owner\MutasiController;
 use App\Http\Controllers\Owner\ProdukController;
+use App\Http\Controllers\Owner\KasirController;
 use App\Http\Controllers\Owner\TokoController as OwnerTokoController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TenantController;
@@ -88,6 +89,11 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('mutasi', MutasiController::class);
 
         Route::resource('pelanggan', App\Http\Controllers\Owner\PelangganController::class);
+
+        // Modul Kasir / POS
+        Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
+        Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
+        Route::get('/kasir/cetak/{id}', [KasirController::class, 'print'])->name('kasir.print');
     });
 
     // --- SUPERADMIN DASHBOARD ---
