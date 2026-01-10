@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Kategori;
+use App\Models\Toko; // Tambahkan Import Model Toko
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -14,9 +15,10 @@ class KategoriController extends Controller
      */
     public function storeAjax(Request $request)
     {
+        // Tambahkan validasi exists untuk memastikan toko_id valid
         $validator = Validator::make($request->all(), [
             'nama_kategori' => 'required|string|max:255',
-            'toko_id'       => 'required',
+            'toko_id'       => 'required|exists:toko,id_toko', 
         ]);
 
         if ($validator->fails()) {
@@ -24,10 +26,13 @@ class KategoriController extends Controller
         }
 
         try {
+            // FIX: Ambil data Toko berdasarkan ID yang dikirim dari form
+            $toko = Toko::findOrFail($request->toko_id); 
+
             $kategori = Kategori::create([
                 'nama_kategori' => $request->nama_kategori,
-                // PERBAIKAN DI SINI: Mapping 'toko_id' dari request ke 'id_tenant' di database
-                'id_tenant'     => $request->toko_id,
+                // FIX: Gunakan id_tenant dari data toko, BUKAN id_toko dari request
+                'id_tenant'     => $toko->id_tenant, 
             ]);
 
             return response()->json(['success' => true, 'data' => $kategori]);

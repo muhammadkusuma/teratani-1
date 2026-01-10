@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Satuan;
+use App\Models\Toko; // 1. Tambahkan Import Model Toko
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,7 +17,8 @@ class SatuanController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama_satuan' => 'required|string|max:255',
-            'toko_id'     => 'required',
+            // 2. Validasi bahwa toko_id benar-benar ada di tabel toko
+            'toko_id'     => 'required|exists:toko,id_toko', 
         ]);
 
         if ($validator->fails()) {
@@ -24,10 +26,13 @@ class SatuanController extends Controller
         }
 
         try {
+            // 3. Ambil data Toko berdasarkan ID yang dikirim
+            $toko = Toko::findOrFail($request->toko_id);
+
             $satuan = Satuan::create([
                 'nama_satuan' => $request->nama_satuan,
-                // PERBAIKAN DI SINI: Mapping 'toko_id' dari request ke 'id_tenant' di database
-                'id_tenant'   => $request->toko_id,
+                // 4. PERBAIKAN: Gunakan id_tenant dari data toko, BUKAN id_toko dari request
+                'id_tenant'   => $toko->id_tenant, 
             ]);
 
             return response()->json(['success' => true, 'data' => $satuan]);
