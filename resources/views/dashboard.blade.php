@@ -4,8 +4,9 @@
 
 @section('content')
     <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-800">Selamat Datang, {{ Auth::user()->nama_lengkap }}!</h2>
-        <p class="text-gray-600">Berikut adalah ringkasan data sistem Teratani hari ini.</p>
+        <h2 class="text-2xl font-bold text-gray-800">Selamat Datang,
+            {{ Auth::user()->nama_lengkap ?? Auth::user()->username }}!</h2>
+        <p class="text-gray-600">Berikut adalah ringkasan performa platform Teratani hari ini.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -20,8 +21,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Total User</p>
-                    <p class="text-lg font-bold text-gray-800">1,257</p>
+                    <p class="text-sm font-medium text-gray-600">Total User System</p>
+                    <p class="text-lg font-bold text-gray-800">{{ number_format($totalUsers) }}</p>
                 </div>
             </div>
         </div>
@@ -36,8 +37,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Active Tenants</p>
-                    <p class="text-lg font-bold text-gray-800">42</p>
+                    <p class="text-sm font-medium text-gray-600">Tenant Aktif</p>
+                    <p class="text-lg font-bold text-gray-800">{{ number_format($activeTenants) }}</p>
                 </div>
             </div>
         </div>
@@ -52,8 +53,8 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Pendapatan Bulan Ini</p>
-                    <p class="text-lg font-bold text-gray-800">Rp 45.2Jt</p>
+                    <p class="text-sm font-medium text-gray-600">Total Pendapatan</p>
+                    <p class="text-lg font-bold text-gray-800">Rp {{ number_format($revenue, 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
@@ -68,52 +69,90 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm font-medium text-gray-600">Laporan Isu</p>
-                    <p class="text-lg font-bold text-gray-800">3</p>
+                    <p class="text-sm font-medium text-gray-600">Laporan Pending</p>
+                    <p class="text-lg font-bold text-gray-800">{{ $pendingIssues }}</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="bg-white rounded-lg shadow-sm">
-        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-            <h3 class="font-bold text-gray-800">Aktivitas Terbaru</h3>
-            <button class="text-sm text-green-600 hover:text-green-800 font-medium">Lihat Semua</button>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">Tenant Terbaru</h3>
+                <a href="{{ route('tenants.index') }}" class="text-sm text-green-600 hover:text-green-800 font-medium">Lihat
+                    Semua</a>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="py-2 text-xs font-semibold text-gray-600 uppercase">Nama Tenant</th>
+                                <th class="py-2 text-xs font-semibold text-gray-600 uppercase">Paket</th>
+                                <th class="py-2 text-xs font-semibold text-gray-600 uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm divide-y divide-gray-100">
+                            @forelse($recentTenants as $tenant)
+                                <tr>
+                                    <td class="py-3">{{ $tenant->nama_bisnis }}</td>
+                                    <td class="py-3">{{ $tenant->paket_layanan }}</td>
+                                    <td class="py-3">
+                                        <span
+                                            class="px-2 py-1 text-xs font-semibold rounded-full {{ $tenant->status_langganan == 'Aktif' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                            {{ $tenant->status_langganan }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="py-3 text-center text-gray-500">Belum ada tenant.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-        <div class="p-6">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr>
-                            <th class="py-2 px-4 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                User</th>
-                            <th class="py-2 px-4 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Role</th>
-                            <th class="py-2 px-4 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Waktu</th>
-                            <th class="py-2 px-4 bg-gray-50 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                                Status</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-sm divide-y divide-gray-100">
-                        <tr>
-                            <td class="py-3 px-4">Budi Santoso</td>
-                            <td class="py-3 px-4">Admin Tenant</td>
-                            <td class="py-3 px-4">2 menit yang lalu</td>
-                            <td class="py-3 px-4"><span
-                                    class="px-2 py-1 text-xs font-semibold text-green-600 bg-green-100 rounded-full">Login</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="py-3 px-4">Siti Aminah</td>
-                            <td class="py-3 px-4">User</td>
-                            <td class="py-3 px-4">15 menit yang lalu</td>
-                            <td class="py-3 px-4"><span
-                                    class="px-2 py-1 text-xs font-semibold text-blue-600 bg-blue-100 rounded-full">Update
-                                    Profil</span></td>
-                        </tr>
-                    </tbody>
-                </table>
+
+        <div class="bg-white rounded-lg shadow-sm">
+            <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+                <h3 class="font-bold text-gray-800">User Baru Terdaftar</h3>
+                <a href="{{ route('users.index') }}" class="text-sm text-green-600 hover:text-green-800 font-medium">Lihat
+                    Semua</a>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="py-2 text-xs font-semibold text-gray-600 uppercase">Username</th>
+                                <th class="py-2 text-xs font-semibold text-gray-600 uppercase">Email</th>
+                                <th class="py-2 text-xs font-semibold text-gray-600 uppercase">Role</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm divide-y divide-gray-100">
+                            @forelse($recentUsers as $user)
+                                <tr>
+                                    <td class="py-3 font-medium text-gray-800">{{ $user->username }}</td>
+                                    <td class="py-3 text-gray-600">{{ $user->email ?? '-' }}</td>
+                                    <td class="py-3">
+                                        @if ($user->is_superadmin)
+                                            <span class="text-xs font-bold text-blue-600">Superadmin</span>
+                                        @else
+                                            <span class="text-xs text-gray-500">User</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" class="py-3 text-center text-gray-500">Belum ada user.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
