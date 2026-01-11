@@ -108,6 +108,8 @@ Route::middleware(['auth'])->group(function () {
         // Master Data: Kategori & Satuan
         Route::resource('kategori', App\Http\Controllers\KategoriController::class);
         Route::resource('satuan', App\Http\Controllers\SatuanController::class);
+
+        Route::resource('pembelian', App\Http\Controllers\Owner\PembelianController::class);
     });
 
     // --- SUPERADMIN DASHBOARD ---

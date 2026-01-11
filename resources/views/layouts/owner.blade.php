@@ -118,6 +118,11 @@
                     <i class="fas fa-boxes"></i> Produk
                 </a>
 
+                <a href="{{ route('owner.pembelian.index') }}"
+                    class="nav-link {{ request()->routeIs('owner.pembelian.*') ? 'active' : '' }}">
+                    <i class="fas fa-truck-loading"></i> Pembelian (Faktur)
+                </a>
+
                 <a href="{{ route('owner.kategori.index') }}"
                     class="nav-link {{ request()->routeIs('owner.kategori.*') ? 'active' : '' }}">
                     <i class="fas fa-tags"></i> Kategori
@@ -191,11 +196,9 @@
     <footer class="bg-slate-800 text-slate-300 text-[9px] px-3 py-1 flex justify-between border-t border-black">
         <div class="flex gap-4">
             <span>Server Time: <b>{{ date('H:i:s') }}</b></span>
-            <span>Database: <b>MariaDB 10.4</b></span>
-            <span>Status: <b class="text-green-400">Connected</b></span>
         </div>
         <div class="font-bold">
-            &copy; {{ date('Y') }} PT. TERATANI SISTEM ERP • v2.0.26
+            &copy; {{ date('Y') }}
         </div>
     </footer>
 
