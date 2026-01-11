@@ -73,6 +73,7 @@
                 </div>
 
                 {{-- TABLE CONTENT (DataGrid Style) --}}
+                {{-- TABLE CONTENT (DataGrid Style) --}}
                 <div class="overflow-x-auto bg-white border-2 border-gray-400 border-l-black border-t-black m-1">
                     <table class="w-full border-collapse">
                         <thead>
@@ -80,6 +81,8 @@
                                 <th class="border-r border-gray-400 px-2 py-1 text-center w-10">NO</th>
                                 <th class="border-r border-gray-400 px-2 py-1 text-center w-16">IMG</th>
                                 <th class="border-r border-gray-400 px-2 py-1 text-left">DESKRIPSI PRODUK</th>
+                                {{-- KOLOM BARU: STOK --}}
+                                <th class="border-r border-gray-400 px-2 py-1 text-center w-20">STOK</th>
                                 <th class="border-r border-gray-400 px-2 py-1 text-left">KATEGORI</th>
                                 <th class="border-r border-gray-400 px-2 py-1 text-left">SATUAN</th>
                                 <th class="border-r border-gray-400 px-2 py-1 text-right">HARGA JUAL</th>
@@ -117,6 +120,28 @@
                                         </div>
                                     </td>
 
+                                    {{-- LOGIKA BARU: MENAMPILKAN STOK --}}
+                                    @php
+                                        // PERBAIKAN: Gunakan stokTokos (plural)
+                                        // Karena hasMany, ini adalah Collection. first() pada Collection kosong = null (AMAN).
+                                        $stokData = $item->stokTokos->first();
+
+                                        $jumlahStok = $stokData ? $stokData->stok_fisik : 0;
+                                        $stokMinimal = $stokData ? $stokData->stok_minimal : 0;
+
+                                        // Warna warning jika stok tipis
+                                        $bgStok =
+                                            $jumlahStok <= $stokMinimal
+                                                ? 'bg-red-200 text-red-700'
+                                                : 'bg-green-100 text-green-800';
+                                    @endphp
+                                    <td class="border-r border-gray-300 px-2 py-1 text-center align-middle">
+                                        <span
+                                            class="px-2 py-0.5 rounded {{ $bgStok }} font-bold border border-gray-300">
+                                            {{ number_format($jumlahStok, 0, ',', '.') }}
+                                        </span>
+                                    </td>
+
                                     {{-- Kategori --}}
                                     <td class="border-r border-gray-300 px-2 py-1 align-middle">
                                         {{ $item->kategori->nama_kategori ?? 'Umum' }}
@@ -140,45 +165,35 @@
                                         Rp {{ number_format($item->harga_jual_umum, 0, ',', '.') }}
                                     </td>
 
-                                    {{-- Aksi (DIPERBAIKI) --}}
+                                    {{-- Aksi --}}
                                     <td class="px-1 py-1 align-middle text-center">
                                         <div class="flex justify-center gap-1">
-
-                                            {{-- Tombol Edit Retro --}}
+                                            {{-- Tombol Edit --}}
                                             <a href="{{ route('owner.toko.produk.edit', [$toko->id_toko, $item->id_produk]) }}"
-                                                class="w-6 h-6 flex items-center justify-center
-                   bg-[#d4d0c8]
-                   border-2 border-t-white border-l-white border-b-black border-r-black
-                   active:border-t-black active:border-l-black active:border-b-white active:border-r-white
-                   hover:bg-gray-300 text-blue-800"
+                                                class="w-6 h-6 flex items-center justify-center bg-[#d4d0c8] border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black hover:bg-gray-300 text-blue-800"
                                                 title="Edit Data">
                                                 <i class="fas fa-pencil-alt text-[11px]"></i>
                                             </a>
 
-                                            {{-- Tombol Hapus Retro --}}
+                                            {{-- Tombol Hapus --}}
                                             <form
                                                 action="{{ route('owner.toko.produk.destroy', [$toko->id_toko, $item->id_produk]) }}"
                                                 method="POST" onsubmit="return confirm('Yakin hapus produk ini?')">
                                                 @csrf
                                                 @method('DELETE')
-
                                                 <button type="submit"
-                                                    class="w-6 h-6 flex items-center justify-center
-                       bg-[#d4d0c8]
-                       border-2 border-t-white border-l-white border-b-black border-r-black
-                       active:border-t-black active:border-l-black active:border-b-white active:border-r-white
-                       hover:bg-gray-300 text-red-600"
+                                                    class="w-6 h-6 flex items-center justify-center bg-[#d4d0c8] border-2 border-t-white border-l-white border-b-black border-r-black active:border-t-black active:border-l-black hover:bg-gray-300 text-red-600"
                                                     title="Hapus Data">
                                                     <i class="fas fa-times text-[12px] font-bold"></i>
                                                 </button>
                                             </form>
-
                                         </div>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="7" class="px-6 py-8 text-center bg-gray-100 border-b border-gray-300">
+                                    {{-- Colspan disesuaikan karena ada tambahan kolom Stok --}}
+                                    <td colspan="8" class="px-6 py-8 text-center bg-gray-100 border-b border-gray-300">
                                         <div class="text-gray-400 font-bold italic">-- DATA KOSONG --</div>
                                     </td>
                                 </tr>
