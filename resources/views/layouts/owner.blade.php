@@ -109,7 +109,8 @@
             </a>
 
             @if (session('toko_active_id'))
-                <a href="{{ route('owner.kasir.index') }}" class="nav-link bg-green-800 hover:bg-green-700">
+                <a href="{{ route('owner.kasir.index') }}"
+                    class="nav-link {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }}">
                     <i class="fas fa-cash-register"></i> Kasir (POS)
                 </a>
                 <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}"
@@ -120,7 +121,8 @@
                     class="nav-link {{ request()->routeIs('owner.mutasi.*') ? 'active' : '' }}">
                     <i class="fas fa-exchange-alt"></i> Transaksi
                 </a>
-                <a href="{{ route('owner.pelanggan.index') }}" class="nav-link">
+                <a href="{{ route('owner.pelanggan.index') }}"
+                    class="nav-link {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i> Pelanggan
                 </a>
                 <a href="{{ route('owner.pengeluaran.index') }}"
