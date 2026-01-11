@@ -57,20 +57,23 @@ class KasirController extends Controller
         $id_toko = $this->getTokoAktif();
 
         if (! $id_toko) {
-            // Ubah redirect agar lebih informatif jika tenant/toko tidak ditemukan
             return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan Toko/Cabang manapun.');
         }
 
         $toko      = Toko::find($id_toko);
         $nama_toko = $toko ? $toko->nama_toko : 'Toko Tidak Diketahui';
 
-        // Load awal: Hanya produk dengan stok > 0 agar rapi
-        // Menggunakan id_toko yang sudah dipastikan valid
-        $produk = Produk::whereHas('stokToko', function ($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
-        })->with(['stokToko' => function ($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko);
-        }, 'satuanKecil'])->limit(20)->get();
+        // PERBAIKAN: Tambahkan where('is_active', 1)
+        // Load awal: Hanya produk dengan stok > 0 DAN is_active = 1
+        $produk = Produk::where('is_active', 1)
+            ->whereHas('stokToko', function ($q) use ($id_toko) {
+                $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
+            })
+            ->with(['stokToko' => function ($q) use ($id_toko) {
+                $q->where('id_toko', $id_toko);
+            }, 'satuanKecil'])
+            ->limit(20)
+            ->get();
 
         $pelanggan = Pelanggan::where('id_tenant', Auth::user()->tenants()->first()->id_tenant ?? 0)->get();
 
@@ -86,9 +89,11 @@ class KasirController extends Controller
 
         $keyword = $request->get('keyword');
 
-        $query = Produk::whereHas('stokToko', function ($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko);
-        });
+        // PERBAIKAN: Tambahkan where('is_active', 1) pada query dasar
+        $query = Produk::where('is_active', 1)
+            ->whereHas('stokToko', function ($q) use ($id_toko) {
+                $q->where('id_toko', $id_toko);
+            });
 
         if (! empty($keyword)) {
             $query->where(function ($q) use ($keyword) {
