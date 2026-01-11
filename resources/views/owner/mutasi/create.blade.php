@@ -110,23 +110,46 @@
             isLoading: false,
             listProduk: [],
             rows: [{ id_produk: '', qty: 1 }],
+            
             async fetchProduk(idToko) {
-                if (!idToko) { this.listProduk = []; return; }
+                // Reset data jika toko tidak dipilih
+                if (!idToko) { 
+                    this.listProduk = []; 
+                    return; 
+                }
+
                 this.isLoading = true;
-                this.rows = [{ id_produk: '', qty: 1 }];
+                this.rows = [{ id_produk: '', qty: 1 }]; // Reset baris input
+
                 try {
-                    let url = "{{ route('owner.mutasi.get-produk', '000') }}".replace('000', idToko);
-                    const response = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
+                    // FIX: Gunakan relative path (parameter ke-3 false) untuk mengatasi masalah port mismatch
+                    let url = "{{ route('owner.mutasi.get-produk', ['id_toko' => '__ID__'], false) }}".replace('__ID__', idToko);
+                    
+                    const response = await fetch(url, { 
+                        headers: { 
+                            'X-Requested-With': 'XMLHttpRequest', 
+                            'Accept': 'application/json' 
+                        } 
+                    });
+
                     if (!response.ok) throw new Error('Network response was not ok');
+                    
                     this.listProduk = await response.json();
                 } catch (error) {
-                    alert('Gagal mengambil data produk.');
+                    console.error("Error fetching produk:", error);
+                    alert('Gagal mengambil data produk. Pastikan server berjalan dan Toko valid.');
                 } finally {
                     this.isLoading = false;
                 }
             },
-            addRow() { this.rows.push({ id_produk: '', qty: 1 }); },
-            removeRow(index) { if (this.rows.length > 1) this.rows.splice(index, 1); }
+            
+            addRow() { 
+                this.rows.push({ id_produk: '', qty: 1 }); 
+            },
+            
+            removeRow(index) { 
+                if (this.rows.length > 1) this.rows.splice(index, 1); 
+            }
         }
     }
 </script>

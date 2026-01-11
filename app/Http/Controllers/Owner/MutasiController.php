@@ -9,28 +9,37 @@ use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MutasiController extends Controller
 {
-    // Helper private untuk mendapatkan ID Tenant yang aktif
-    private function getActiveTenantId()
+    /**
+     * Helper protected untuk mendapatkan ID Tenant yang aktif.
+     * Digunakan di semua fungsi CRUD dan AJAX agar konsisten.
+     */
+    protected function getActiveTenantId()
     {
+        if (!Auth::check()) {
+            return null;
+        }
+
         $user = Auth::user();
 
-        // 1. Coba ambil properti id_tenant langsung dari tabel users
-        if (! empty($user->id_tenant)) {
+        // 1. Coba ambil properti id_tenant langsung dari tabel users (jika ada kolomnya)
+        if (!empty($user->id_tenant)) {
             return $user->id_tenant;
         }
 
         // 2. Jika tidak ada, ambil dari relasi tenants (ambil yang pertama/primary)
-        // Karena di User.php relasinya belongsToMany
-        $tenant = $user->tenants()->first();
-
-        if ($tenant) {
-            return $tenant->id_tenant;
+        // Pastikan relasi 'tenants' ada di model User
+        if (method_exists($user, 'tenants')) {
+            $tenant = $user->tenants()->first();
+            if ($tenant) {
+                return $tenant->id_tenant;
+            }
         }
 
-        // 3. Fallback (Hanya untuk dev/debug, kembalikan 1 atau null)
+        // 3. Fallback (Hanya untuk dev/debug atau default tenant)
         return 1;
     }
 
@@ -49,67 +58,66 @@ class MutasiController extends Controller
     public function create()
     {
         $idTenant = $this->getActiveTenantId();
-
-        // Debugging: Uncomment baris di bawah ini jika masih kosong untuk melihat ID tenant yang didapat
-        // dd($idTenant);
-
-        // Ambil daftar toko berdasarkan tenant yang valid
         $tokos = Toko::where('id_tenant', $idTenant)->get();
-
-        // Debugging: Pastikan ada data tokonya
-        // if($tokos->isEmpty()) { dd("Data Toko Kosong untuk Tenant ID: " . $idTenant); }
 
         return view('owner.mutasi.create', compact('tokos'));
     }
 
-    // Ganti method getProdukByToko dengan versi debug ini
+    /**
+     * AJAX Route: Mengambil daftar produk beserta stok di toko tertentu
+     */
     public function getProdukByToko($id_toko)
     {
         try {
-            $user = Auth::user();
-
-            // 1. Ambil Tenant ID (Logika deteksi tenant yang aman)
-            $idTenant = $user->id_tenant;
-            if (empty($idTenant)) {
-                if (method_exists($user, 'tenants')) {
-                    $tenantRelasi = $user->tenants()->first();
-                    $idTenant     = $tenantRelasi ? $tenantRelasi->id_tenant : 1;
-                } else {
-                    $idTenant = 1;
-                }
+            // 1. Pastikan user login
+            if (!Auth::check()) {
+                return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            // 2. Validasi Toko
+            // 2. Ambil Tenant ID menggunakan helper yang konsisten
+            $idTenant = $this->getActiveTenantId();
+            if (!$idTenant) {
+                return response()->json(['error' => 'Tenant not found'], 404);
+            }
+
+            // 3. Validasi Toko (Pastikan toko milik tenant ini)
             $cekToko = Toko::where('id_toko', $id_toko)
                 ->where('id_tenant', $idTenant)
                 ->exists();
 
-            if (! $cekToko) {
+            if (!$cekToko) {
+                // Jika toko tidak valid/tidak ditemukan, kembalikan array kosong agar JS tidak error
                 return response()->json([]);
             }
 
-            // 3. Query Produk (PERBAIKAN: Ganti 'kode_produk' jadi 'sku')
+            // 4. Query Produk & Stok
+            // Menggunakan LEFT JOIN agar produk yang belum ada record di stok_toko tetap muncul (stok 0)
             $produks = DB::table('produk')
                 ->leftJoin('stok_toko', function ($join) use ($id_toko) {
                     $join->on('produk.id_produk', '=', 'stok_toko.id_produk')
                         ->where('stok_toko.id_toko', '=', $id_toko);
                 })
                 ->where('produk.id_tenant', $idTenant)
+                ->where('produk.is_active', true) // Opsional: hanya ambil produk aktif
                 ->select(
                     'produk.id_produk',
                     'produk.nama_produk',
-                    'produk.sku', // <-- INI YANG DIUBAH (sebelumnya kode_produk)
+                    'produk.sku', // Pastikan kolom ini ada di tabel produk (cek migration)
                     DB::raw('COALESCE(stok_toko.stok_fisik, 0) as stok_fisik')
                 )
+                ->orderBy('produk.nama_produk', 'asc')
                 ->get();
 
             return response()->json($produks);
 
         } catch (\Exception $e) {
+            // Log error untuk debugging di server (storage/logs/laravel.log)
+            Log::error("Error getProdukByToko: " . $e->getMessage());
+
             return response()->json([
                 'status'  => 'error',
-                'message' => $e->getMessage(),
-                'line'    => $e->getLine(),
+                'message' => 'Terjadi kesalahan server saat mengambil data produk.',
+                'debug'   => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
@@ -133,11 +141,10 @@ class MutasiController extends Controller
                 foreach ($request->items as $item) {
                     $stokAsal = StokToko::where('id_toko', $request->id_toko_asal)
                         ->where('id_produk', $item['id_produk'])
-                        ->lockForUpdate() // Kunci row agar tidak ada transaksi lain yang mengubah saat pengecekan
+                        ->lockForUpdate()
                         ->first();
 
-                    if (! $stokAsal || $stokAsal->stok_fisik < $item['qty']) {
-                        // Cari nama produk untuk pesan error yang informatif (Opsional)
+                    if (!$stokAsal || $stokAsal->stok_fisik < $item['qty']) {
                         $namaProduk = DB::table('produk')->where('id_produk', $item['id_produk'])->value('nama_produk');
                         throw new \Exception("Stok tidak mencukupi untuk produk: " . ($namaProduk ?? 'ID ' . $item['id_produk']));
                     }
@@ -150,13 +157,13 @@ class MutasiController extends Controller
                     'id_toko_asal'     => $request->id_toko_asal,
                     'id_toko_tujuan'   => $request->id_toko_tujuan,
                     'tgl_kirim'        => $request->tgl_kirim,
-                    'status'           => 'Proses', // Sesuai migration enum
+                    'status'           => 'Proses',
                     'keterangan'       => $request->keterangan,
                     'id_user_pengirim' => Auth::id(),
                 ]);
 
+                // 3. Simpan Detail & Kurangi Stok
                 foreach ($request->items as $item) {
-                    // 3. Simpan Detail
                     MutasiDetail::create([
                         'id_mutasi'  => $mutasi->id_mutasi,
                         'id_produk'  => $item['id_produk'],
@@ -164,12 +171,10 @@ class MutasiController extends Controller
                         'qty_terima' => 0,
                     ]);
 
-                    // 4. Kurangi Stok Toko ASAL
                     $stokAsal = StokToko::where('id_toko', $request->id_toko_asal)
                         ->where('id_produk', $item['id_produk'])
                         ->first();
 
-                    // Kita sudah validasi di atas, jadi aman untuk decrement
                     $stokAsal->decrement('stok_fisik', $item['qty']);
                 }
             });
@@ -198,45 +203,33 @@ class MutasiController extends Controller
 
         try {
             DB::transaction(function () use ($id, $idTenant) {
-                // Ambil data mutasi beserta detailnya
                 $mutasi = MutasiStok::with('details')
                     ->where('id_tenant', $idTenant)
-                    ->where('status', 'Proses') // Pastikan hanya yang status 'Proses'
-                    ->lockForUpdate()           // Kunci row
+                    ->where('status', 'Proses')
+                    ->lockForUpdate()
                     ->findOrFail($id);
 
-                // Update Header
-                // PERBAIKAN: Gunakan 'Diterima' sesuai file migration 2024_01_01_000003_create_inventory_tables.php
                 $mutasi->update([
                     'status'           => 'Diterima',
-                    'tgl_terima'       => now(), // Perbaikan nama kolom (sebelumnya tgl_diterima, di migration tgl_terima)
+                    'tgl_terima'       => now(),
                     'id_user_penerima' => Auth::id(),
                 ]);
 
                 foreach ($mutasi->details as $detail) {
-                    // 1. Update Qty Terima di tabel detail
-                    $detail->update([
-                        'qty_terima' => $detail->qty_kirim,
-                    ]);
+                    $detail->update(['qty_terima' => $detail->qty_kirim]);
 
-                    // 2. Tambah Stok Toko TUJUAN
-                    // Cek apakah produk sudah ada di toko tujuan
-                    $stokTujuan = StokToko::where('id_toko', $mutasi->id_toko_tujuan)
-                        ->where('id_produk', $detail->id_produk)
-                        ->first();
+                    $stokTujuan = StokToko::firstOrCreate(
+                        [
+                            'id_toko'   => $mutasi->id_toko_tujuan,
+                            'id_produk' => $detail->id_produk
+                        ],
+                        [
+                            'stok_fisik'   => 0,
+                            'stok_minimal' => 5
+                        ]
+                    );
 
-                    if ($stokTujuan) {
-                        $stokTujuan->increment('stok_fisik', $detail->qty_kirim);
-                    } else {
-                        // Jika belum ada, buat record baru
-                        StokToko::create([
-                            'id_toko'      => $mutasi->id_toko_tujuan,
-                            'id_produk'    => $detail->id_produk,
-                            'stok_fisik'   => $detail->qty_kirim,
-                            'stok_minimal' => 5, // Default value
-                                                 // 'lokasi_rak' => null, // Default
-                        ]);
-                    }
+                    $stokTujuan->increment('stok_fisik', $detail->qty_kirim);
                 }
             });
 
