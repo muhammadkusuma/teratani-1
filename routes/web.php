@@ -3,9 +3,11 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Owner\BisnisController;
-use App\Http\Controllers\Owner\MutasiController;
-use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\Owner\KasirController;
+use App\Http\Controllers\Owner\LaporanKeuanganController;
+use App\Http\Controllers\Owner\MutasiController;
+use App\Http\Controllers\Owner\PengeluaranController;
+use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\Owner\TokoController as OwnerTokoController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TenantController;
@@ -96,6 +98,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kasir/cetak/{id}', [KasirController::class, 'print'])->name('kasir.print');
 
         Route::get('/kasir/ajax-search', [KasirController::class, 'searchProduk'])->name('kasir.search');
+
+        // Route Pengeluaran
+        Route::resource('pengeluaran', PengeluaranController::class)->except(['show', 'edit', 'update']);
+
+        // Route Laporan Keuangan
+        Route::get('laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan.keuangan');
     });
 
     // --- SUPERADMIN DASHBOARD ---
