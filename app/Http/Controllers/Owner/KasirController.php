@@ -6,6 +6,7 @@ use App\Models\KartuPiutang;
 use App\Models\LogStok;
 use App\Models\Pelanggan;
 use App\Models\Penjualan;
+use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
 use App\Models\Produk;
 use App\Models\StokToko;
@@ -284,5 +285,14 @@ class KasirController extends Controller
         $toko = Toko::find($id_toko);
 
         return view('owner.kasir.struk', compact('penjualan', 'toko'));
+    }
+
+    public function cetakFaktur($id)
+    {
+        // Ambil data penjualan beserta relasinya
+        $transaksi = Penjualan::with(['details.produk', 'pelanggan', 'toko', 'user'])->findOrFail($id);
+
+        // Return ke view faktur
+        return view('owner.kasir.faktur', compact('transaksi'));
     }
 }

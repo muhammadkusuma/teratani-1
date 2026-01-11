@@ -36,4 +36,9 @@ class Penjualan extends Model
     {
         return $this->hasOne(KartuPiutang::class, 'id_penjualan');
     }
+
+    public function toko()
+    {
+        return $this->belongsTo(Toko::class, 'id_toko');
+    }
 }

@@ -119,5 +119,7 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+Route::get('/transaksi/{id}/faktur', [App\Http\Controllers\Owner\KasirController::class, 'cetakFaktur'])->name('kasir.cetak-faktur');
+
 Route::post('/ajax/kategori', [App\Http\Controllers\KategoriController::class, 'storeAjax'])->name('ajax.kategori.store');
 Route::post('/ajax/satuan', [App\Http\Controllers\SatuanController::class, 'storeAjax'])->name('ajax.satuan.store');
