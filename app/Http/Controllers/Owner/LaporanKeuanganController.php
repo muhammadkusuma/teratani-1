@@ -11,48 +11,68 @@ class LaporanKeuanganController extends Controller
 {
     public function index(Request $request)
     {
-        // PERBAIKAN DISINI: Gunakan 'toko_active_id' agar sesuai dengan PengeluaranController
+        // 1. Pastikan Toko Dipilih
         $id_toko = session('toko_active_id');
 
-        // Validasi tambahan: Jika session toko hilang/belum dipilih
         if (! $id_toko) {
             return redirect()->route('owner.dashboard')->with('error', 'Silakan pilih toko terlebih dahulu.');
         }
 
-        // Filter Tanggal (Default: Bulan ini)
+        // 2. Filter Tanggal
         $startDate = $request->input('start_date', date('Y-m-01'));
         $endDate   = $request->input('end_date', date('Y-m-t'));
 
-        // 1. Hitung Total Penjualan (Omset)
+        // -----------------------------------------------------------
+        // A. HITUNG OMSET (Pendapatan Bersih)
+        // -----------------------------------------------------------
+        // Omset dihitung dari total_netto (sudah dikurangi diskon)
         $penjualan = Penjualan::where('id_toko', $id_toko)
             ->whereBetween('tgl_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-            ->where('status_transaksi', 'Selesai')
+            ->where('status_transaksi', 'Selesai') // Hanya transaksi sukses
             ->get();
 
         $totalOmset = $penjualan->sum('total_netto');
 
-        // 2. Hitung HPP (Harga Pokok Penjualan)
+        // -----------------------------------------------------------
+        // B. HITUNG HPP (Harga Pokok Penjualan) - LOGIC FALLBACK
+        // -----------------------------------------------------------
+        // Jika 'harga_modal_saat_jual' di tabel transaksi 0 (bug lama),
+        // gunakan 'harga_beli_rata_rata' dari tabel master produk.
         $totalHPP = DB::table('penjualan_detail')
             ->join('penjualan', 'penjualan.id_penjualan', '=', 'penjualan_detail.id_penjualan')
+            ->join('produk', 'penjualan_detail.id_produk', '=', 'produk.id_produk') // Join ke master produk
             ->where('penjualan.id_toko', $id_toko)
             ->whereBetween('penjualan.tgl_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
             ->where('penjualan.status_transaksi', 'Selesai')
-            ->selectRaw('SUM(penjualan_detail.qty * penjualan_detail.harga_modal_saat_jual) as total_hpp')
+            ->selectRaw('
+                SUM(
+                    penjualan_detail.qty * CASE 
+                        WHEN penjualan_detail.harga_modal_saat_jual > 0 
+                        THEN penjualan_detail.harga_modal_saat_jual 
+                        ELSE produk.harga_beli_rata_rata 
+                    END
+                ) as total_hpp
+            ')
             ->value('total_hpp');
 
-        // Pastikan totalHPP tidak null jika tidak ada data
         $totalHPP = $totalHPP ?? 0;
 
-        // 3. Laba Kotor
+        // -----------------------------------------------------------
+        // C. HITUNG LABA KOTOR
+        // -----------------------------------------------------------
         $labaKotor = $totalOmset - $totalHPP;
 
-        // 4. Hitung Pengeluaran Operasional (Gaji, Listrik, dll)
-        // Pastikan id_toko sudah benar agar query ini berjalan
+        // -----------------------------------------------------------
+        // D. HITUNG PENGELUARAN (Biaya Operasional)
+        // -----------------------------------------------------------
+        // Menggunakan whereDate agar rentang tanggal inklusif
         $totalPengeluaran = Pengeluaran::where('id_toko', $id_toko)
             ->whereBetween('tgl_pengeluaran', [$startDate, $endDate])
             ->sum('nominal');
 
-        // 5. Laba Bersih
+        // -----------------------------------------------------------
+        // E. HITUNG LABA BERSIH
+        // -----------------------------------------------------------
         $labaBersih = $labaKotor - $totalPengeluaran;
 
         return view('owner.laporan.keuangan', compact(

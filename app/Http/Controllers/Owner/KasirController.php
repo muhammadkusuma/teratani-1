@@ -228,7 +228,7 @@ class KasirController extends Controller
                     'id_produk'             => $data['produk']->id_produk,
                     'qty'                   => $data['qty'],
                     'satuan_jual'           => $data['produk']->satuanKecil->nama_satuan ?? 'Pcs',
-                    'harga_modal_saat_jual' => 0,
+                    'harga_modal_saat_jual' => $data['produk']->harga_beli_rata_rata ?? 0,
                     'harga_jual_satuan'     => $data['harga'],
                     'subtotal'              => $data['subtotal'],
                 ]);
