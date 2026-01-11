@@ -2,23 +2,80 @@
 namespace App\Http\Controllers;
 
 use App\Models\Satuan;
-use App\Models\Toko; // 1. Tambahkan Import Model Toko
+use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class SatuanController extends Controller
 {
-    // ... method index, store biasa, dll ...
+    // Menampilkan halaman list satuan
+    public function index()
+    {
+        $idToko = session('toko_active_id');
+        if (! $idToko) {
+            return redirect()->route('owner.toko.index')->with('error', 'Silakan pilih toko terlebih dahulu.');
+        }
+
+        $toko = Toko::findOrFail($idToko);
+
+        // Ambil satuan berdasarkan tenant
+        $satuan = Satuan::where('id_tenant', $toko->id_tenant)
+            ->orderBy('nama_satuan', 'asc')
+            ->get();
+
+        return view('owner.satuan.index', compact('satuan'));
+    }
+
+    // Simpan Satuan Baru
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nama_satuan' => 'required|string|max:20',
+        ]);
+
+        $idToko = session('toko_active_id');
+        $toko   = Toko::findOrFail($idToko);
+
+        Satuan::create([
+            'nama_satuan' => $request->nama_satuan,
+            'id_tenant'   => $toko->id_tenant,
+        ]);
+
+        return redirect()->back()->with('success', 'Satuan berhasil ditambahkan.');
+    }
+
+    // Update Satuan
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'nama_satuan' => 'required|string|max:20',
+        ]);
+
+        $satuan = Satuan::findOrFail($id);
+        $satuan->update([
+            'nama_satuan' => $request->nama_satuan,
+        ]);
+
+        return redirect()->back()->with('success', 'Satuan berhasil diperbarui.');
+    }
+
+    // Hapus Satuan
+    public function destroy($id)
+    {
+        $satuan = Satuan::findOrFail($id);
+        $satuan->delete();
+
+        return redirect()->back()->with('success', 'Satuan berhasil dihapus.');
+    }
 
     /**
-     * Method khusus untuk AJAX Request
+     * Method khusus untuk AJAX Request (Code Lama Anda)
      */
     public function storeAjax(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'nama_satuan' => 'required|string|max:255',
-            // 2. Validasi bahwa toko_id benar-benar ada di tabel toko
-            'toko_id'     => 'required|exists:toko,id_toko', 
+            'toko_id'     => 'required|exists:toko,id_toko',
         ]);
 
         if ($validator->fails()) {
@@ -26,13 +83,10 @@ class SatuanController extends Controller
         }
 
         try {
-            // 3. Ambil data Toko berdasarkan ID yang dikirim
-            $toko = Toko::findOrFail($request->toko_id);
-
+            $toko   = Toko::findOrFail($request->toko_id);
             $satuan = Satuan::create([
                 'nama_satuan' => $request->nama_satuan,
-                // 4. PERBAIKAN: Gunakan id_tenant dari data toko, BUKAN id_toko dari request
-                'id_tenant'   => $toko->id_tenant, 
+                'id_tenant'   => $toko->id_tenant,
             ]);
 
             return response()->json(['success' => true, 'data' => $satuan]);

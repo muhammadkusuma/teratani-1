@@ -104,6 +104,10 @@ Route::middleware(['auth'])->group(function () {
 
         // Route Laporan Keuangan
         Route::get('laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan.keuangan');
+
+        // Master Data: Kategori & Satuan
+        Route::resource('kategori', App\Http\Controllers\KategoriController::class);
+        Route::resource('satuan', App\Http\Controllers\SatuanController::class);
     });
 
     // --- SUPERADMIN DASHBOARD ---

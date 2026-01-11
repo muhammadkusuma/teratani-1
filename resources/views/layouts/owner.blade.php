@@ -115,7 +115,16 @@
                 </a>
                 <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}"
                     class="nav-link {{ request()->routeIs('owner.toko.produk.*') ? 'active' : '' }}">
-                    <i class="fas fa-boxes"></i> Inventory
+                    <i class="fas fa-boxes"></i> Produk
+                </a>
+
+                <a href="{{ route('owner.kategori.index') }}"
+                    class="nav-link {{ request()->routeIs('owner.kategori.*') ? 'active' : '' }}">
+                    <i class="fas fa-tags"></i> Kategori
+                </a>
+                <a href="{{ route('owner.satuan.index') }}"
+                    class="nav-link {{ request()->routeIs('owner.satuan.*') ? 'active' : '' }}">
+                    <i class="fas fa-weight-hanging"></i> Satuan
                 </a>
                 <a href="{{ route('owner.mutasi.index') }}"
                     class="nav-link {{ request()->routeIs('owner.mutasi.*') ? 'active' : '' }}">
