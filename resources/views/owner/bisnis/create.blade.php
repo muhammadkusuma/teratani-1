@@ -1,46 +1,66 @@
 @extends('layouts.owner')
 
+@section('title', 'Daftarkan Bisnis')
+
 @section('content')
-    <div class="max-w-2xl mx-auto mt-10">
-        <div class="bg-white rounded-2xl shadow-lg border overflow-hidden">
-            <div class="px-8 py-6 bg-blue-600 text-white">
-                <h1 class="text-2xl font-bold">Daftarkan Bisnis Anda</h1>
-                <p class="text-blue-100 mt-1">Langkah pertama untuk menggunakan aplikasi.</p>
-            </div>
-
-            <div class="p-8">
-                <form action="{{ route('owner.bisnis.store') }}" method="POST" class="space-y-6">
-                    @csrf
-
-                    {{-- Nama Bisnis --}}
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Bisnis / Perusahaan</label>
-                        <input type="text" name="nama_bisnis" required
-                            placeholder="Contoh: PT. Maju Jaya atau Toko Sembako Berkah"
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                        <p class="text-xs text-gray-500 mt-1">Nama ini akan menjadi identitas utama akun bisnis Anda.</p>
-                    </div>
-
-                    {{-- No Telp --}}
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">No. Telepon Bisnis</label>
-                        <input type="text" name="no_telp" placeholder="0812..."
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
-                    </div>
-
-                    {{-- Alamat --}}
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Alamat Pusat</label>
-                        <textarea name="alamat" rows="3" placeholder="Alamat lengkap kantor/bisnis pusat..."
-                            class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"></textarea>
-                    </div>
-
-                    <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-0.5">
-                        Simpan & Lanjutkan
-                    </button>
-                </form>
-            </div>
+    <div class="max-w-4xl">
+        {{-- Header Section --}}
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">DAFTARKAN BISNIS ANDA</h2>
+            {{-- Opsional: Tombol kembali jika diperlukan --}}
+            {{-- <a href="{{ route('dashboard') }}" class="text-blue-700 underline text-xs hover:text-blue-500">&laquo; Kembali</a> --}}
         </div>
+
+        {{-- Error Handling (Mengikuti style referensi) --}}
+        @if ($errors->any())
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 mb-4 text-xs">
+                <ul class="list-disc pl-4">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        {{-- Form Container --}}
+        <form action="{{ route('owner.bisnis.store') }}" method="POST"
+            class="bg-gray-100 p-4 border border-gray-400 shadow-inner">
+            @csrf
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                {{-- Nama Bisnis --}}
+                <div>
+                    <label class="block font-bold text-xs mb-1">Nama Bisnis / Perusahaan</label>
+                    <input type="text" name="nama_bisnis" required
+                        class="w-full border border-gray-400 p-1 text-sm bg-white focus:outline-none focus:border-blue-500"
+                        placeholder="Contoh: PT. Maju Jaya">
+                    <p class="text-[10px] text-gray-500 mt-1 italic">*Identitas utama akun bisnis Anda.</p>
+                </div>
+
+                {{-- No Telepon --}}
+                <div>
+                    <label class="block font-bold text-xs mb-1">No. Telepon Bisnis</label>
+                    <input type="text" name="no_telp"
+                        class="w-full border border-gray-400 p-1 text-sm bg-white focus:outline-none focus:border-blue-500"
+                        placeholder="0812...">
+                </div>
+            </div>
+
+            {{-- Alamat (Full Width) --}}
+            <div class="mb-4">
+                <label class="block font-bold text-xs mb-1">Alamat Pusat</label>
+                <textarea name="alamat" rows="3"
+                    class="w-full border border-gray-400 p-1 text-sm bg-white focus:outline-none focus:border-blue-500"
+                    placeholder="Alamat lengkap kantor/bisnis pusat..."></textarea>
+            </div>
+
+            {{-- Footer / Action Button --}}
+            <div class="border-t border-gray-300 pt-3 text-right">
+                <button type="submit"
+                    class="bg-blue-800 text-white px-4 py-2 border border-blue-900 shadow hover:bg-blue-700 font-bold text-xs uppercase">
+                    Simpan & Lanjutkan
+                </button>
+            </div>
+        </form>
     </div>
 @endsection
