@@ -8,36 +8,40 @@ use Illuminate\Support\Facades\Auth;
 
 class PelangganController extends Controller
 {
-    /**
-     * Helper untuk mendapatkan ID Tenant dari User yang login.
-     * Mengambil dari relasi tenants() karena User N:N Tenant.
-     */
     private function getTenantId()
     {
         $user = Auth::user();
-
-        // 1. Cek session jika ada (opsional jika nanti ada fitur switch tenant)
         if (session()->has('id_tenant')) {
             return session('id_tenant');
         }
-
-        // 2. Ambil tenant pertama dari relasi
-        // Menggunakan properti 'tenants' (collection) yang didefinisikan di User Model
         $tenant = $user->tenants->first();
-
         return $tenant ? $tenant->id_tenant : null;
+    }
+
+    // Helper baru untuk mengambil ID Toko yang sedang aktif
+    private function getActiveTokoId()
+    {
+        // Session ini diset di TokoController@select
+        return session('toko_active_id');
     }
 
     public function index(Request $request)
     {
         $id_tenant = $this->getTenantId();
+        $id_toko   = $this->getActiveTokoId(); // Ambil toko aktif
 
         if (! $id_tenant) {
-            // Fallback jika user baru register dan belum di-assign tenant
             return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan Bisnis/Tenant manapun.');
         }
 
-        $query = Pelanggan::where('id_tenant', $id_tenant);
+        // Validasi: User harus memilih toko terlebih dahulu
+        if (! $id_toko) {
+            return redirect()->route('owner.toko.index')->with('warning', 'Silakan pilih Toko/Cabang terlebih dahulu.');
+        }
+
+        // Filter berdasarkan Tenant DAN Toko
+        $query = Pelanggan::where('id_tenant', $id_tenant)
+            ->where('id_toko', $id_toko);
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -55,6 +59,10 @@ class PelangganController extends Controller
 
     public function create()
     {
+        // Pastikan ada toko aktif sebelum tambah data
+        if (! $this->getActiveTokoId()) {
+            return redirect()->route('owner.toko.index')->with('warning', 'Pilih toko terlebih dahulu.');
+        }
         return view('owner.pelanggan.create');
     }
 
@@ -67,17 +75,19 @@ class PelangganController extends Controller
         ]);
 
         $id_tenant = $this->getTenantId();
+        $id_toko   = $this->getActiveTokoId();
 
-        if (! $id_tenant) {
-            return back()->with('error', 'Gagal menyimpan: Tenant tidak ditemukan.');
+        if (! $id_tenant || ! $id_toko) {
+            return back()->with('error', 'Gagal menyimpan: Tenant atau Toko tidak aktif.');
         }
 
-        // Generate Kode Pelanggan Otomatis
-        $count = Pelanggan::where('id_tenant', $id_tenant)->count();
+        // Generate Kode Pelanggan (scope per toko atau per tenant, di sini saya buat per toko agar unik di toko tsb)
+        $count = Pelanggan::where('id_tenant', $id_tenant)->where('id_toko', $id_toko)->count();
         $kode  = 'CUST-' . str_pad($count + 1, 4, '0', STR_PAD_LEFT);
 
         Pelanggan::create([
             'id_tenant'      => $id_tenant,
+            'id_toko'        => $id_toko, // Simpan ID Toko
             'kode_pelanggan' => $request->kode_pelanggan ?? $kode,
             'nama_pelanggan' => $request->nama_pelanggan,
             'wilayah'        => $request->wilayah,
@@ -86,14 +96,18 @@ class PelangganController extends Controller
             'limit_piutang'  => $request->limit_piutang ?? 0,
         ]);
 
-        return redirect()->route('owner.pelanggan.index')->with('success', 'Data Pelanggan berhasil disimpan.');
+        return redirect()->route('owner.pelanggan.index')->with('success', 'Data Pelanggan berhasil disimpan di toko aktif.');
     }
 
     public function edit($id)
     {
         $id_tenant = $this->getTenantId();
-        // Pastikan hanya mengedit data milik tenant sendiri
-        $pelanggan = Pelanggan::where('id_tenant', $id_tenant)->findOrFail($id);
+        $id_toko   = $this->getActiveTokoId();
+
+        // Pastikan data milik tenant dan toko yang sedang aktif
+        $pelanggan = Pelanggan::where('id_tenant', $id_tenant)
+            ->where('id_toko', $id_toko)
+            ->findOrFail($id);
 
         return view('owner.pelanggan.edit', compact('pelanggan'));
     }
@@ -106,7 +120,11 @@ class PelangganController extends Controller
         ]);
 
         $id_tenant = $this->getTenantId();
-        $pelanggan = Pelanggan::where('id_tenant', $id_tenant)->findOrFail($id);
+        $id_toko   = $this->getActiveTokoId();
+
+        $pelanggan = Pelanggan::where('id_tenant', $id_tenant)
+            ->where('id_toko', $id_toko)
+            ->findOrFail($id);
 
         $pelanggan->update([
             'nama_pelanggan' => $request->nama_pelanggan,
@@ -123,7 +141,12 @@ class PelangganController extends Controller
     public function destroy($id)
     {
         $id_tenant = $this->getTenantId();
-        $pelanggan = Pelanggan::where('id_tenant', $id_tenant)->findOrFail($id);
+        $id_toko   = $this->getActiveTokoId();
+
+        $pelanggan = Pelanggan::where('id_tenant', $id_tenant)
+            ->where('id_toko', $id_toko)
+            ->findOrFail($id);
+
         $pelanggan->delete();
 
         return redirect()->route('owner.pelanggan.index')->with('success', 'Data Pelanggan berhasil dihapus.');
