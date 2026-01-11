@@ -167,13 +167,10 @@ class TokoController extends Controller
     {
         $toko = Toko::findOrFail($id_toko);
 
-        // dd($toko->id_tenant);
-
         // Validasi apakah toko ini milik tenant user yang login
         $user   = Auth::user();
         $tenant = $user->tenants->first();
 
-        // --- FIX: Cek tenant ---
         if (! $tenant) {
             abort(403, 'Akses ditolak: User tidak memiliki tenant.');
         }
@@ -182,9 +179,9 @@ class TokoController extends Controller
             abort(403, 'Akses ditolak');
         }
 
-        // Simpan ID toko ke dalam SESSION
+        // PERBAIKAN: Simpan id_toko, BUKAN id_tenant
         session([
-            'toko_active_id'   => $toko->id_tenant,
+            'toko_active_id'   => $toko->id_toko, // <-- Sebelumnya $toko->id_tenant (salah)
             'toko_active_nama' => $toko->nama_toko,
         ]);
 

@@ -22,31 +22,30 @@ class KasirController extends Controller
      */
     private function getTokoAktif()
     {
-        // 1. Cek apakah sudah ada di session (Prioritas Utama)
+        // 1. Cek apakah sudah ada di session (Gunakan key yang konsisten: 'toko_active_id')
         if (session()->has('toko_active_id')) {
             return session('toko_active_id');
         }
 
-        $user = Auth::user();
-
-        // 2. Ambil tenant user (menggunakan properti tenants, bukan method tenants() untuk lazy loading jika memungkinkan, tapi tenants()->first() lebih aman di sini)
+        $user   = Auth::user();
         $tenant = $user->tenants()->first();
 
-        // VALIDASI: Pastikan user memiliki tenant
         if (! $tenant) {
             return null;
         }
 
-        // 3. Cari Toko berdasarkan Tenant
-        // Perbaikan: Prioritaskan toko yang 'is_pusat' = 1, jika tidak ada baru ambil berdasarkan ID terlama
+        // 3. Cari Toko Default
         $toko = Toko::where('id_tenant', $tenant->id_tenant)
-            ->orderBy('is_pusat', 'desc') // Prioritas Toko Pusat
-            ->orderBy('id_toko', 'asc')   // Fallback ke toko pertama dibuat
+            ->orderBy('is_pusat', 'desc')
+            ->orderBy('id_toko', 'asc')
             ->first();
 
         if ($toko) {
-            // Simpan ke session agar request berikutnya tidak perlu query DB lagi
-            session(['id_toko_aktif' => $toko->id_toko]);
+            // PERBAIKAN: Gunakan key session yang sama dengan TokoController
+            session([
+                'toko_active_id'   => $toko->id_toko,
+                'toko_active_nama' => $toko->nama_toko,
+            ]);
             return $toko->id_toko;
         }
 

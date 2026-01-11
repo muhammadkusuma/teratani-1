@@ -20,8 +20,10 @@ class ProdukController extends Controller
     {
         $toko = Toko::find($id_toko);
 
-        // PERBAIKAN DISINI:
-        // Gunakan 'id_tenant' dari toko tersebut, bukan 'toko_id'
+        // Pastikan akses sesuai tenant
+        if (! $toko) {abort(404);}
+
+        // Query Dasar
         $query = Produk::where('id_tenant', $toko->id_tenant);
 
         // LOGIKA PENCARIAN
@@ -34,8 +36,11 @@ class ProdukController extends Controller
             });
         }
 
-        // Pagination (append query string agar search tidak hilang saat pindah halaman)
-        $produks = $query->paginate(10)->withQueryString();
+        // PERBAIKAN: Load relasi stokToko KHUSUS untuk toko yang sedang dipilih ($id_toko)
+        // Agar di view bisa menampilkan stok toko ini saja
+        $produks = $query->with(['stokToko' => function ($q) use ($id_toko) {
+            $q->where('id_toko', $id_toko);
+        }])->paginate(10)->withQueryString();
 
         return view('owner.produk.index', compact('toko', 'produks'));
     }
