@@ -15,7 +15,12 @@
             @if(session('toko_active_id'))
                 <span class="text-[10px] bg-blue-200 px-2 py-0.5 rounded-full text-blue-800">Mode Filter Aktif</span>
             @else
-                <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full text-slate-600">Mode Global</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded-full text-slate-600">Mode Global</span>
+                    <a href="{{ route('owner.toko.index') }}" class="text-[10px] bg-yellow-400 hover:bg-yellow-500 text-yellow-900 px-2 py-0.5 rounded font-bold transition shadow-sm border border-yellow-500 no-underline">
+                        <i class="fas fa-exchange-alt mr-1"></i> Pilih Toko
+                    </a>
+                </div>
             @endif
         </div>
     </div>
