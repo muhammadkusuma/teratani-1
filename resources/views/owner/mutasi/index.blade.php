@@ -3,79 +3,75 @@
 @section('title', 'Transfer Stok Antar Toko')
 
 @section('content')
-    {{-- TAMBAHAN: Flash Message --}}
-    @if (session('success'))
-        <div class="p-4 mb-4 text-green-800 bg-green-100 border border-green-300 rounded">
-            {{ session('success') }}
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="p-4 mb-4 text-red-800 bg-red-100 border border-red-300 rounded">
-            {{ session('error') }}
-        </div>
-    @endif
-    {{-- END TAMBAHAN --}}
+<div class="flex justify-between items-center mb-3">
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">RIWAYAT TRANSFER STOK</h2>
+    <a href="{{ route('owner.mutasi.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
+        + BUAT TRANSFER BARU
+    </a>
+</div>
 
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-bold text-gray-800">Riwayat Transfer Barang</h2>
-        <a href="{{ route('owner.mutasi.create') }}"
-            class="px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 font-bold border border-blue-800 shadow-sm">
-            + Buat Transfer Baru
-        </a>
-    </div>
+{{-- Filter/Search Placeholder (Jika diperlukan) --}}
+<div class="mb-3 flex gap-2">
+    <div class="text-xs text-gray-500 italic py-1">Menampilkan data transfer stok terbaru.</div>
+</div>
 
-    <div class="overflow-x-auto bg-white border border-gray-400">
-        <table class="w-full text-left border-collapse">
-            <thead>
-                <tr class="bg-gray-200 border-b border-gray-400 text-sm">
-                    <th class="p-2 border-r border-gray-300">No Mutasi</th>
-                    <th class="p-2 border-r border-gray-300">Tanggal</th>
-                    <th class="p-2 border-r border-gray-300">Asal Toko</th>
-                    <th class="p-2 border-r border-gray-300">Tujuan Toko</th>
-                    <th class="p-2 border-r border-gray-300">Pengirim</th>
-                    <th class="p-2 border-r border-gray-300">Status</th>
-                    <th class="p-2">Aksi</th>
-                </tr>
-            </thead>
-            <tbody class="text-sm">
-                @forelse($mutasi as $m)
-                    <tr class="border-b border-gray-200 hover:bg-yellow-50">
-                        <td class="p-2 border-r border-gray-200 font-mono">{{ $m->no_mutasi }}</td>
-                        <td class="p-2 border-r border-gray-200">{{ date('d/m/Y H:i', strtotime($m->tgl_kirim)) }}</td>
-                        <td class="p-2 border-r border-gray-200 text-red-600">{{ $m->tokoAsal->nama_toko ?? '-' }}</td>
-                        <td class="p-2 border-r border-gray-200 text-green-600">{{ $m->tokoTujuan->nama_toko ?? '-' }}</td>
-                        <td class="p-2 border-r border-gray-200">{{ $m->pengirim->name ?? '-' }}</td>
-                        <td class="p-2 border-r border-gray-200">
-                            @php
-                                $badgeColor = match ($m->status) {
-                                    'Proses' => 'bg-yellow-200 text-yellow-800 border-yellow-400',
-                                    'Dikirim' => 'bg-blue-200 text-blue-800 border-blue-400',
-                                    'Diterima' => 'bg-green-200 text-green-800 border-green-400',
-                                    'Batal' => 'bg-red-200 text-red-800 border-red-400',
-                                    default => 'bg-gray-200 text-gray-800 border-gray-400',
-                                };
-                            @endphp
-                            <span class="px-2 py-0.5 border text-xs {{ $badgeColor }}">
-                                {{ $m->status }}
-                            </span>
-                        </td>
-                        <td class="p-2">
-                            {{-- PERBAIKAN: Tombol link ke Show --}}
-                            <a href="{{ route('owner.mutasi.show', $m->id_mutasi) }}"
-                                class="text-blue-600 hover:underline font-bold">
-                                Detail
-                            </a>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7" class="p-4 text-center text-gray-500 italic">Belum ada data transfer stok.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-        <div class="p-2">
-            {{ $mutasi->links() }}
-        </div>
+@if(session('success'))
+    <div class="bg-green-100 border border-green-400 text-green-700 px-2 py-1 mb-2 text-xs">
+        {{ session('success') }}
     </div>
+@endif
+
+<div class="overflow-x-auto border border-gray-400 bg-white">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="bg-gray-200 text-gray-700 text-xs uppercase">
+                <th class="border border-gray-400 p-2 text-center w-10">No</th>
+                <th class="border border-gray-400 p-2">No Bukti</th>
+                <th class="border border-gray-400 p-2">Tanggal</th>
+                <th class="border border-gray-400 p-2 text-red-700">Dari Toko</th>
+                <th class="border border-gray-400 p-2 text-green-700">Ke Toko</th>
+                <th class="border border-gray-400 p-2">Pengirim</th>
+                <th class="border border-gray-400 p-2 text-center">Status</th>
+                <th class="border border-gray-400 p-2 text-center w-24">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($mutasi as $index => $m)
+            <tr class="hover:bg-yellow-50 text-xs">
+                <td class="border border-gray-300 p-2 text-center">{{ $mutasi->firstItem() + $index }}</td>
+                <td class="border border-gray-300 p-2 font-mono font-bold">{{ $m->no_mutasi }}</td>
+                <td class="border border-gray-300 p-2">{{ date('d/m/Y H:i', strtotime($m->tgl_kirim)) }}</td>
+                <td class="border border-gray-300 p-2 text-red-700">{{ $m->tokoAsal->nama_toko ?? '-' }}</td>
+                <td class="border border-gray-300 p-2 text-green-700">{{ $m->tokoTujuan->nama_toko ?? '-' }}</td>
+                <td class="border border-gray-300 p-2">{{ $m->pengirim->name ?? '-' }}</td>
+                <td class="border border-gray-300 p-2 text-center">
+                    @php
+                        $badgeColor = match ($m->status) {
+                            'Proses' => 'bg-yellow-200 text-yellow-800 border-yellow-400',
+                            'Dikirim' => 'bg-blue-200 text-blue-800 border-blue-400',
+                            'Diterima' => 'bg-green-200 text-green-800 border-green-400',
+                            'Batal' => 'bg-red-200 text-red-800 border-red-400',
+                            default => 'bg-gray-200 text-gray-800 border-gray-400',
+                        };
+                    @endphp
+                    <span class="px-2 py-0.5 border text-[10px] font-bold {{ $badgeColor }}">
+                        {{ strtoupper($m->status) }}
+                    </span>
+                </td>
+                <td class="border border-gray-300 p-2 text-center">
+                    <a href="{{ route('owner.mutasi.show', $m->id_mutasi) }}" class="bg-gray-100 border border-gray-400 px-2 py-0.5 text-[10px] hover:bg-gray-200 text-blue-700">DETAIL</a>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="8" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada riwayat transfer.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-3 text-xs">
+    {{ $mutasi->links() }}
+</div>
 @endsection
