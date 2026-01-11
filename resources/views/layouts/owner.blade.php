@@ -123,6 +123,15 @@
                 <a href="{{ route('owner.pelanggan.index') }}" class="nav-link">
                     <i class="fas fa-users"></i> Pelanggan
                 </a>
+                <a href="{{ route('owner.pengeluaran.index') }}"
+                    class="nav-link {{ request()->routeIs('owner.pengeluaran.*') ? 'active' : '' }}">
+                    <i class="fas fa-file-invoice-dollar"></i> Pengeluaran
+                </a>
+
+                <a href="{{ route('owner.laporan.keuangan') }}"
+                    class="nav-link {{ request()->routeIs('owner.laporan.keuangan') ? 'active' : '' }}">
+                    <i class="fas fa-chart-line"></i> Laporan Keuangan
+                </a>
             @endif
 
             <form action="{{ route('logout') }}" method="POST" class="ml-auto flex">
@@ -141,7 +150,7 @@
             <i class="fas fa-map-marker-alt text-cyan-500"></i>
             <span>Lokasi: Owner Area &gt; @yield('title')</span>
         </div>
-        
+
         @if (session('toko_active_nama'))
             <div class="ml-auto flex items-center gap-2 border-l border-cyan-300 pl-3">
                 <div>
@@ -149,9 +158,9 @@
                     UNIT AKTIF: <span class="text-blue-700 uppercase">{{ session('toko_active_nama') }}</span>
                 </div>
                 {{-- Tombol Ganti Toko --}}
-                <a href="{{ route('owner.toko.index') }}" 
-                   class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-2 py-0.5 rounded text-[9px] font-bold border border-yellow-600 shadow-sm transition"
-                   title="Ganti Unit Bisnis / Cabang">
+                <a href="{{ route('owner.toko.index') }}"
+                    class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-2 py-0.5 rounded text-[9px] font-bold border border-yellow-600 shadow-sm transition"
+                    title="Ganti Unit Bisnis / Cabang">
                     <i class="fas fa-exchange-alt"></i> Ganti
                 </a>
             </div>
@@ -160,7 +169,7 @@
                 <i class="fas fa-exclamation-circle"></i> BELUM PILIH TOKO
             </div>
         @endif
-        </div>
+    </div>
 
     <main class="flex-1 p-1 bg-slate-200 overflow-hidden flex flex-col">
         <div class="bg-white border border-slate-400 shadow-sm flex-1 overflow-auto">
