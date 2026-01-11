@@ -128,7 +128,7 @@
                 </a>
                 <a href="{{ route('owner.mutasi.index') }}"
                     class="nav-link {{ request()->routeIs('owner.mutasi.*') ? 'active' : '' }}">
-                    <i class="fas fa-exchange-alt"></i> Transaksi
+                    <i class="fas fa-exchange-alt"></i> Mutasi
                 </a>
                 <a href="{{ route('owner.pelanggan.index') }}"
                     class="nav-link {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }}">

@@ -19,14 +19,14 @@ class MutasiController extends Controller
      */
     protected function getActiveTenantId()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return null;
         }
 
         $user = Auth::user();
 
         // 1. Coba ambil properti id_tenant langsung dari tabel users (jika ada kolomnya)
-        if (!empty($user->id_tenant)) {
+        if (! empty($user->id_tenant)) {
             return $user->id_tenant;
         }
 
@@ -58,7 +58,7 @@ class MutasiController extends Controller
     public function create()
     {
         $idTenant = $this->getActiveTenantId();
-        $tokos = Toko::where('id_tenant', $idTenant)->get();
+        $tokos    = Toko::where('id_tenant', $idTenant)->get();
 
         return view('owner.mutasi.create', compact('tokos'));
     }
@@ -66,44 +66,46 @@ class MutasiController extends Controller
     /**
      * AJAX Route: Mengambil daftar produk beserta stok di toko tertentu
      */
+    /**
+     * AJAX Route: Mengambil daftar produk di toko tertentu
+     * PERBAIKAN: Hanya menampilkan produk yang stok fisiknya > 0
+     */
     public function getProdukByToko($id_toko)
     {
         try {
             // 1. Pastikan user login
-            if (!Auth::check()) {
+            if (! Auth::check()) {
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
-            // 2. Ambil Tenant ID menggunakan helper yang konsisten
+            // 2. Ambil Tenant ID
             $idTenant = $this->getActiveTenantId();
-            if (!$idTenant) {
+            if (! $idTenant) {
                 return response()->json(['error' => 'Tenant not found'], 404);
             }
 
-            // 3. Validasi Toko (Pastikan toko milik tenant ini)
+            // 3. Validasi Toko
             $cekToko = Toko::where('id_toko', $id_toko)
                 ->where('id_tenant', $idTenant)
                 ->exists();
 
-            if (!$cekToko) {
-                // Jika toko tidak valid/tidak ditemukan, kembalikan array kosong agar JS tidak error
+            if (! $cekToko) {
                 return response()->json([]);
             }
 
-            // 4. Query Produk & Stok
-            // Menggunakan LEFT JOIN agar produk yang belum ada record di stok_toko tetap muncul (stok 0)
+            // 4. Query Produk (Hanya yang memiliki stok > 0)
             $produks = DB::table('produk')
-                ->leftJoin('stok_toko', function ($join) use ($id_toko) {
-                    $join->on('produk.id_produk', '=', 'stok_toko.id_produk')
-                        ->where('stok_toko.id_toko', '=', $id_toko);
-                })
-                ->where('produk.id_tenant', $idTenant)
-                ->where('produk.is_active', true) // Opsional: hanya ambil produk aktif
+            // Gunakan JOIN (Inner Join) bukan LEFT JOIN karena kita hanya mau data yang ada di tabel stok
+                ->join('stok_toko', 'produk.id_produk', '=', 'stok_toko.id_produk')
+                ->where('stok_toko.id_toko', $id_toko)  // Filter khusus toko yang dipilih
+                ->where('produk.id_tenant', $idTenant)  // Pastikan produk milik tenant ini
+                ->where('produk.is_active', true)       // Pastikan produk aktif
+                ->where('stok_toko.stok_fisik', '>', 0) // <-- FILTER UTAMA: Stok harus lebih dari 0
                 ->select(
                     'produk.id_produk',
                     'produk.nama_produk',
-                    'produk.sku', // Pastikan kolom ini ada di tabel produk (cek migration)
-                    DB::raw('COALESCE(stok_toko.stok_fisik, 0) as stok_fisik')
+                    'produk.sku',
+                    'stok_toko.stok_fisik'
                 )
                 ->orderBy('produk.nama_produk', 'asc')
                 ->get();
@@ -111,13 +113,11 @@ class MutasiController extends Controller
             return response()->json($produks);
 
         } catch (\Exception $e) {
-            // Log error untuk debugging di server (storage/logs/laravel.log)
             Log::error("Error getProdukByToko: " . $e->getMessage());
-
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Terjadi kesalahan server saat mengambil data produk.',
-                'debug'   => config('app.debug') ? $e->getMessage() : null
+                'message' => 'Terjadi kesalahan server',
+                'debug'   => config('app.debug') ? $e->getMessage() : null,
             ], 500);
         }
     }
@@ -144,7 +144,7 @@ class MutasiController extends Controller
                         ->lockForUpdate()
                         ->first();
 
-                    if (!$stokAsal || $stokAsal->stok_fisik < $item['qty']) {
+                    if (! $stokAsal || $stokAsal->stok_fisik < $item['qty']) {
                         $namaProduk = DB::table('produk')->where('id_produk', $item['id_produk'])->value('nama_produk');
                         throw new \Exception("Stok tidak mencukupi untuk produk: " . ($namaProduk ?? 'ID ' . $item['id_produk']));
                     }
@@ -221,11 +221,11 @@ class MutasiController extends Controller
                     $stokTujuan = StokToko::firstOrCreate(
                         [
                             'id_toko'   => $mutasi->id_toko_tujuan,
-                            'id_produk' => $detail->id_produk
+                            'id_produk' => $detail->id_produk,
                         ],
                         [
                             'stok_fisik'   => 0,
-                            'stok_minimal' => 5
+                            'stok_minimal' => 5,
                         ]
                     );
 
