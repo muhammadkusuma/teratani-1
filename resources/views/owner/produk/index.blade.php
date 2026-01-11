@@ -42,6 +42,8 @@
                     <th class="border border-gray-400 p-2 text-center">Stok</th>
                     <th class="border border-gray-400 p-2">Satuan</th>
                     <th class="border border-gray-400 p-2 text-right">Harga Jual</th>
+                    {{-- TAMBAHAN: Header Status --}}
+                    <th class="border border-gray-400 p-2 text-center w-20">Status</th>
                     <th class="border border-gray-400 p-2 text-center w-24">Aksi</th>
                 </tr>
             </thead>
@@ -89,6 +91,22 @@
                         <td class="border border-gray-300 p-2 text-right font-mono font-bold">
                             Rp {{ number_format($item->harga_jual_umum, 0, ',', '.') }}
                         </td>
+
+                        {{-- TAMBAHAN: Body Status --}}
+                        <td class="border border-gray-300 p-2 text-center">
+                            @if ($item->is_active)
+                                <span
+                                    class="inline-block px-1.5 py-0.5 bg-green-200 text-green-800 border border-green-400 rounded text-[10px] font-bold">
+                                    AKTIF
+                                </span>
+                            @else
+                                <span
+                                    class="inline-block px-1.5 py-0.5 bg-gray-200 text-gray-600 border border-gray-400 rounded text-[10px] font-bold">
+                                    NON-AKTIF
+                                </span>
+                            @endif
+                        </td>
+
                         <td class="border border-gray-300 p-2 text-center">
                             <div class="flex justify-center gap-1">
                                 <a href="{{ route('owner.toko.produk.edit', [$toko->id_toko, $item->id_produk]) }}"
@@ -105,7 +123,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="8" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada
+                        <td colspan="9" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada
                             data produk.</td>
                     </tr>
                 @endforelse
