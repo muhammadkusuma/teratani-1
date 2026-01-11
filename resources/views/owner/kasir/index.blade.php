@@ -168,6 +168,38 @@
         </div>
     </div>
 
+    {{-- MODAL PILIHAN CETAK --}}
+    <div id="modalCetak" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-2xl border-2 border-gray-800 w-96 text-center">
+            <div class="mb-4 text-green-600">
+                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold mb-2">Transaksi Berhasil!</h2>
+            <p class="text-gray-600 mb-6">Pilih jenis struk yang ingin dicetak:</p>
+
+            <div class="flex flex-col gap-3">
+                {{-- Tombol Cetak Thermal --}}
+                <button onclick="printStruk()"
+                    class="w-full py-2 px-4 bg-gray-200 border-2 border-gray-400 hover:bg-gray-300 font-bold text-gray-800 flex items-center justify-center gap-2">
+                    <i class="fas fa-receipt"></i> CETAK STRUK KECIL (THERMAL)
+                </button>
+
+                {{-- Tombol Cetak Faktur --}}
+                <button onclick="printFaktur()"
+                    class="w-full py-2 px-4 bg-blue-600 border-2 border-blue-800 hover:bg-blue-700 text-white font-bold flex items-center justify-center gap-2">
+                    <i class="fas fa-file-invoice"></i> CETAK FAKTUR (A4)
+                </button>
+
+                {{-- Tombol Tutup --}}
+                <button onclick="tutupModal()" class="mt-2 text-sm text-red-600 underline hover:text-red-800">
+                    Tutup / Transaksi Baru
+                </button>
+            </div>
+        </div>
+    </div>
+
     {{-- Script JavaScript (Tetap Sama) --}}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -313,7 +345,7 @@
                     if (data.length === 0) {
                         $('#productList').html(
                             '<div class="col-span-full text-center text-gray-500 italic py-4">-- PRODUK TIDAK DITEMUKAN --</div>'
-                            );
+                        );
                     } else {
                         data.forEach(p => {
                             let stok = p.stok_toko ? p.stok_toko.stok_fisik : 0;
@@ -345,8 +377,12 @@
             }, 300);
         });
 
+        let lastTransactionId = null; // Variabel untuk menyimpan ID transaksi terakhir
+
         function prosesBayar() {
             if (cart.length === 0) return alert('KERANJANG KOSONG!');
+
+            // ... (validasi pembayaran tetap sama) ...
             let total = cart.reduce((a, b) => a + (b.harga * b.qty), 0);
             let bayar = parseFloat($('#inputBayar').val()) || 0;
             let metode = $('#metodeBayar').val();
@@ -369,15 +405,45 @@
                     metode_bayar: metode
                 })
                 .done(res => {
-                    let printUrl = "{{ url('owner/kasir/cetak') }}/" + res.id_penjualan;
-                    window.open(printUrl, 'Struk', 'width=400,height=600');
-                    alert('TRANSAKSI BERHASIL!');
-                    location.reload();
+                    // UPDATE DISINI: Jangan langsung reload/print
+                    btn.prop('disabled', false).html(oriText);
+
+                    // 1. Simpan ID Transaksi
+                    lastTransactionId = res.id_penjualan;
+
+                    // 2. Tampilkan Modal Pilihan
+                    $('#modalCetak').removeClass('hidden').addClass('flex');
+
+                    // 3. Reset Cart di background (Opsional, agar siap transaksi baru)
+                    cart = [];
+                    renderCart();
+                    $('#inputBayar').val('');
+                    $('#pelanggan').val('');
                 })
                 .fail(xhr => {
                     btn.prop('disabled', false).html(oriText);
                     alert('GAGAL: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Terjadi kesalahan sistem.'));
                 });
+        }
+
+        // --- FUNGSI BARU UNTUK MODAL ---
+
+        function printStruk() {
+            if (!lastTransactionId) return;
+            let url = "{{ url('owner/kasir/cetak') }}/" + lastTransactionId;
+            window.open(url, 'Struk', 'width=400,height=600');
+        }
+
+        function printFaktur() {
+            if (!lastTransactionId) return;
+            // Panggil route cetak faktur yang baru dibuat
+            let url = "{{ url('owner/kasir/cetak-faktur') }}/" + lastTransactionId;
+            window.open(url, 'Faktur', 'width=800,height=600');
+        }
+
+        function tutupModal() {
+            $('#modalCetak').addClass('hidden').removeClass('flex');
+            location.reload(); // Refresh halaman untuk transaksi baru yang bersih
         }
     </script>
 

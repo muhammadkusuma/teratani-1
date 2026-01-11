@@ -293,10 +293,39 @@ class KasirController extends Controller
 
     public function cetakFaktur($id)
     {
-        // Ambil data penjualan beserta relasinya
-        $transaksi = Penjualan::with(['details.produk', 'pelanggan', 'toko', 'user'])->findOrFail($id);
+        // Pastikan load relasi pelanggan lengkap
+        $transaksi = Penjualan::with(['details.produk', 'pelanggan', 'toko', 'user'])
+            ->findOrFail($id);
+
+        // Generate terbilang
+        $terbilang = $this->terbilang($transaksi->total_netto) . ' Rupiah';
 
         // Return ke view faktur
-        return view('owner.kasir.faktur', compact('transaksi'));
+        return view('owner.kasir.faktur', compact('transaksi', 'terbilang'));
+    }
+
+    private function terbilang($nilai)
+    {
+        $nilai = abs($nilai);
+        $huruf = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
+        $temp  = "";
+        if ($nilai < 12) {
+            $temp = " " . $huruf[$nilai];
+        } else if ($nilai < 20) {
+            $temp = $this->terbilang($nilai - 10) . " Belas";
+        } else if ($nilai < 100) {
+            $temp = $this->terbilang($nilai / 10) . " Puluh" . $this->terbilang($nilai % 10);
+        } else if ($nilai < 200) {
+            $temp = " Seratus" . $this->terbilang($nilai - 100);
+        } else if ($nilai < 1000) {
+            $temp = $this->terbilang($nilai / 100) . " Ratus" . $this->terbilang($nilai % 100);
+        } else if ($nilai < 2000) {
+            $temp = " Seribu" . $this->terbilang($nilai - 1000);
+        } else if ($nilai < 1000000) {
+            $temp = $this->terbilang($nilai / 1000) . " Ribu" . $this->terbilang($nilai % 1000);
+        } else if ($nilai < 1000000000) {
+            $temp = $this->terbilang($nilai / 1000000) . " Juta" . $this->terbilang($nilai % 1000000);
+        }
+        return $temp;
     }
 }
