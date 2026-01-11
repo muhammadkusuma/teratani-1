@@ -21,12 +21,11 @@
             border-radius: 0 !important;
         }
 
-        /* Gaya Khusus Navigasi ala Gambar Referensi */
+        /* Gaya Khusus Navigasi */
         .nav-row {
             display: flex;
             flex-wrap: wrap;
             background-color: #1e3a8a;
-            /* Biru Gelap */
             border-bottom: 1px solid #1e40af;
             padding: 1px 0;
         }
@@ -42,12 +41,10 @@
             transition: background 0.2s;
             white-space: nowrap;
             cursor: pointer;
-            /* Tambahan agar button terlihat clickable */
         }
 
         .nav-link:hover {
             background-color: #f97316;
-            /* Orange hover seperti RS Awal Bros */
         }
 
         .nav-link.active {
@@ -83,8 +80,10 @@
         <div class="flex justify-between items-center px-4 py-2">
             <div class="flex items-center gap-4">
                 <div>
-                    <h1 class="text-2xl font-black italic tracking-tighter leading-none">TERATANI</h1>
-                    <p class="text-[10px] font-bold tracking-[0.2em] uppercase text-teal-100">Kelola Bisnis, Panen Profit</p>
+                    <h1 class="text-2xl font-black italic tracking-tighter leading-none">TERATANI SYSTEM</h1>
+                    <p class="text-[10px] font-bold tracking-[0.2em] uppercase text-teal-100">
+                        Tanam Kebaikan • Tuai Kemudahan
+                    </p>
                 </div>
             </div>
             <div class="hidden md:block bg-black/20 p-2 border border-white/20">
@@ -142,13 +141,26 @@
             <i class="fas fa-map-marker-alt text-cyan-500"></i>
             <span>Lokasi: Owner Area &gt; @yield('title')</span>
         </div>
+        
         @if (session('toko_active_nama'))
-            <div class="ml-auto border-l border-cyan-300 pl-3">
-                <i class="fas fa-building text-cyan-500"></i>
-                UNIT AKTIF: <span class="text-blue-700 uppercase">{{ session('toko_active_nama') }}</span>
+            <div class="ml-auto flex items-center gap-2 border-l border-cyan-300 pl-3">
+                <div>
+                    <i class="fas fa-building text-cyan-500"></i>
+                    UNIT AKTIF: <span class="text-blue-700 uppercase">{{ session('toko_active_nama') }}</span>
+                </div>
+                {{-- Tombol Ganti Toko --}}
+                <a href="{{ route('owner.toko.index') }}" 
+                   class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-2 py-0.5 rounded text-[9px] font-bold border border-yellow-600 shadow-sm transition"
+                   title="Ganti Unit Bisnis / Cabang">
+                    <i class="fas fa-exchange-alt"></i> Ganti
+                </a>
+            </div>
+        @else
+            <div class="ml-auto text-red-500 font-bold border-l border-red-300 pl-3">
+                <i class="fas fa-exclamation-circle"></i> BELUM PILIH TOKO
             </div>
         @endif
-    </div>
+        </div>
 
     <main class="flex-1 p-1 bg-slate-200 overflow-hidden flex flex-col">
         <div class="bg-white border border-slate-400 shadow-sm flex-1 overflow-auto">
