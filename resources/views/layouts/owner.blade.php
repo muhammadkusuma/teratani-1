@@ -41,6 +41,8 @@
             font-weight: 500;
             transition: background 0.2s;
             white-space: nowrap;
+            cursor: pointer;
+            /* Tambahan agar button terlihat clickable */
         }
 
         .nav-link:hover {
@@ -80,13 +82,9 @@
     <header class="bg-gradient-to-r from-teal-500 to-cyan-600 text-white border-b-4 border-yellow-500">
         <div class="flex justify-between items-center px-4 py-2">
             <div class="flex items-center gap-4">
-                <div class="bg-white p-1 shadow-sm">
-                    <img src="https://via.placeholder.com/40x40?text=T" alt="Logo">
-                </div>
                 <div>
-                    <h1 class="text-2xl font-black italic tracking-tighter leading-none">TERATANI SYSTEM</h1>
-                    <p class="text-[10px] font-bold tracking-[0.2em] uppercase text-teal-100">Profesional • Rapi •
-                        Amanah • Terpercaya</p>
+                    <h1 class="text-2xl font-black italic tracking-tighter leading-none">TERATANI</h1>
+                    <p class="text-[10px] font-bold tracking-[0.2em] uppercase text-teal-100">Kelola Bisnis, Panen Profit</p>
                 </div>
             </div>
             <div class="hidden md:block bg-black/20 p-2 border border-white/20">
@@ -126,8 +124,15 @@
                 <a href="{{ route('owner.pelanggan.index') }}" class="nav-link">
                     <i class="fas fa-users"></i> Pelanggan
                 </a>
-        
             @endif
+
+            <form action="{{ route('logout') }}" method="POST" class="ml-auto flex">
+                @csrf
+                <button type="submit"
+                    class="nav-link bg-red-700 hover:!bg-red-600 border-l border-white/20 text-white">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
         </div>
     </nav>
 
