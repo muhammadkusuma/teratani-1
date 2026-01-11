@@ -13,7 +13,7 @@
         {{-- 1. HEADER KASIR (Internal) --}}
         <div class="shrink-0 p-2 border-b border-gray-500 flex justify-between items-end bg-[#c0c0c0]">
             <div>
-                <h1 class="font-bold text-lg text-blue-900 uppercase leading-none">Point of Sale (POS) v2.0</h1>
+                <h1 class="font-bold text-lg text-blue-900 uppercase leading-none">Point of Sale (POS)</h1>
                 <div class="text-gray-600 mt-1">
                     Kasir: <span
                         class="font-bold text-black bg-white px-1 border border-gray-400">{{ Auth::user()->name }}</span>

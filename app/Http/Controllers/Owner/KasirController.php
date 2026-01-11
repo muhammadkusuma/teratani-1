@@ -6,7 +6,6 @@ use App\Models\KartuPiutang;
 use App\Models\LogStok;
 use App\Models\Pelanggan;
 use App\Models\Penjualan;
-use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
 use App\Models\Produk;
 use App\Models\StokToko;
