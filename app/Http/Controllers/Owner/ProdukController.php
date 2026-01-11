@@ -16,6 +16,7 @@ use Illuminate\Validation\Rule;
 class ProdukController extends Controller
 {
     // Menampilkan daftar produk per toko
+    // Menampilkan daftar produk per toko
     public function index(Request $request, $id_toko)
     {
         $toko = Toko::find($id_toko);
@@ -25,10 +26,16 @@ class ProdukController extends Controller
             abort(403);
         }
 
-        // Query Produk milik Tenant ini
+        // 1. Ambil Produk milik Tenant
         $query = Produk::where('id_tenant', $toko->id_tenant);
 
-        // LOGIKA PENCARIAN
+        // 2. PERBAIKAN UTAMA: Filter Hanya Produk yang Ada di Toko Ini
+        // Menggunakan whereHas untuk mengecek keberadaan data di tabel stok_toko
+        $query->whereHas('stokTokos', function ($q) use ($id_toko) {
+            $q->where('id_toko', $id_toko);
+        });
+
+        // 3. Logika Pencarian (Tetap sama)
         if ($request->has('search') && $request->search != null) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -38,9 +45,7 @@ class ProdukController extends Controller
             });
         }
 
-        // --- PERBAIKAN UTAMA DISINI ---
-        // Kita load relasi 'stokToko' tapi HANYA yang 'id_toko'-nya sesuai URL
-        // Ini kuncinya agar saat switch toko, stok yang dimuat adalah stok toko tersebut
+        // 4. Eager Loading (Tetap gunakan stokTokos plural)
         $produks = $query->with(['stokTokos' => function ($q) use ($id_toko) {
             $q->where('id_toko', $id_toko);
         }, 'kategori', 'satuanKecil', 'satuanBesar'])
