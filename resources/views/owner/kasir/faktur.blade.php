@@ -6,116 +6,106 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faktur - {{ $transaksi->no_faktur }}</title>
     <style>
+        /* --- STYLE DASAR SAMA SEPERTI SEBELUMNYA --- */
         body {
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            color: #333;
-            line-height: 1.5;
-            font-size: 14px;
+            font-family: 'Arial', sans-serif;
+            color: #000080;
+            /* Biru Navy */
             margin: 0;
             padding: 20px;
-            background: #eee;
+            background: #e0e0e0;
+            font-size: 13px;
         }
 
         .invoice-box {
             max-width: 210mm;
-            /* A4 Width */
             margin: auto;
-            background: #fff;
-            padding: 30px;
-            border: 1px solid #ddd;
+            background: #ffe4e8;
+            /* Background Pink Faktur */
+            padding: 20px 30px;
+            border: 1px solid #ccc;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-            min-height: 297mm;
-            /* A4 Height */
+            min-height: 140mm;
             position: relative;
         }
 
-        /* Header */
+        /* Header Layout */
         .header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 20px;
+            align-items: flex-start;
+            margin-bottom: 20px;
         }
 
-        .company-details {
+        .header-left {
+            width: 50%;
+        }
+
+        .header-right {
+            width: 45%;
             text-align: right;
         }
 
-        .company-details h2 {
-            margin: 0;
-            color: #2c3e50;
+        .company-name {
+            font-size: 24px;
+            font-weight: 800;
             text-transform: uppercase;
-        }
-
-        .invoice-title {
-            font-size: 32px;
-            font-weight: bold;
-            color: #555;
-            text-transform: uppercase;
-            margin: 0;
-        }
-
-        /* Info Grid */
-        .info-grid {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 30px;
-        }
-
-        .client-details,
-        .invoice-meta {
-            width: 48%;
-        }
-
-        .box-label {
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #777;
-            font-weight: bold;
+            color: #000080;
             margin-bottom: 5px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 3px;
         }
 
-        .meta-table {
-            width: 100%;
-            border-collapse: collapse;
+        .company-address {
+            font-size: 11px;
+            line-height: 1.3;
         }
 
-        .meta-table td {
-            padding: 3px 0;
+        .customer-info {
+            margin-top: 10px;
+            border: 1px dashed #000080;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 5px;
+            width: 80%;
         }
 
-        .meta-label {
+        .invoice-meta {
+            margin-top: 15px;
             font-weight: bold;
-            width: 120px;
-            color: #555;
         }
 
-        /* Table Items */
+        /* --- UPDATE PADA TABEL --- */
         .items-table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
+            border: 2px solid #000080;
+            background: transparent;
         }
 
         .items-table th {
-            background: #2c3e50;
-            color: white;
-            text-align: left;
-            padding: 10px;
-            font-size: 13px;
+            border: 1px solid #000080;
+            padding: 8px;
+            text-align: center;
+            background: rgba(0, 0, 128, 0.1);
+            color: #000080;
             text-transform: uppercase;
+            font-size: 12px;
         }
 
         .items-table td {
-            border-bottom: 1px solid #eee;
-            padding: 10px;
+            border: 1px solid #000080;
+            padding: 6px 8px;
+            vertical-align: middle;
+            /* Supaya teks di tengah vertikal */
         }
 
-        .items-table tr:last-child td {
-            border-bottom: 2px solid #333;
+        /* Kotak Cek Manual */
+        .check-box {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 1px solid #000080;
+            background: white;
         }
 
         .text-right {
@@ -126,101 +116,86 @@
             text-align: center;
         }
 
-        /* Totals */
-        .totals-container {
+        /* Footer & Totals */
+        .footer-section {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 10px;
+        }
+
+        .signatures {
+            width: 60%;
+            display: flex;
+            justify-content: space-between;
+            padding-right: 50px;
+        }
+
+        .sign-box {
+            text-align: center;
+            width: 120px;
+        }
+
+        .sign-space {
+            height: 60px;
+        }
+
+        .sign-name {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .totals-area {
+            width: 35%;
         }
 
         .totals-table {
-            width: 40%;
+            width: 100%;
             border-collapse: collapse;
         }
 
         .totals-table td {
-            padding: 5px;
+            padding: 4px;
+            font-weight: bold;
         }
 
-        .totals-table .total-row {
-            font-weight: bold;
+        .totals-table .label {
+            text-align: left;
+            width: 40%;
+        }
+
+        .totals-table .value {
+            text-align: right;
+            border-bottom: 1px solid #000080;
+        }
+
+        .grand-total {
             font-size: 16px;
-            border-top: 2px solid #333;
-            color: #2c3e50;
+            color: #000080;
         }
 
-        /* Terbilang & Notes */
-        .notes-section {
-            margin-top: 20px;
-            padding: 10px;
-            background: #f9f9f9;
-            border-left: 4px solid #2c3e50;
-            font-size: 13px;
-        }
-
-        .terbilang {
-            font-style: italic;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #555;
-        }
-
-        /* Signature */
-        .signature-section {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 60px;
-            text-align: center;
-        }
-
-        .sign-box {
-            width: 30%;
-        }
-
-        .sign-line {
-            border-top: 1px solid #333;
-            margin-top: 60px;
-            width: 80%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        /* Status Stamp */
-        .stamp {
+        .vertical-info {
             position: absolute;
-            top: 180px;
-            right: 40px;
-            font-size: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-            padding: 5px 15px;
-            border: 3px solid;
-            transform: rotate(-15deg);
-            opacity: 0.8;
-        }
-
-        .lunas {
-            color: green;
-            border-color: green;
-        }
-
-        .belum-lunas {
-            color: red;
-            border-color: red;
+            right: 10px;
+            top: 40%;
+            transform: rotate(-90deg);
+            transform-origin: right top;
+            font-size: 10px;
+            color: #666;
+            white-space: nowrap;
         }
 
         @media print {
             body {
                 background: white;
-                padding: 0;
+                -webkit-print-color-adjust: exact;
             }
 
             .invoice-box {
                 box-shadow: none;
                 border: none;
-                padding: 0;
-                margin: 0;
                 width: 100%;
-                max-width: 100%;
+                padding: 0;
             }
 
             .no-print {
@@ -232,84 +207,47 @@
 
 <body>
 
-    <div class="no-print" style="max-width: 210mm; margin: 0 auto 20px auto; text-align: right;">
-        <button onclick="window.print()"
-            style="padding: 10px 20px; background: #2c3e50; color: white; border: none; cursor: pointer; border-radius: 4px;">
-            🖨️ Cetak Faktur / Simpan PDF
-        </button>
+    <div class="no-print" style="max-width: 210mm; margin: 0 auto 10px auto; text-align: right;">
+        <button onclick="window.print()" style="padding: 8px 15px; cursor: pointer;">🖨️ Cetak</button>
     </div>
 
     <div class="invoice-box">
 
-        {{-- Stamp Status Lunas/Belum --}}
-        @if ($transaksi->status_bayar == 'Lunas')
-            <div class="stamp lunas">LUNAS</div>
-        @else
-            <div class="stamp belum-lunas">BELUM LUNAS</div>
-        @endif
-
         <div class="header">
-            <div>
-                <h1 class="invoice-title">FAKTUR PENJUALAN</h1>
-                <small>No. Referensi: {{ $transaksi->no_faktur }}</small>
+            <div class="header-left">
+                <div style="font-size: 12px; margin-bottom: 5px;">Kepada Yth,</div>
+                <div class="customer-info">
+                    <strong
+                        style="font-size: 14px;">{{ $transaksi->pelanggan->nama_pelanggan ?? 'Pelanggan Umum' }}</strong><br>
+                    {{ $transaksi->pelanggan->alamat ?? 'Alamat: -' }}<br>
+                    HP/WA: {{ $transaksi->pelanggan->telepon ?? '-' }}
+                </div>
             </div>
-            <div class="company-details">
-                <h2>{{ $transaksi->toko->nama_toko ?? 'TERATANI STORE' }}</h2>
-                <div>{{ $transaksi->toko->alamat ?? 'Alamat Toko Belum Diisi' }}</div>
-                <div>Telp: {{ $transaksi->toko->telepon ?? '-' }}</div>
-            </div>
-        </div>
 
-        <div class="info-grid">
-            <div class="client-details">
-                <div class="box-label">Ditagihkan Kepada (Bill To):</div>
-                @if ($transaksi->pelanggan)
-                    <h3 style="margin: 5px 0;">{{ $transaksi->pelanggan->nama_pelanggan }}</h3>
-                    <div>{{ $transaksi->pelanggan->alamat ?? 'Alamat tidak tersedia' }}</div>
-                    <div>Telp: {{ $transaksi->pelanggan->telepon ?? '-' }}</div>
-                @else
-                    <h3 style="margin: 5px 0; color: #777;">Pelanggan Umum</h3>
-                    <div>-</div>
-                @endif
-            </div>
-            <div class="invoice-meta">
-                <div class="box-label">Rincian Faktur:</div>
-                <table class="meta-table">
-                    <tr>
-                        <td class="meta-label">Tanggal Transaksi</td>
-                        <td>: {{ \Carbon\Carbon::parse($transaksi->tgl_transaksi)->format('d F Y') }}</td>
-                    </tr>
-                    <tr>
-                        <td class="meta-label">Jatuh Tempo</td>
-                        <td>:
-                            @if ($transaksi->metode_bayar == 'Hutang' && $transaksi->tgl_jatuh_tempo)
-                                <strong
-                                    style="color: red;">{{ \Carbon\Carbon::parse($transaksi->tgl_jatuh_tempo)->format('d F Y') }}</strong>
-                            @else
-                                -
-                            @endif
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="meta-label">Metode Bayar</td>
-                        <td>: {{ strtoupper($transaksi->metode_bayar) }}</td>
-                    </tr>
-                    <tr>
-                        <td class="meta-label">Kasir/Sales</td>
-                        <td>: {{ $transaksi->user->username ?? 'Admin' }}</td>
-                    </tr>
-                </table>
+            <div class="header-right">
+                <div class="company-name">{{ $transaksi->toko->nama_toko ?? 'KERINCI TANI AGRO' }}</div>
+                <div class="company-address">
+                    {{ $transaksi->toko->alamat ?? 'Jl. Yos Sudarso' }}<br>
+                    {{ $transaksi->toko->kota ?? 'Kota Sungai Penuh' }}<br>
+                    HP / WA : {{ $transaksi->toko->telepon ?? '-' }}
+                </div>
+
+                <div class="invoice-meta">
+                    <div>NO. FAKTUR : {{ $transaksi->no_faktur }}</div>
+                    <div>TANGGAL : {{ \Carbon\Carbon::parse($transaksi->tgl_transaksi)->format('d/m/Y') }}</div>
+                </div>
             </div>
         </div>
 
         <table class="items-table">
             <thead>
                 <tr>
-                    <th style="width: 5%;" class="text-center">#</th>
-                    <th style="width: 45%;">Deskripsi Produk</th>
-                    <th style="width: 15%;" class="text-right">Harga Satuan</th>
-                    <th style="width: 10%;" class="text-center">Qty</th>
-                    <th style="width: 25%;" class="text-right">Subtotal</th>
+                    <th style="width: 5%;">NO.</th>
+                    <th style="width: 40%; text-align: left;">NAMA BARANG</th>
+                    <th style="width: 10%;">QTY</th>
+                    <th style="width: 18%; text-align: right;">HARGA</th>
+                    <th style="width: 18%; text-align: right;">JUMLAH</th>
+                    <th style="width: 9%;">CEK</th>
                 </tr>
             </thead>
             <tbody>
@@ -317,94 +255,90 @@
                     <tr>
                         <td class="text-center">{{ $idx + 1 }}</td>
                         <td>
-                            <strong>{{ $item->produk->nama_produk ?? 'Produk Dihapus' }}</strong>
-                            @if ($item->produk && $item->produk->kode_produk)
-                                <br><small style="color: #777;">SKU: {{ $item->produk->kode_produk }}</small>
+                            {{ $item->produk->nama_produk }}
+                            @if ($item->produk->kode_produk)
+                                <span
+                                    style="font-size:10px; font-style:italic;">({{ $item->produk->kode_produk }})</span>
                             @endif
                         </td>
-                        <td class="text-right">Rp {{ number_format($item->harga_jual_satuan, 0, ',', '.') }}</td>
-                        <td class="text-center">{{ $item->qty }} {{ $item->satuan_jual ?? 'Pcs' }}</td>
-                        <td class="text-right">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                        <td class="text-center">{{ $item->qty }} {{ $item->satuan_jual }}</td>
+                        <td class="text-right">{{ number_format($item->harga_jual_satuan, 0, ',', '.') }}</td>
+                        <td class="text-right">{{ number_format($item->subtotal, 0, ',', '.') }}</td>
+                        <td class="text-center">
+                            <span class="check-box"></span>
+                        </td>
                     </tr>
                 @endforeach
+
+                @for ($i = 0; $i < 8 - count($transaksi->details); $i++)
+                    <tr>
+                        <td style="color: transparent;">.</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="text-center">
+                            <span class="check-box" style="border-color: transparent;"></span>
+                        </td>
+                    </tr>
+                @endfor
             </tbody>
         </table>
 
-        <div class="totals-container">
-            <table class="totals-table">
-                <tr>
-                    <td>Total Bruto</td>
-                    <td class="text-right">Rp {{ number_format($transaksi->total_bruto, 0, ',', '.') }}</td>
-                </tr>
-                @if ($transaksi->diskon_nota > 0)
-                    <tr>
-                        <td>Diskon</td>
-                        <td class="text-right text-red">- Rp {{ number_format($transaksi->diskon_nota, 0, ',', '.') }}
-                        </td>
-                    </tr>
-                @endif
-                @if ($transaksi->pajak_ppn > 0)
-                    <tr>
-                        <td>PPN</td>
-                        <td class="text-right">Rp {{ number_format($transaksi->pajak_ppn, 0, ',', '.') }}</td>
-                    </tr>
-                @endif
-                <tr class="total-row">
-                    <td>TOTAL TAGIHAN</td>
-                    <td class="text-right">Rp {{ number_format($transaksi->total_netto, 0, ',', '.') }}</td>
-                </tr>
-                @if ($transaksi->metode_bayar != 'Hutang')
-                    <tr style="color: #777; font-size: 12px;">
-                        <td>Dibayar</td>
-                        <td class="text-right">Rp {{ number_format($transaksi->jumlah_bayar, 0, ',', '.') }}</td>
-                    </tr>
-                    <tr style="color: #777; font-size: 12px;">
-                        <td>Kembali</td>
-                        <td class="text-right">Rp {{ number_format($transaksi->kembalian, 0, ',', '.') }}</td>
-                    </tr>
-                @else
-                    <tr style="color: red; font-size: 12px; font-weight: bold;">
-                        <td>Sisa Hutang</td>
-                        <td class="text-right">Rp
-                            {{ number_format($transaksi->total_netto - $transaksi->jumlah_bayar, 0, ',', '.') }}</td>
-                    </tr>
-                @endif
-            </table>
-        </div>
-
-        <div class="notes-section">
-            <div class="terbilang">Terbilang: # {{ $terbilang }} #</div>
-
-            <div style="margin-top: 10px;">
-                <strong>Info Pembayaran:</strong><br>
-                Silakan transfer ke:
-                <strong>BCA 123-456-7890 a.n {{ $transaksi->toko->nama_toko ?? 'Pemilik Toko' }}</strong><br>
-                Mohon sertakan No. Faktur saat melakukan pembayaran.
-            </div>
-
-            @if ($transaksi->catatan)
-                <div style="margin-top: 10px;">
-                    <strong>Catatan:</strong><br>
-                    {{ $transaksi->catatan }}
+        <div class="footer-section">
+            <div class="signatures">
+                <div class="sign-box">
+                    <p>Hormat Kami,</p>
+                    <div class="sign-space"></div>
+                    <p class="sign-name">({{ $transaksi->user->username ?? 'Admin' }})</p>
                 </div>
-            @endif
+                <div class="sign-box">
+                    <p>Penerima,</p>
+                    <div class="sign-space"></div>
+                    <p class="sign-name">({{ $transaksi->pelanggan->nama_pelanggan ?? '..................' }})</p>
+                </div>
+            </div>
+
+            <div class="totals-area">
+                <table class="totals-table">
+                    <tr>
+                        <td class="label">Total</td>
+                        <td class="value">Rp {{ number_format($transaksi->total_bruto, 0, ',', '.') }}</td>
+                    </tr>
+                    @if ($transaksi->diskon_nota > 0)
+                        <tr>
+                            <td class="label">Disc.</td>
+                            <td class="value">- Rp {{ number_format($transaksi->diskon_nota, 0, ',', '.') }}</td>
+                        </tr>
+                    @endif
+                    <tr>
+                        <td class="label grand-total">Total Bayar</td>
+                        <td class="value grand-total">Rp {{ number_format($transaksi->total_netto, 0, ',', '.') }}</td>
+                    </tr>
+
+                    @if ($transaksi->metode_bayar == 'Hutang')
+                        <tr>
+                            <td class="label" style="color:red;">Sisa Hutang</td>
+                            <td class="value" style="color:red;">Rp
+                                {{ number_format($transaksi->total_netto - $transaksi->jumlah_bayar, 0, ',', '.') }}
+                            </td>
+                        </tr>
+                    @else
+                        <tr>
+                            <td class="label">Bayar</td>
+                            <td class="value">Rp {{ number_format($transaksi->jumlah_bayar, 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Kembali</td>
+                            <td class="value">Rp {{ number_format($transaksi->kembalian, 0, ',', '.') }}</td>
+                        </tr>
+                    @endif
+                </table>
+            </div>
         </div>
 
-        <div class="signature-section">
-            <div class="sign-box">
-                <p>Penerima,</p>
-                <div class="sign-line"></div>
-                <p>({{ $transaksi->pelanggan->nama_pelanggan ?? '.....................' }})</p>
-            </div>
-            <div class="sign-box">
-                <p>Hormat Kami,</p>
-                <div class="sign-line"></div>
-                <p>({{ $transaksi->toko->nama_toko ?? 'Manager' }})</p>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 40px; font-size: 10px; color: #999;">
-            Dicetak secara otomatis oleh sistem Teratani pada {{ date('d/m/Y H:i') }}
+        <div class="vertical-info">
+            FAKTUR PENJUALAN dibuat oleh ({{ $transaksi->user->name ?? 'System' }}) pada {{ date('d/m/Y H:i') }}
         </div>
 
     </div>
