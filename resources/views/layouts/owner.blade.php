@@ -139,6 +139,10 @@
                     class="nav-link {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }}">
                     <i class="fas fa-users"></i> Pelanggan
                 </a>
+                <a href="{{ route('owner.distributor.index') }}"
+                    class="nav-link {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }}">
+                    <i class="fas fa-truck"></i> Distributor
+                </a>
                 <a href="{{ route('owner.pengeluaran.index') }}"
                     class="nav-link {{ request()->routeIs('owner.pengeluaran.*') ? 'active' : '' }}">
                     <i class="fas fa-file-invoice-dollar"></i> Pengeluaran

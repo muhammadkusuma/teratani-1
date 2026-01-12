@@ -111,6 +111,8 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('satuan', App\Http\Controllers\SatuanController::class);
 
         Route::resource('pembelian', App\Http\Controllers\Owner\PembelianController::class);
+
+        Route::resource('distributor', App\Http\Controllers\Owner\DistributorController::class);
     });
 
     // --- SUPERADMIN DASHBOARD ---
