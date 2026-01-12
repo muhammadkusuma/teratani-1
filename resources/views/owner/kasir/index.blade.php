@@ -20,6 +20,10 @@
                     Kasir: <span
                         class="font-bold text-black bg-white px-1 border border-gray-400">{{ Auth::user()->username }}</span>
                 </div>
+                <a href="{{ route('owner.kasir.riwayat') }}"
+                    class="mb-0.5 px-3 py-1 bg-[#d4d0c8] border-2 border-white border-r-black border-b-black active:border-t-black active:border-l-black text-xs font-bold hover:bg-blue-100 flex items-center gap-1 text-blue-900 no-underline">
+                    <i class="fas fa-history"></i> RIWAYAT / CETAK ULANG
+                </a>
             </div>
             <div
                 class="text-right font-mono font-bold text-xl bg-black text-green-500 px-3 py-1 border-2 border-gray-500 border-b-white border-r-white">

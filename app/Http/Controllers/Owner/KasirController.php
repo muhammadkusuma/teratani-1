@@ -149,11 +149,11 @@ class KasirController extends Controller
                     throw new \Exception("Stok {$produk->nama_produk} kurang (Sisa: $stok_sekarang).");
                 }
 
-                $harga    = $produk->harga_jual_umum;
-                $subtotal = $harga * $item['qty'];
+                $harga       = $produk->harga_jual_umum;
+                $subtotal    = $harga * $item['qty'];
                 $total_bruto += $subtotal;
 
-                $items_fix[] = [
+                $items_fix[]  = [
                     'produk'   => $produk,
                     'qty'      => $item['qty'],
                     'harga'    => $harga,
@@ -328,4 +328,30 @@ class KasirController extends Controller
         }
         return $temp;
     }
+
+    // ... method index() dan searchProduk() yang sudah ada ...
+
+    /**
+     * Menampilkan halaman riwayat transaksi hari ini / terbaru
+     */
+    public function riwayat(Request $request)
+    {
+        $id_toko = $this->getTokoAktif();
+        if (! $id_toko) {
+            return redirect()->back()->with('error', 'Akses Toko Ditolak');
+        }
+
+        // Ambil filter tanggal dari request, default hari ini
+        $tanggal = $request->get('tanggal', date('Y-m-d'));
+
+        $transaksi = Penjualan::with(['pelanggan', 'user'])
+            ->where('id_toko', $id_toko)
+            ->whereDate('tgl_transaksi', $tanggal)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('owner.kasir.riwayat', compact('transaksi', 'tanggal'));
+    }
+
+    // ... method store(), print(), dll ...
 }

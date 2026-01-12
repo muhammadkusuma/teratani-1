@@ -98,6 +98,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/kasir/cetak/{id}', [KasirController::class, 'print'])->name('kasir.print');
         Route::get('/kasir/cetak-faktur/{id}', [KasirController::class, 'cetakFaktur'])->name('kasir.cetak-faktur');
 
+        Route::get('/kasir/riwayat', [KasirController::class, 'riwayat'])->name('kasir.riwayat');
+
         Route::get('/kasir/ajax-search', [KasirController::class, 'searchProduk'])->name('kasir.search');
 
         // Route Pengeluaran
