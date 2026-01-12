@@ -6,7 +6,7 @@ use App\Models\Distributor;
 use App\Models\LogStok;
 use App\Models\Pembelian;
 use App\Models\PembelianDetail;
-use App\Models\Pengeluaran; // Tambahkan Model Pengeluaran
+use App\Models\Pengeluaran;
 use App\Models\Produk;
 use App\Models\Satuan;
 use App\Models\StokToko;
@@ -34,7 +34,7 @@ class PembelianController extends Controller
         $id_toko = session('toko_active_id');
         $toko    = Toko::findOrFail($id_toko);
 
-        // Ambil data berdasarkan Tenant ID
+        // Ambil data distributor dan produk berdasarkan Tenant toko tersebut
         $distributors = Distributor::where('id_tenant', $toko->id_tenant)
             ->orderBy('nama_distributor', 'asc')
             ->get();
@@ -49,18 +49,22 @@ class PembelianController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Validasi Input
         $request->validate([
             'id_distributor'     => 'required|exists:distributor,id_distributor',
             'no_faktur_supplier' => 'required|string|max:50',
             'tgl_pembelian'      => 'required|date',
+            'tgl_jatuh_tempo'    => 'nullable|date',
             'status_bayar'       => 'required|in:Lunas,Hutang,Sebagian',
-            'nominal_bayar'      => 'nullable|numeric|min:0', // Input baru untuk jumlah yang dibayar
-            'produk_id'          => 'required|array',
+            'nominal_bayar'      => 'nullable|numeric|min:0',
+            'produk_id'          => 'required|array|min:1',
             'produk_id.*'        => 'required|exists:produk,id_produk',
             'qty'                => 'required|array',
             'qty.*'              => 'required|integer|min:1',
             'harga_beli'         => 'required|array',
             'harga_beli.*'       => 'required|numeric|min:0',
+            'tgl_expired'        => 'nullable|array',
+            'tgl_expired.*'      => 'nullable|date',
         ]);
 
         $id_toko = session('toko_active_id');
@@ -68,44 +72,49 @@ class PembelianController extends Controller
         try {
             DB::beginTransaction();
 
-            // 1. Hitung Total Pembelian
+            // 2. Hitung Grand Total
             $grandTotal = 0;
             foreach ($request->qty as $key => $val) {
-                $grandTotal += ($val * $request->harga_beli[$key]);
+                // Pastikan key ada di harga_beli untuk menghindari error undefined index
+                $harga       = $request->harga_beli[$key] ?? 0;
+                $grandTotal += ($val * $harga);
             }
 
-            // 2. Simpan Header Pembelian
+            // 3. Simpan Header Pembelian
             $pembelian = Pembelian::create([
                 'id_toko'            => $id_toko,
                 'id_distributor'     => $request->id_distributor,
                 'id_user'            => Auth::id(),
                 'no_faktur_supplier' => $request->no_faktur_supplier,
                 'tgl_pembelian'      => $request->tgl_pembelian,
-                'tgl_jatuh_tempo'    => $request->tgl_jatuh_tempo,
+                'tgl_jatuh_tempo'    => $request->status_bayar == 'Lunas' ? null : $request->tgl_jatuh_tempo,
                 'status_bayar'       => $request->status_bayar,
                 'keterangan'         => $request->keterangan,
                 'total_pembelian'    => $grandTotal,
             ]);
 
-            // 3. Simpan Detail & Update Stok
+            // 4. Simpan Detail & Update Stok
             foreach ($request->produk_id as $index => $id_produk) {
                 $qty      = $request->qty[$index];
                 $harga    = $request->harga_beli[$index];
                 $subtotal = $qty * $harga;
-                $expired  = $request->tgl_expired[$index] ?? null;
+
+                // Handle tanggal expired (ubah string kosong jadi null)
+                $expiredInput = $request->tgl_expired[$index] ?? null;
+                $expired      = empty($expiredInput) ? null : $expiredInput;
 
                 $produk = Produk::find($id_produk);
 
-                // Cari nama satuan (opsional)
-                $namaSatuan = 'Pcs';
+                                     // Cari nama satuan kecil produk
+                $namaSatuan = 'Pcs'; // Default
                 if ($produk->id_satuan_kecil) {
                     $satuanObj = Satuan::find($produk->id_satuan_kecil);
                     if ($satuanObj) {
                         $namaSatuan = $satuanObj->nama_satuan;
                     }
-
                 }
 
+                // Simpan Detail Pembelian
                 PembelianDetail::create([
                     'id_pembelian'      => $pembelian->id_pembelian,
                     'id_produk'         => $id_produk,
@@ -116,15 +125,19 @@ class PembelianController extends Controller
                     'tgl_expired_item'  => $expired,
                 ]);
 
-                // Update Harga Beli Rata-rata di Master Produk
+                // Update Harga Beli Rata-rata di Master Produk (Opsional, tapi bagus untuk HPP)
                 $produk->update(['harga_beli_rata_rata' => $harga]);
 
-                // Update Stok Toko
+                // --- INI LOGIKA PENTING: UPDATE STOK TOKO ---
                 $stokToko = StokToko::firstOrCreate(
                     ['id_toko' => $id_toko, 'id_produk' => $id_produk],
-                    ['stok' => 0]
+                    ['stok' => 0]// Default jika belum ada record
                 );
+
+                // Simpan stok awal untuk log
                 $stokAwal = $stokToko->stok;
+
+                // Tambah stok
                 $stokToko->increment('stok', $qty);
 
                 // Catat Log Stok
@@ -132,44 +145,44 @@ class PembelianController extends Controller
                     'id_toko'         => $id_toko,
                     'id_produk'       => $id_produk,
                     'id_user'         => Auth::id(),
-                    'jenis_transaksi' => 'Pembelian',
+                    'jenis_transaksi' => 'Pembelian', // Pastikan kolom ini cukup panjang di DB (ENUM atau VARCHAR)
                     'no_referensi'    => $pembelian->no_faktur_supplier,
                     'qty_masuk'       => $qty,
                     'qty_keluar'      => 0,
                     'stok_akhir'      => $stokAwal + $qty,
-                    'keterangan'      => 'Pembelian ID: ' . $pembelian->id_pembelian,
+                    'keterangan'      => 'Faktur Pembelian #' . $pembelian->id_pembelian,
                 ]);
             }
 
-            // 4. Integrasi ke Keuangan (Tabel Pengeluaran)
-            // Jika status Lunas atau Sebagian, catat uang keluar
-            $nominalBayar = $request->input('nominal_bayar', 0);
+                                                                                              // 5. Integrasi ke Keuangan (Pengeluaran)
+            $nominalBayar = str_replace(['.', ','], '', $request->input('nominal_bayar', 0)); // Bersihkan format currency jika ada
 
-            // Override nominal jika status Lunas (bayar full)
+            // Jika Lunas, nominal bayar = grand total
             if ($request->status_bayar == 'Lunas') {
                 $nominalBayar = $grandTotal;
             }
 
+            // Catat pengeluaran HANYA jika ada uang keluar (Lunas atau Sebagian/DP)
             if (($request->status_bayar == 'Lunas' || $request->status_bayar == 'Sebagian') && $nominalBayar > 0) {
                 Pengeluaran::create([
                     'id_toko'         => $id_toko,
                     'id_user'         => Auth::id(),
-                    'no_referensi'    => 'BYR-' . $pembelian->id_pembelian,
+                    'no_referensi'    => 'BYR-BELI-' . $pembelian->id_pembelian,
                     'tgl_pengeluaran' => $request->tgl_pembelian,
                     'kategori_biaya'  => 'Pembelian Stok',
                     'nominal'         => $nominalBayar,
-                    'keterangan'      => 'Pembayaran Faktur Supplier: ' . $request->no_faktur_supplier,
+                    'keterangan'      => 'Pembayaran Faktur: ' . $request->no_faktur_supplier . ' (' . $request->status_bayar . ')',
                 ]);
             }
 
             DB::commit();
 
             return redirect()->route('owner.pembelian.index')
-                ->with('success', 'Pembelian berhasil disimpan. Stok bertambah & Keuangan tercatat.');
+                ->with('success', 'Pembelian berhasil disimpan. Stok telah bertambah.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Gagal menyimpan: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Gagal menyimpan transaksi: ' . $e->getMessage())->withInput();
         }
     }
 
