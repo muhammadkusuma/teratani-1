@@ -2,10 +2,10 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pembelian; // [Tambahan] Import Model Pembelian
 use App\Models\Pengeluaran;
 use App\Models\Penjualan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class LaporanKeuanganController extends Controller
 {
@@ -25,49 +25,38 @@ class LaporanKeuanganController extends Controller
         // -----------------------------------------------------------
         // A. HITUNG OMSET (Pendapatan Bersih)
         // -----------------------------------------------------------
-        // Omset dihitung dari total_netto (sudah dikurangi diskon)
         $penjualan = Penjualan::where('id_toko', $id_toko)
             ->whereBetween('tgl_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-            ->where('status_transaksi', 'Selesai') // Hanya transaksi sukses
+            ->where('status_transaksi', 'Selesai')
             ->get();
 
         $totalOmset = $penjualan->sum('total_netto');
 
         // -----------------------------------------------------------
-        // B. HITUNG HPP (Harga Pokok Penjualan) - LOGIC FALLBACK
+        // B. HITUNG TOTAL PEMBELIAN (Pengganti HPP / Cost of Goods)
         // -----------------------------------------------------------
-        // Jika 'harga_modal_saat_jual' di tabel transaksi 0 (bug lama),
-        // gunakan 'harga_beli_rata_rata' dari tabel master produk.
-        $totalHPP = DB::table('penjualan_detail')
-            ->join('penjualan', 'penjualan.id_penjualan', '=', 'penjualan_detail.id_penjualan')
-            ->join('produk', 'penjualan_detail.id_produk', '=', 'produk.id_produk') // Join ke master produk
-            ->where('penjualan.id_toko', $id_toko)
-            ->whereBetween('penjualan.tgl_transaksi', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
-            ->where('penjualan.status_transaksi', 'Selesai')
-            ->selectRaw('
-                SUM(
-                    penjualan_detail.qty * CASE 
-                        WHEN penjualan_detail.harga_modal_saat_jual > 0 
-                        THEN penjualan_detail.harga_modal_saat_jual 
-                        ELSE produk.harga_beli_rata_rata 
-                    END
-                ) as total_hpp
-            ')
-            ->value('total_hpp');
+        // [PERBAIKAN] Menghitung total pembelian barang pada periode ini
+        $totalPembelian = Pembelian::where('id_toko', $id_toko)
+            ->whereBetween('tgl_pembelian', [$startDate, $endDate])
+            ->sum('total_pembelian');
 
-        $totalHPP = $totalHPP ?? 0;
+        // Opsional: Jika masih ingin menampilkan HPP sebagai referensi data (tidak mempengaruhi laba rugi jika pakai metode pembelian)
+        // $totalHPP = ... (kode lama bisa di-comment atau dibiarkan jika ingin ditampilkan saja)
 
         // -----------------------------------------------------------
         // C. HITUNG LABA KOTOR
         // -----------------------------------------------------------
-        $labaKotor = $totalOmset - $totalHPP;
+        // Rumus: Omset - Total Pembelian Barang
+        $labaKotor = $totalOmset - $totalPembelian;
 
         // -----------------------------------------------------------
         // D. HITUNG PENGELUARAN (Biaya Operasional)
         // -----------------------------------------------------------
-        // Menggunakan whereDate agar rentang tanggal inklusif
+        // [PERBAIKAN] Filter 'kategori_biaya' != 'Pembelian Stok'
+        // agar tidak double counting dengan data di poin B.
         $totalPengeluaran = Pengeluaran::where('id_toko', $id_toko)
             ->whereBetween('tgl_pengeluaran', [$startDate, $endDate])
+            ->where('kategori_biaya', '!=', 'Pembelian Stok') // Exclude pembayaran beli stok
             ->sum('nominal');
 
         // -----------------------------------------------------------
@@ -77,7 +66,7 @@ class LaporanKeuanganController extends Controller
 
         return view('owner.laporan.keuangan', compact(
             'startDate', 'endDate',
-            'totalOmset', 'totalHPP', 'labaKotor',
+            'totalOmset', 'totalPembelian', 'labaKotor', // Ganti totalHPP dengan totalPembelian
             'totalPengeluaran', 'labaBersih'
         ));
     }
