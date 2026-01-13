@@ -25,7 +25,10 @@ Route::get("/", function () {
 });
 
 Route::get('/fitur', function () {return view('landing.fitur');});
-Route::get('/harga', function () {return view('landing.harga');});
+// Route::get('/harga', function () {return view('landing.harga');});
+Route::get('/harga', function () {
+    return view('maintenance');
+})->name('harga');
 Route::get('/studi-kasus', function () {return view('landing.studi-kasus');});
 Route::get('/tentang-kami', function () {return view('landing.tentang');});
 Route::get('/karir', function () {return view('landing.karir');});
@@ -115,6 +118,10 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('pembelian', App\Http\Controllers\Owner\PembelianController::class);
 
         Route::resource('distributor', App\Http\Controllers\Owner\DistributorController::class);
+
+        Route::get('/piutang', [App\Http\Controllers\Owner\PiutangController::class, 'index'])->name('piutang.index');
+        Route::get('/piutang/{id}', [App\Http\Controllers\Owner\PiutangController::class, 'show'])->name('piutang.show');
+        Route::post('/piutang/{id}/bayar', [App\Http\Controllers\Owner\PiutangController::class, 'storePayment'])->name('piutang.storePayment');
     });
 
     // --- SUPERADMIN DASHBOARD ---
