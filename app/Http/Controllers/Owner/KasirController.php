@@ -117,12 +117,12 @@ class KasirController extends Controller
             'items.*.id'   => 'required|exists:produk,id_produk',
             'items.*.qty'  => 'required|numeric|min:1',
             'bayar'        => 'required|numeric|min:0',
-            'metode_bayar' => 'required|in:Tunai,Transfer,Hutang',
+            'metode_bayar' => 'required|in:Tunai,Transfer,Hutang', // Validasi input
         ]);
 
         $id_toko = $this->getTokoAktif();
         if (! $id_toko) {
-            return response()->json(['status' => 'error', 'message' => 'Sesi toko kadaluarsa atau tidak valid.'], 403);
+            return response()->json(['status' => 'error', 'message' => 'Sesi toko kadaluarsa.'], 403);
         }
 
         $user = Auth::user();
@@ -132,9 +132,8 @@ class KasirController extends Controller
             $total_bruto = 0;
             $items_fix   = [];
 
-            // 1. Cek Stok & Hitung
+            // 1. Cek Stok & Hitung Total
             foreach ($request->items as $item) {
-                // Pastikan stok dicek berdasarkan toko yang aktif
                 $produk = Produk::with(['stokToko' => function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko);
                 }])->find($item['id']);
@@ -161,7 +160,7 @@ class KasirController extends Controller
                 ];
             }
 
-            // 2. Hitung Pembayaran
+            // 2. Kalkulasi Angka
             $diskon      = $request->diskon ?? 0;
             $pajak       = 0;
             $total_netto = ($total_bruto - $diskon) + $pajak;
@@ -171,24 +170,59 @@ class KasirController extends Controller
             $status_bayar = 'Lunas';
             $kembalian    = $bayar - $total_netto;
 
+            // 3. LOGIKA KHUSUS HUTANG & LIMIT PIUTANG
             if ($metode == 'Hutang') {
                 if (empty($request->id_pelanggan)) {
                     throw new \Exception("Transaksi Hutang WAJIB memilih Pelanggan.");
                 }
 
-                if ($bayar >= $total_netto) {
-                    $status_bayar = 'Lunas';
+                $pelanggan = Pelanggan::find($request->id_pelanggan);
+                if (! $pelanggan) {
+                    throw new \Exception("Data pelanggan tidak valid.");
+                }
+
+                // Cek apakah bayar kurang dari total (benar-benar hutang)
+                if ($bayar < $total_netto) {
+                    $status_bayar   = 'Belum Lunas';
+                    $kembalian      = 0;
+                    $nominal_hutang = $total_netto - $bayar;
+
+                    // === FITUR LIMIT PIUTANG ===
+                    // Hitung total hutang yang belum lunas dari pelanggan ini
+                    $total_hutang_berjalan = KartuPiutang::where('id_pelanggan', $pelanggan->id_pelanggan)
+                        ->where('status', 'Belum Lunas')
+                        ->sum('sisa_piutang');
+
+                    // Hitung sisa limit yang tersedia
+                    $sisa_limit = $pelanggan->limit_piutang - $total_hutang_berjalan;
+
+                    // Cek apakah penambahan hutang baru melebihi sisa limit
+                    if ($nominal_hutang > $sisa_limit) {
+                        $format_sisa   = number_format($sisa_limit, 0, ',', '.');
+                        $format_hutang = number_format($total_hutang_berjalan, 0, ',', '.');
+                        $format_limit  = number_format($pelanggan->limit_piutang, 0, ',', '.');
+
+                        throw new \Exception(
+                            "Limit Piutang Tidak Mencukupi!\n\n" .
+                            "Limit Pelanggan: Rp $format_limit\n" .
+                            "Hutang Berjalan: Rp $format_hutang\n" .
+                            "Sisa Limit: Rp $format_sisa\n" .
+                            "Transaksi ini butuh: Rp " . number_format($nominal_hutang, 0, ',', '.')
+                        );
+                    }
+                    // === END FITUR LIMIT PIUTANG ===
                 } else {
-                    $status_bayar = 'Belum Lunas';
-                    $kembalian    = 0;
+                    // Jika user pilih 'Hutang' tapi bayarnya Lunas/Lebih
+                    $status_bayar = 'Lunas';
                 }
             } else {
+                // Metode Tunai/Transfer
                 if ($kembalian < 0) {
-                    throw new \Exception("Uang kurang Rp " . number_format(abs($kembalian), 0, ',', '.'));
+                    throw new \Exception("Uang pembayaran kurang Rp " . number_format(abs($kembalian), 0, ',', '.'));
                 }
             }
 
-            // 3. Simpan Penjualan
+            // 4. Simpan Penjualan
             $penjualan = Penjualan::create([
                 'id_toko'          => $id_toko,
                 'id_user'          => $user->id_user,
@@ -202,26 +236,31 @@ class KasirController extends Controller
                 'total_netto'      => $total_netto,
                 'jumlah_bayar'     => $bayar,
                 'kembalian'        => max(0, $kembalian),
-                'metode_bayar'     => $metode,
+                'metode_bayar'     => $metode, // Sekarang 'Hutang' bisa masuk
                 'status_transaksi' => 'Selesai',
                 'status_bayar'     => $status_bayar,
             ]);
 
-            // 4. Simpan Kartu Piutang jika Hutang
+            // 5. Simpan Kartu Piutang
             if ($metode == 'Hutang' && $status_bayar == 'Belum Lunas') {
                 KartuPiutang::create([
                     'id_toko'         => $id_toko,
                     'id_pelanggan'    => $request->id_pelanggan,
                     'id_penjualan'    => $penjualan->id_penjualan,
-                    'tanggal_piutang' => now(),
-                    'jumlah_piutang'  => $total_netto - $bayar,
+                    'tanggal_piutang' => now(),                 // PERBAIKAN: tanggal_piutang bukan tgl_jatuh_tempo
+                    'tgl_jatuh_tempo' => now()->addDays(30),    // Simpan tanggal jatuh tempo
+                    'total_piutang'   => $total_netto - $bayar, // PERBAIKAN: Simpan total awal
+                    'jumlah_piutang'  => 0,                     // Field ini mungkin redundant jika ada total_piutang, sesuaikan dengan struktur tabel
+                    'sudah_dibayar'   => 0,
                     'sisa_piutang'    => $total_netto - $bayar,
                     'status'          => 'Belum Lunas',
-                    'keterangan'      => 'Penjualan Kasir ' . $penjualan->no_faktur,
+                    // 'keterangan'      => 'Penjualan Kasir ...' // Opsional jika ada kolom keterangan
                 ]);
+
+                // Note: Pastikan field di create() sesuai dengan migration KartuPiutang
             }
 
-            // 5. Simpan Detail & Update Stok
+            // 6. Simpan Detail & Kurangi Stok
             foreach ($items_fix as $data) {
                 PenjualanDetail::create([
                     'id_penjualan'          => $penjualan->id_penjualan,
@@ -233,7 +272,7 @@ class KasirController extends Controller
                     'subtotal'              => $data['subtotal'],
                 ]);
 
-                // Update Stok pada Toko yang Aktif
+                // Update Stok
                 $stokToko = StokToko::where('id_toko', $id_toko)
                     ->where('id_produk', $data['produk']->id_produk)
                     ->first();

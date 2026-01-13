@@ -14,6 +14,11 @@ class KartuPiutang extends Model
         return $this->hasMany(PembayaranPiutang::class, 'id_piutang');
     }
 
+    public function pelanggan()
+    {
+        return $this->belongsTo(Pelanggan::class, 'id_pelanggan');
+    }
+
     public function penjualan()
     {
         return $this->belongsTo(Penjualan::class, 'id_penjualan');

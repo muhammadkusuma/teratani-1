@@ -61,7 +61,7 @@ return new class extends Migration
             $table->decimal('jumlah_bayar', 15, 2)->default(0);
             $table->decimal('kembalian', 15, 2)->default(0);
 
-            $table->enum('metode_bayar', ['Tunai', 'Kredit', 'Transfer', 'QRIS'])->default('Tunai');
+            $table->enum('metode_bayar', ['Tunai', 'Kredit', 'Transfer', 'QRIS', 'Hutang'])->default('Tunai');
             $table->enum('status_transaksi', ['Selesai', 'Pending', 'Batal'])->default('Selesai');
             $table->enum('status_bayar', ['Lunas', 'Belum Lunas', 'Sebagian'])->default('Lunas');
             $table->text('catatan')->nullable();
