@@ -4,9 +4,9 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\Owner\BisnisController;
-use App\Http\Controllers\Owner\DistributorController;
+// use App\Http\Controllers\Owner\DistributorController; // Non-Inti
 use App\Http\Controllers\Owner\KasirController;
-use App\Http\Controllers\Owner\LaporanKeuanganController;
+// use App\Http\Controllers\Owner\LaporanKeuanganController; // Non-Inti
 
 /*
 |--------------------------------------------------------------------------
@@ -14,11 +14,11 @@ use App\Http\Controllers\Owner\LaporanKeuanganController;
 |--------------------------------------------------------------------------
 */
 
-use App\Http\Controllers\Owner\MutasiController;
+// use App\Http\Controllers\Owner\MutasiController; // Non-Inti
 use App\Http\Controllers\Owner\PelangganController;
-use App\Http\Controllers\Owner\PembelianController;
-use App\Http\Controllers\Owner\PengeluaranController;
-use App\Http\Controllers\Owner\PiutangController;
+// use App\Http\Controllers\Owner\PembelianController; // Non-Inti
+// use App\Http\Controllers\Owner\PengeluaranController; // Non-Inti
+// use App\Http\Controllers\Owner\PiutangController; // Non-Inti
 use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\Owner\TokoController as OwnerTokoController;
 use App\Http\Controllers\SatuanController;
@@ -36,14 +36,15 @@ use Illuminate\Support\Facades\Route;
 Route::view('/', 'welcome');
 
 Route::view('/fitur', 'landing.fitur');
-Route::view('/studi-kasus', 'landing.studi-kasus');
-Route::view('/tentang-kami', 'landing.tentang');
-Route::view('/karir', 'landing.karir');
 Route::view('/kontak', 'landing.kontak');
-Route::view('/privasi', 'landing.privasi');
-Route::view('/syarat-ketentuan', 'landing.syarat');
-
 Route::get('/harga', fn() => view('maintenance'))->name('harga');
+
+// --- Halaman Landing Non-Esensial (Di-comment) ---
+// Route::view('/studi-kasus', 'landing.studi-kasus');
+// Route::view('/tentang-kami', 'landing.tentang');
+// Route::view('/karir', 'landing.karir');
+// Route::view('/privasi', 'landing.privasi');
+// Route::view('/syarat-ketentuan', 'landing.syarat');
 
 /*
 |--------------------------------------------------------------------------
@@ -69,7 +70,7 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | OWNER AREA
+    | OWNER AREA (INTI: Faktur, Kasir, Produk, Pelanggan)
     |--------------------------------------------------------------------------
     */
     Route::prefix('owner')->name('owner.')->group(function () {
@@ -77,27 +78,25 @@ Route::middleware('auth')->group(function () {
         // Dashboard
         Route::get('/dashboard', [DashboardController::class, 'ownerIndex'])->name('dashboard');
 
-        // Bisnis / Tenant
+        // Bisnis / Tenant (Setup Awal)
         Route::get('/bisnis/baru', [BisnisController::class, 'create'])->name('bisnis.create');
         Route::post('/bisnis/baru', [BisnisController::class, 'store'])->name('bisnis.store');
 
-        // Toko
+        // Toko (Manajemen Cabang - Diperlukan untuk Kasir)
         Route::resource('toko', OwnerTokoController::class)->except('show');
         Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');
 
-        // Produk per Toko
+        // Produk per Toko (Diperlukan untuk Kasir)
         Route::resource('toko.produk', ProdukController::class);
 
-        // Mutasi
-        Route::get('/ajax/mutasi-produk/{id_toko}', [MutasiController::class, 'getProdukByToko'])
-            ->name('mutasi.get-produk');
-        Route::post('/mutasi/{id}/terima', [MutasiController::class, 'terima'])->name('mutasi.terima');
-        Route::resource('mutasi', MutasiController::class);
-
-        // Pelanggan
+        // Pelanggan (Diperlukan untuk Faktur)
         Route::resource('pelanggan', PelangganController::class);
 
-        // Kasir / POS
+        // Master Data (Kategori & Satuan - Diperlukan untuk Produk)
+        Route::resource('kategori', KategoriController::class);
+        Route::resource('satuan', SatuanController::class);
+
+        // === FITUR UTAMA: KASIR & FAKTUR ===
         Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
         Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
         Route::get('/kasir/riwayat', [KasirController::class, 'riwayat'])->name('kasir.riwayat');
@@ -105,41 +104,59 @@ Route::middleware('auth')->group(function () {
         Route::get('/kasir/cetak/{id}', [KasirController::class, 'print'])->name('kasir.print');
         Route::get('/kasir/cetak-faktur/{id}', [KasirController::class, 'cetakFaktur'])->name('kasir.cetak-faktur');
 
-        // Pengeluaran
-        Route::resource('pengeluaran', PengeluaranController::class)
-            ->except(['show', 'edit', 'update']);
+        /* * --- FITUR NON-INTI (DI-COMMENT) ---
+         * Fokus saat ini hanya pada core features (Faktur/Kasir).
+         */
 
-        // Laporan
-        Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])
-            ->name('laporan.keuangan');
+        // Mutasi Stok (Non-Inti)
+        // Route::get('/ajax/mutasi-produk/{id_toko}', [MutasiController::class, 'getProdukByToko'])->name('mutasi.get-produk');
+        // Route::post('/mutasi/{id}/terima', [MutasiController::class, 'terima'])->name('mutasi.terima');
+        // Route::resource('mutasi', MutasiController::class);
 
-        // Master Data
-        Route::resource('kategori', KategoriController::class);
-        Route::resource('satuan', SatuanController::class);
+        // Pengeluaran (Non-Inti)
+        // Route::resource('pengeluaran', PengeluaranController::class)->except(['show', 'edit', 'update']);
 
-        // Pembelian & Distributor
-        Route::resource('pembelian', PembelianController::class);
-        Route::resource('distributor', DistributorController::class);
+        // Laporan Keuangan (Non-Inti)
+        // Route::get('/laporan-keuangan', [LaporanKeuanganController::class, 'index'])->name('laporan.keuangan');
 
-        // Piutang
-        Route::get('/piutang', [PiutangController::class, 'index'])->name('piutang.index');
-        Route::get('/piutang/{id}', [PiutangController::class, 'show'])->name('piutang.show');
-        Route::post('/piutang/{id}/bayar', [PiutangController::class, 'storePayment'])
-            ->name('piutang.storePayment');
+        // Pembelian & Distributor (Non-Inti)
+        // Route::resource('pembelian', PembelianController::class);
+        // Route::resource('distributor', DistributorController::class);
+
+        // Piutang (Non-Inti - Fokus ke Faktur dulu)
+        // Route::get('/piutang', [PiutangController::class, 'index'])->name('piutang.index');
+        // Route::get('/piutang/{id}', [PiutangController::class, 'show'])->name('piutang.show');
+        // Route::post('/piutang/{id}/bayar', [PiutangController::class, 'storePayment'])->name('piutang.storePayment');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | SUPER ADMIN
+    | SUPER ADMIN (INTI: Tenant, User Internal, Log)
     |--------------------------------------------------------------------------
     */
     Route::middleware(EnsureSuperAdmin::class)->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+        // Manajemen Akun Internal (Customer Care, dll)
         Route::resource('users', UserController::class);
+
+        // Manajemen Database Toko
         Route::resource('tenants', TenantController::class);
+
+        // Log Sistem
         Route::resource('settings', SettingController::class);
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | CUSTOMER CARE (TODO: Perlu Implementasi Controller)
+    |--------------------------------------------------------------------------
+    */
+    // Route::prefix('cc')->name('cc.')->group(function () {
+    //     Route::get('/marketing', ...);
+    //     Route::get('/billing', ...);
+    //     Route::get('/support', ...);
+    // });
 });
 
 /*
@@ -147,6 +164,7 @@ Route::middleware('auth')->group(function () {
 | Global / AJAX
 |--------------------------------------------------------------------------
 */
+// Rute untuk cetak faktur (diakses dari public/landing jika diperlukan, atau dipindah ke dalam auth)
 Route::get('/transaksi/{id}/faktur', [KasirController::class, 'cetakFaktur'])
     ->name('kasir.cetak-faktur');
 
