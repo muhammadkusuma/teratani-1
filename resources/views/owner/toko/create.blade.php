@@ -101,6 +101,17 @@
                                     class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50 font-mono text-[10px]">{{ old('alamat') }}</textarea>
                                 <p class="text-[9px] text-gray-500 mt-0.5">* Masukkan nama jalan, RT/RW, dan Kode Pos.</p>
                             </div>
+                            {{-- Info Rekening Pembayaran --}}
+                            <div class="col-span-1 md:col-span-2 mt-2">
+                                <label for="info_rekening" class="block font-bold text-gray-700 mb-1">
+                                    Info Pembayaran / No. Rekening
+                                </label>
+                                <textarea id="info_rekening" name="info_rekening" rows="2"
+                                    placeholder="Contoh: BCA 123456 a.n Toko Tani&#10;BRI 98765 a.n Toko Tani"
+                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50 font-mono text-[10px]">{{ old('info_rekening') }}</textarea>
+                                <p class="text-[9px] text-gray-500 mt-0.5">* Info ini akan muncul di bagian bawah struk dan
+                                    faktur.</p>
+                            </div>
                         </div>
                     </fieldset>
 

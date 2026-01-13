@@ -36,10 +36,11 @@ class TokoController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_toko' => 'required|string|max:100',
-            'alamat'    => 'nullable|string', // Tambahkan validasi alamat
-            'kota'      => 'nullable|string|max:50',
-            'no_telp'   => 'nullable|string|max:20',
+            'nama_toko'     => 'required|string|max:100',
+            'alamat'        => 'nullable|string', // Tambahkan validasi alamat
+            'kota'          => 'nullable|string|max:50',
+            'no_telp'       => 'nullable|string|max:20',
+            'info_rekening' => 'nullable|string',
         ]);
 
         $user   = Auth::user();
@@ -54,14 +55,15 @@ class TokoController extends Controller
         DB::transaction(function () use ($request, $user, $tenant) {
             // 1. Buat Toko
             $toko = Toko::create([
-                'id_tenant' => $tenant->id_tenant,
-                'nama_toko' => $request->nama_toko,
-                'kode_toko' => 'TK-' . time(), // Contoh generate kode
-                'alamat'    => $request->alamat,
-                'kota'      => $request->kota,
-                'no_telp'   => $request->no_telp,
-                'is_pusat'  => false, // Default cabang
-                'is_active' => true,
+                'id_tenant'     => $tenant->id_tenant,
+                'nama_toko'     => $request->nama_toko,
+                'kode_toko'     => 'TK-' . time(), // Contoh generate kode
+                'alamat'        => $request->alamat,
+                'kota'          => $request->kota,
+                'no_telp'       => $request->no_telp,
+                'info_rekening' => $request->info_rekening,
+                'is_pusat'      => false, // Default cabang
+                'is_active'     => true,
             ]);
 
             // 2. Beri akses user owner ke toko ini (table user_toko_access)
@@ -103,6 +105,7 @@ class TokoController extends Controller
             'alamat'    => 'nullable|string',
             'kota'      => 'nullable|string|max:50',
             'no_telp'   => 'nullable|string|max:20',
+            'info_rekening' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
 
@@ -126,6 +129,7 @@ class TokoController extends Controller
             'alamat'    => $request->alamat,
             'kota'      => $request->kota,
             'no_telp'   => $request->no_telp,
+            'info_rekening' => $request->info_rekening,
             // is_pusat sebaiknya tidak diubah sembarangan
             'is_active' => $request->has('is_active') ? $request->is_active : $toko->is_active,
         ]);

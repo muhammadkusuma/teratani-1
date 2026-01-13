@@ -16,6 +16,7 @@ class Toko extends Model
         'alamat',
         'kota',
         'no_telp',
+        'info_rekening',
         'is_pusat',
         'is_active',
     ];

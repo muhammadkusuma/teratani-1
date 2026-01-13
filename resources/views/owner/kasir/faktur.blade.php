@@ -124,6 +124,22 @@
             margin-top: 10px;
         }
 
+        .payment-info {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px dashed #000080;
+            background-color: #f0f8ff;
+            font-size: 11px;
+            width: 55%;
+            /* Lebar area info */
+        }
+
+        .payment-info h4 {
+            margin: 0 0 5px 0;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
         .signatures {
             width: 60%;
             display: flex;
@@ -286,17 +302,26 @@
         </table>
 
         <div class="footer-section">
-            <div class="signatures">
-                <div class="sign-box">
-                    <p>Hormat Kami,</p>
-                    <div class="sign-space"></div>
-                    <p class="sign-name">({{ $transaksi->user->username ?? 'Admin' }})</p>
+            <div class="signatures" style="flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                    <div class="sign-box">
+                        <p>Hormat Kami,</p>
+                        <div class="sign-space"></div>
+                        <p class="sign-name">({{ $transaksi->user->username ?? 'Admin' }})</p>
+                    </div>
+                    <div class="sign-box">
+                        <p>Penerima,</p>
+                        <div class="sign-space"></div>
+                        <p class="sign-name">({{ $transaksi->pelanggan->nama_pelanggan ?? '..................' }})</p>
+                    </div>
                 </div>
-                <div class="sign-box">
-                    <p>Penerima,</p>
-                    <div class="sign-space"></div>
-                    <p class="sign-name">({{ $transaksi->pelanggan->nama_pelanggan ?? '..................' }})</p>
-                </div>
+
+                @if (!empty($transaksi->toko->info_rekening))
+                    <div class="payment-info">
+                        <h4>Info Pembayaran Transfer:</h4>
+                        {!! nl2br(e($transaksi->toko->info_rekening)) !!}
+                    </div>
+                @endif
             </div>
 
             <div class="totals-area">
