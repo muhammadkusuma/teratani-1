@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Validator;
 
 class SatuanController extends Controller
 {
-    // Menampilkan halaman list satuan
     public function index()
     {
         $idToko = session('toko_active_id');
@@ -18,7 +17,6 @@ class SatuanController extends Controller
 
         $toko = Toko::findOrFail($idToko);
 
-        // Ambil satuan berdasarkan tenant
         $satuan = Satuan::where('id_tenant', $toko->id_tenant)
             ->orderBy('nama_satuan', 'asc')
             ->get();
@@ -26,7 +24,6 @@ class SatuanController extends Controller
         return view('owner.satuan.index', compact('satuan'));
     }
 
-    // Simpan Satuan Baru
     public function store(Request $request)
     {
         $request->validate([
@@ -44,7 +41,6 @@ class SatuanController extends Controller
         return redirect()->back()->with('success', 'Satuan berhasil ditambahkan.');
     }
 
-    // Update Satuan
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -59,7 +55,6 @@ class SatuanController extends Controller
         return redirect()->back()->with('success', 'Satuan berhasil diperbarui.');
     }
 
-    // Hapus Satuan
     public function destroy($id)
     {
         $satuan = Satuan::findOrFail($id);

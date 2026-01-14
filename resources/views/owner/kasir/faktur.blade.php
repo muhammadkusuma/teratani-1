@@ -236,7 +236,7 @@
                     <strong
                         style="font-size: 14px;">{{ $transaksi->pelanggan->nama_pelanggan ?? 'Pelanggan Umum' }}</strong><br>
                     {{ $transaksi->pelanggan->alamat ?? 'Alamat: -' }}<br>
-                    HP/WA: {{ $transaksi->pelanggan->telepon ?? '-' }}
+                    HP/WA: {{ $transaksi->pelanggan->no_hp ?? '-' }}
                 </div>
             </div>
 
@@ -245,7 +245,7 @@
                 <div class="company-address">
                     {{ $transaksi->toko->alamat ?? 'Jl. Yos Sudarso' }}<br>
                     {{ $transaksi->toko->kota ?? 'Kota Sungai Penuh' }}<br>
-                    HP / WA : {{ $transaksi->toko->telepon ?? '-' }}
+                    HP / WA : {{ $transaksi->toko->no_telp ?? '-' }}
                 </div>
 
                 <div class="invoice-meta">

@@ -10,8 +10,6 @@ class User extends Authenticatable
     protected $table      = 'users';
     protected $primaryKey = 'id_user';
     protected $guarded    = ['id_user'];
-
-    // Hidden password
     protected $hidden = ['password'];
 
     public function tenants()

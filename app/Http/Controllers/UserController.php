@@ -12,7 +12,6 @@ class UserController extends Controller
      */
     public function index()
     {
-        // Mengambil semua user, diurutkan terbaru
         $users = User::orderBy('created_at', 'desc')->get();
         return view('users.index', compact('users'));
     }
@@ -82,7 +81,6 @@ class UserController extends Controller
             'is_active'     => $request->has('is_active'),
         ];
 
-        // Update password hanya jika diisi
         if ($request->filled('password')) {
             $dataToUpdate['password'] = Hash::make($request->password);
         }

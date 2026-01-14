@@ -15,27 +15,20 @@ use Illuminate\Validation\Rule;
 
 class ProdukController extends Controller
 {
-    // Menampilkan daftar produk per toko
-    // Menampilkan daftar produk per toko
     public function index(Request $request, $id_toko)
     {
         $toko = Toko::find($id_toko);
 
-        // Validasi akses tenant
         if ($toko->id_tenant !== Auth::user()->tenants->first()->id_tenant) {
             abort(403);
         }
 
-        // 1. Ambil Produk milik Tenant
         $query = Produk::where('id_tenant', $toko->id_tenant);
 
-        // 2. PERBAIKAN UTAMA: Filter Hanya Produk yang Ada di Toko Ini
-        // Menggunakan whereHas untuk mengecek keberadaan data di tabel stok_toko
         $query->whereHas('stokTokos', function ($q) use ($id_toko) {
             $q->where('id_toko', $id_toko);
         });
 
-        // 3. Logika Pencarian (Tetap sama)
         if ($request->has('search') && $request->search != null) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -45,7 +38,6 @@ class ProdukController extends Controller
             });
         }
 
-        // 4. Eager Loading (Tetap gunakan stokTokos plural)
         $produks = $query->with(['stokTokos' => function ($q) use ($id_toko) {
             $q->where('id_toko', $id_toko);
         }, 'kategori', 'satuanKecil', 'satuanBesar'])
@@ -55,7 +47,6 @@ class ProdukController extends Controller
         return view('owner.produk.index', compact('toko', 'produks'));
     }
 
-    // Form Tambah Produk
     public function create(Toko $toko)
     {
         $kategoris = Kategori::where('id_tenant', $toko->id_tenant)->get();
@@ -63,7 +54,6 @@ class ProdukController extends Controller
         return view('owner.produk.create', compact('toko', 'kategoris', 'satuans'));
     }
 
-    // Simpan Produk Baru
     public function store(Request $request, Toko $toko)
     {
         $tenantId = $toko->id_tenant;
@@ -82,7 +72,7 @@ class ProdukController extends Controller
             'nilai_konversi'       => 'required|integer|min:1',
             'harga_beli_rata_rata' => 'required|numeric|min:0',
             'harga_jual_umum'      => 'required|numeric|min:0',
-            'stok_awal'            => 'nullable|integer|min:0', // Field tambahan untuk stok awal
+            'stok_awal'            => 'nullable|integer|min:0',
             'gambar_produk'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
@@ -98,7 +88,6 @@ class ProdukController extends Controller
 
             $produk = Produk::create($data);
 
-            // Input Stok Awal ke Toko ini
             if ($request->filled('stok_awal') && $request->stok_awal > 0) {
                 StokToko::create([
                     'id_toko'      => $toko->id_toko,
@@ -107,7 +96,6 @@ class ProdukController extends Controller
                     'stok_minimal' => 5,
                 ]);
             } else {
-                // Buat entry stok 0 agar muncul di list
                 StokToko::create([
                     'id_toko'      => $toko->id_toko,
                     'id_produk'    => $produk->id_produk,
@@ -117,7 +105,6 @@ class ProdukController extends Controller
             }
 
             DB::commit();
-            // Redirect wajib menyertakan parameter toko
             return redirect()->route('owner.toko.produk.index', $toko->id_toko)
                 ->with('success', 'Produk berhasil ditambahkan');
         } catch (\Exception $e) {
@@ -128,7 +115,6 @@ class ProdukController extends Controller
 
     public function edit(Toko $toko, Produk $produk)
     {
-        // Pastikan produk milik tenant yang sama
         if ($produk->id_tenant !== $toko->id_tenant) {
             abort(403);
         }
@@ -136,7 +122,6 @@ class ProdukController extends Controller
         $kategoris = Kategori::where('id_tenant', $toko->id_tenant)->get();
         $satuans   = Satuan::where('id_tenant', $toko->id_tenant)->get();
 
-        // Ambil stok spesifik toko ini untuk ditampilkan (opsional diedit disini)
         $stokToko = StokToko::where('id_toko', $toko->id_toko)
             ->where('id_produk', $produk->id_produk)
             ->first();

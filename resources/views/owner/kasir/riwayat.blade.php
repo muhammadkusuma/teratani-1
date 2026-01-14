@@ -6,7 +6,7 @@
     <div class="w-full flex flex-col font-sans text-[12px] bg-[#c0c0c0]"
         style="font-family: 'MS Sans Serif', Arial, sans-serif; min-height: calc(100vh - 80px);">
 
-        {{-- HEADER --}}
+        
         <div class="shrink-0 p-2 border-b border-gray-500 flex justify-between items-center bg-[#c0c0c0]">
             <div>
                 <h1 class="font-bold text-lg text-blue-900 uppercase leading-none">Riwayat Transaksi</h1>
@@ -27,7 +27,7 @@
             </div>
         </div>
 
-        {{-- KONTEN TABEL --}}
+        
         <div class="p-2 flex-1 overflow-auto">
             <div class="bg-white border-2 border-gray-400 border-l-black border-t-black min-h-full p-1">
                 <table class="w-full border-collapse text-left">
@@ -61,7 +61,7 @@
                                 </td>
                                 <td class="p-2 border border-gray-300 text-center">
                                     <div class="flex justify-center gap-1">
-                                        {{-- Cetak Struk (Thermal) --}}
+                                        
                                         <button
                                             onclick="window.open('{{ route('owner.kasir.print', $trx->id_penjualan) }}', 'Struk', 'width=400,height=600')"
                                             class="px-2 py-1 bg-gray-200 border border-gray-400 hover:bg-white text-[10px] font-bold"
@@ -69,7 +69,7 @@
                                             <i class="fas fa-receipt"></i> STRUK
                                         </button>
 
-                                        {{-- Cetak Faktur (A4) --}}
+                                        
                                         <button
                                             onclick="window.open('{{ route('owner.kasir.cetak-faktur', $trx->id_penjualan) }}', 'Faktur', 'width=800,height=600')"
                                             class="px-2 py-1 bg-blue-100 border border-blue-400 hover:bg-white text-[10px] font-bold text-blue-800"
@@ -88,6 +88,10 @@
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-4">
+                {{ $transaksi->appends(['tanggal' => $tanggal])->links() }}
             </div>
         </div>
     </div>

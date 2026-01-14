@@ -16,7 +16,6 @@ class TenantController extends Controller
 
         if ($request->has('search')) {
             $search = $request->search;
-            // Sesuaikan pencarian dengan nama kolom di DB
             $query->where('nama_bisnis', 'like', "%{$search}%")
                 ->orWhere('kode_unik_tenant', 'like', "%{$search}%");
         }
@@ -40,20 +39,16 @@ class TenantController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            // Validasi input form
             'nama_tenant' => 'required|string|max:100',
-            // Validasi input domain ke kolom DB 'kode_unik_tenant'
             'domain'      => 'nullable|string|max:20|unique:tenants,kode_unik_tenant',
             'status'      => 'required|in:active,inactive',
-            // id_tenant dihapus karena DB menggunakan Auto Increment
         ]);
 
         Tenant::create([
-            // Kiri: Kolom Database => Kanan: Input Form
             'nama_bisnis'      => $request->nama_tenant,
-            'kode_unik_tenant' => $request->domain, // Mapping domain form ke kode_unik DB
+            'kode_unik_tenant' => $request->domain,
             'status_langganan' => $request->status === 'active' ? 'Aktif' : 'Suspend',
-            'paket_layanan'    => 'Trial', // Default value
+            'paket_layanan'    => 'Trial',
         ]);
 
         return redirect()->route('tenants.index')->with('success', 'Tenant berhasil ditambahkan.');
@@ -77,7 +72,6 @@ class TenantController extends Controller
 
         $request->validate([
             'nama_tenant' => 'required|string|max:100',
-            // Cek unique kecuali punya diri sendiri
             'domain'      => ['nullable', 'string', 'max:20', Rule::unique('tenants', 'kode_unik_tenant')->ignore($tenant->id_tenant, 'id_tenant')],
             'status'      => 'required|in:active,inactive',
         ]);

@@ -15,7 +15,7 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            {{-- Kolom Kiri --}}
+            
             <div class="space-y-3">
                 <h3 class="font-bold text-blue-800 border-b border-gray-300 pb-1 text-xs">A. IDENTITAS BARANG</h3>
                 
@@ -48,7 +48,7 @@
                 </div>
             </div>
 
-            {{-- Kolom Kanan --}}
+            
             <div class="space-y-3">
                 <h3 class="font-bold text-blue-800 border-b border-gray-300 pb-1 text-xs">B. SATUAN & HARGA</h3>
 
@@ -88,14 +88,14 @@
                     </div>
                 </div>
 
-                {{-- Info Stok Readonly --}}
+                
                 <div class="bg-yellow-50 p-2 border border-yellow-200 flex justify-between items-center">
                     <span class="text-xs font-bold text-gray-600">Sisa Stok Fisik:</span>
                     <span class="text-lg font-bold font-mono">{{ $stokToko->stok_fisik ?? 0 }}</span>
                 </div>
             </div>
 
-            {{-- Full Width: Foto & Status --}}
+            
             <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-300 pt-3 mt-1">
                 <div class="flex gap-2 items-start">
                     @if ($produk->gambar_produk)

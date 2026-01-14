@@ -28,13 +28,8 @@ class Penjualan extends Model
     }
 
     public function user()
-    { // Kasir
-        return $this->belongsTo(User::class, 'id_user');
-    }
-
-    public function kartuPiutang()
     {
-        return $this->hasOne(KartuPiutang::class, 'id_penjualan');
+        return $this->belongsTo(User::class, 'id_user');
     }
 
     public function toko()

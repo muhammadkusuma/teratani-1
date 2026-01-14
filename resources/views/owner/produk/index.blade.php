@@ -14,7 +14,7 @@
         </a>
     </div>
 
-    {{-- Search Bar --}}
+    
     <form action="{{ route('owner.toko.produk.index', $toko->id_toko) }}" method="GET" class="mb-3 flex gap-2">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama / SKU / Barcode..."
             class="border border-gray-400 p-1 text-xs w-64 shadow-inner">
@@ -42,7 +42,7 @@
                     <th class="border border-gray-400 p-2 text-center">Stok</th>
                     <th class="border border-gray-400 p-2">Satuan</th>
                     <th class="border border-gray-400 p-2 text-right">Harga Jual</th>
-                    {{-- TAMBAHAN: Header Status --}}
+                    
                     <th class="border border-gray-400 p-2 text-center w-20">Status</th>
                     <th class="border border-gray-400 p-2 text-center w-24">Aksi</th>
                 </tr>
@@ -92,7 +92,7 @@
                             Rp {{ number_format($item->harga_jual_umum, 0, ',', '.') }}
                         </td>
 
-                        {{-- TAMBAHAN: Body Status --}}
+                        
                         <td class="border border-gray-300 p-2 text-center">
                             @if ($item->is_active)
                                 <span

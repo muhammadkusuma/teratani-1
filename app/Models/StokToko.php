@@ -7,7 +7,14 @@ class StokToko extends Model
 {
     protected $table      = 'stok_toko';
     protected $primaryKey = 'id_stok';
-    protected $guarded    = ['id_stok'];
+    
+    protected $fillable = [
+        'id_toko',
+        'id_produk',
+        'stok_fisik',
+        'stok_minimal',
+        'lokasi_rak',
+    ];
 
     public function produk()
     {

@@ -1,215 +1,216 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title') - TERATANI ERP</title>
-
+    <title>@yield('title') - Sistem Toko Tani</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
         body {
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 11px;
-            background-color: #f0f2f5;
+            font-family: 'Tahoma', 'MS Sans Serif', Arial, sans-serif;
+            font-size: 16px;
         }
 
-        * {
-            border-radius: 0 !important;
+        .win98-border {
+            border: 3px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            box-shadow: 1px 1px 0 #808080;
         }
 
-        /* Gaya Khusus Navigasi */
-        .nav-row {
-            display: flex;
-            flex-wrap: wrap;
-            background-color: #1e3a8a;
-            border-bottom: 1px solid #1e40af;
-            padding: 1px 0;
+        .win98-inset {
+            border: 2px solid;
+            border-color: #000000 #ffffff #ffffff #000000;
         }
 
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 4px 10px;
-            color: white;
-            text-decoration: none;
-            border-right: 1px solid #3b82f6;
-            font-weight: 500;
-            transition: background 0.2s;
-            white-space: nowrap;
+        .win98-button {
+            border: 3px solid;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            background: #c0c0c0;
+            padding: 8px 16px;
+            font-weight: bold;
             cursor: pointer;
         }
 
-        .nav-link:hover {
-            background-color: #f97316;
+        .win98-button:hover {
+            background: #d4d0c8;
         }
 
-        .nav-link.active {
-            background-color: #0369a1;
+        .win98-button:active {
+            border-color: #000000 #ffffff #ffffff #000000;
+        }
+
+        .menu-item {
+            padding: 8px 16px;
+            font-size: 16px;
             font-weight: bold;
+            border: 2px solid transparent;
         }
 
-        .nav-link i {
-            font-size: 12px;
-            margin-right: 5px;
+        .menu-item:hover {
+            background: #000080;
+            color: white;
         }
 
-        /* Scrollbar Klasik */
-        ::-webkit-scrollbar {
-            width: 10px;
-            height: 10px;
+        .menu-item.active {
+            border: 2px solid;
+            border-color: #000000 #ffffff #ffffff #000000;
+            background: #c0c0c0;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #e2e8f0;
+        /* Global Helper Classes */
+        .win98-panel {
+            background: white;
+            border: 2px solid;
+            border-color: #000000 #ffffff #ffffff #000000;
+            padding: 16px;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #94a3b8;
-            border: 2px solid #e2e8f0;
+        .win98-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        .win98-table th {
+            background: #000080;
+            color: white;
+            padding: 10px;
+            text-align: left;
+            font-weight: bold;
+            font-size: 16px;
+            border: 1px solid #000;
+        }
+
+        .win98-table td {
+            background: white;
+            padding: 10px;
+            border: 1px solid #808080;
+            font-size: 15px;
+        }
+
+        .win98-table tr:nth-child(even) td {
+            background: #f0f0f0;
+        }
+
+        .win98-input {
+            font-family: 'Tahoma', Arial, sans-serif;
+            font-size: 16px;
+            padding: 6px;
+            border: 2px solid;
+            border-color: #000000 #ffffff #ffffff #000000;
+            background: white;
+        }
+
+        .win98-input:focus {
+            outline: 2px dotted #000;
+        }
+
+        .win98-heading {
+            font-size: 20px;
+            color: #000080;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .win98-text-large {
+            font-size: 16px;
         }
     </style>
 </head>
 
-<body class="flex flex-col min-h-screen">
-
-    <header class="bg-gradient-to-r from-teal-500 to-cyan-600 text-white border-b-4 border-yellow-500">
-        <div class="flex justify-between items-center px-4 py-2">
-            <div class="flex items-center gap-4">
-                <div>
-                    <h1 class="text-2xl font-black italic tracking-tighter leading-none">TERATANI SYSTEM</h1>
-                    <p class="text-[10px] font-bold tracking-[0.2em] uppercase text-teal-100">
-                        Tanam Kebaikan • Tuai Kemudahan
-                    </p>
-                </div>
-            </div>
-            <div class="hidden md:block bg-black/20 p-2 border border-white/20">
-                <table class="text-[10px]">
-                    <tr>
-                        <td class="pr-2 opacity-80">PENGGUNA:</td>
-                        <td class="font-bold text-yellow-300">{{ strtoupper(Auth::user()->name ?? 'User') }}</td>
-                    </tr>
-                    <tr>
-                        <td class="pr-2 opacity-80">ROLE:</td>
-                        <td class="font-bold">OWNER MANAGEMENT</td>
-                    </tr>
-                </table>
-            </div>
+<body class="bg-teal-700 overflow-hidden h-screen">
+    <div class="win98-border bg-gray-300 h-screen flex flex-col">
+        <!-- Title Bar -->
+        <div class="bg-gradient-to-r from-blue-900 to-blue-600 text-white px-2 py-1.5 flex justify-between items-center">
+            <span class="font-bold text-base">📊 SISTEM TOKO TANI - {{ session('toko_active_nama', 'Pilih Toko') }}</span>
+            <form action="{{ route('logout') }}" method="POST" class="inline">
+                @csrf
+                <button type="submit" class="win98-button text-sm px-3 py-1">✕ Keluar</button>
+            </form>
         </div>
-    </header>
 
-    <nav class="shadow-md select-none">
-        <div class="nav-row bg-blue-950">
-            <a href="{{ route('owner.dashboard') }}"
-                class="nav-link {{ request()->routeIs('owner.dashboard') ? 'active' : '' }}">
-                <i class="fas fa-home"></i> Home
+        <!-- Menu Bar -->
+        <div class="bg-gray-300 border-b-2 border-gray-400 p-1 flex flex-wrap gap-1">
+            <a href="{{ route('owner.dashboard') }}" 
+               class="menu-item {{ request()->routeIs('owner.dashboard') ? 'active' : '' }} text-black no-underline">
+                🏠 Beranda
             </a>
 
             @if (session('toko_active_id'))
-                <a href="{{ route('owner.kasir.index') }}"
-                    class="nav-link {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }}">
-                    <i class="fas fa-cash-register"></i> Kasir (POS)
+                <a href="{{ route('owner.kasir.index') }}" 
+                   class="menu-item {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }} text-black no-underline">
+                    💰 Kasir
                 </a>
-                <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}"
-                    class="nav-link {{ request()->routeIs('owner.toko.produk.*') ? 'active' : '' }}">
-                    <i class="fas fa-boxes"></i> Produk
+                <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}" 
+                   class="menu-item {{ request()->routeIs('owner.toko.produk.*') ? 'active' : '' }} text-black no-underline">
+                    📦 Produk
                 </a>
-
-                <a href="{{ route('owner.pembelian.index') }}"
-                    class="nav-link {{ request()->routeIs('owner.pembelian.*') ? 'active' : '' }}">
-                    <i class="fas fa-truck-loading"></i> Pembelian (Faktur)
+                <a href="{{ route('owner.stok.index') }}" 
+                   class="menu-item {{ request()->routeIs('owner.stok.*') ? 'active' : '' }} text-black no-underline">
+                    📊 Stok
                 </a>
-
-                <a href="{{ route('owner.kategori.index') }}"
-                    class="nav-link {{ request()->routeIs('owner.kategori.*') ? 'active' : '' }}">
-                    <i class="fas fa-tags"></i> Kategori
-                </a>
-                <a href="{{ route('owner.satuan.index') }}"
-                    class="nav-link {{ request()->routeIs('owner.satuan.*') ? 'active' : '' }}">
-                    <i class="fas fa-weight-hanging"></i> Satuan
-                </a>
-                <a href="{{ route('owner.mutasi.index') }}"
-                    class="nav-link {{ request()->routeIs('owner.mutasi.*') ? 'active' : '' }}">
-                    <i class="fas fa-exchange-alt"></i> Mutasi
-                </a>
-                <a href="{{ route('owner.pelanggan.index') }}"
-                    class="nav-link {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i> Pelanggan
-                </a>
-                <a href="{{ route('owner.piutang.index') }}"
-                    class="nav-link {{ request()->routeIs('owner.piutang.*') ? 'active' : '' }}">
-                    <i class="fas fa-book-reader"></i> Piutang
-                </a>
-                <a href="{{ route('owner.distributor.index') }}"
-                    class="nav-link {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }}">
-                    <i class="fas fa-truck"></i> Distributor
-                </a>
-                <a href="{{ route('owner.pengeluaran.index') }}"
-                    class="nav-link {{ request()->routeIs('owner.pengeluaran.*') ? 'active' : '' }}">
-                    <i class="fas fa-file-invoice-dollar"></i> Pengeluaran
-                </a>
-
-                <a href="{{ route('owner.laporan.keuangan') }}"
-                    class="nav-link {{ request()->routeIs('owner.laporan.keuangan') ? 'active' : '' }}">
-                    <i class="fas fa-chart-line"></i> Laporan Keuangan
+                <a href="{{ route('owner.pelanggan.index') }}" 
+                   class="menu-item {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }} text-black no-underline">
+                    👥 Pelanggan
                 </a>
             @endif
 
-            <form action="{{ route('logout') }}" method="POST" class="ml-auto flex">
-                @csrf
-                <button type="submit"
-                    class="nav-link bg-red-700 hover:!bg-red-600 border-l border-white/20 text-white">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
-        </div>
-    </nav>
+            <a href="{{ route('owner.toko.index') }}" 
+               class="menu-item {{ request()->routeIs('owner.toko.index') ? 'active' : '' }} text-black no-underline">
+                🏪 Toko
+            </a>
 
-    <div
-        class="bg-cyan-50 border-b border-cyan-200 p-1 px-3 flex items-center text-[10px] text-cyan-800 font-semibold shadow-inner">
-        <div class="flex items-center gap-1 mr-4">
-            <i class="fas fa-map-marker-alt text-cyan-500"></i>
-            <span>Lokasi: Owner Area &gt; @yield('title')</span>
+            <a href="{{ route('owner.profile.edit-password') }}" 
+               class="menu-item {{ request()->routeIs('owner.profile.*') ? 'active' : '' }} text-black no-underline">
+                🔐 Ubah Password
+            </a>
         </div>
 
-        @if (session('toko_active_nama'))
-            <div class="ml-auto flex items-center gap-2 border-l border-cyan-300 pl-3">
-                <div>
-                    <i class="fas fa-building text-cyan-500"></i>
-                    UNIT AKTIF: <span class="text-blue-700 uppercase">{{ session('toko_active_nama') }}</span>
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-3 bg-gray-300">
+            @if (session('success'))
+                <div class="bg-green-400 border-4 border-green-600 p-4 mb-3 font-bold text-base text-black">
+                    ✓ {{ session('success') }}
                 </div>
-                {{-- Tombol Ganti Toko --}}
-                <a href="{{ route('owner.toko.index') }}"
-                    class="bg-yellow-400 hover:bg-yellow-300 text-yellow-900 px-2 py-0.5 rounded text-[9px] font-bold border border-yellow-600 shadow-sm transition"
-                    title="Ganti Unit Bisnis / Cabang">
-                    <i class="fas fa-exchange-alt"></i> Ganti
-                </a>
-            </div>
-        @else
-            <div class="ml-auto text-red-500 font-bold border-l border-red-300 pl-3">
-                <i class="fas fa-exclamation-circle"></i> BELUM PILIH TOKO
-            </div>
-        @endif
-    </div>
+            @endif
 
-    <main class="flex-1 p-1 bg-slate-200 overflow-hidden flex flex-col">
-        <div class="bg-white border border-slate-400 shadow-sm flex-1 overflow-auto">
+            @if (session('error'))
+                <div class="bg-red-500 border-4 border-red-800 p-4 mb-3 font-bold text-base text-white">
+                    ✗ {{ session('error') }}
+                </div>
+            @endif
+
+            @if (session('warning'))
+                <div class="bg-yellow-300 border-4 border-yellow-600 p-4 mb-3 font-bold text-base text-black">
+                    ⚠ {{ session('warning') }}
+                </div>
+            @endif
+
             @yield('content')
         </div>
-    </main>
 
-    <footer class="bg-slate-800 text-slate-300 text-[9px] px-3 py-1 flex justify-between border-t border-black">
-        <div class="flex gap-4">
-            <span>Server Time: <b>{{ date('H:i:s') }}</b></span>
+        <!-- Status Bar -->
+        <div class="bg-gray-300 border-t-2 border-gray-400 px-3 py-1.5 flex justify-between text-base">
+            <span class="font-bold">👤 {{ Auth::user()->nama_lengkap ?? Auth::user()->username }}</span>
+            <span class="font-bold">🕐 <span id="clock"></span></span>
         </div>
-        <div class="font-bold">
-            &copy; {{ date('Y') }}
-        </div>
-    </footer>
+    </div>
 
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('clock').textContent = `${hours}:${minutes}:${seconds}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+    </script>
+
+    @stack('scripts')
 </body>
-
 </html>

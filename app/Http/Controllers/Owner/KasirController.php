@@ -2,8 +2,6 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
-use App\Models\KartuPiutang;
-use App\Models\LogStok;
 use App\Models\Pelanggan;
 use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
@@ -22,7 +20,6 @@ class KasirController extends Controller
      */
     private function getTokoAktif()
     {
-        // 1. Cek apakah sudah ada di session (Gunakan key yang konsisten: 'toko_active_id')
         if (session()->has('toko_active_id')) {
             return session('toko_active_id');
         }
@@ -34,14 +31,12 @@ class KasirController extends Controller
             return null;
         }
 
-        // 3. Cari Toko Default
         $toko = Toko::where('id_tenant', $tenant->id_tenant)
             ->orderBy('is_pusat', 'desc')
             ->orderBy('id_toko', 'asc')
             ->first();
 
         if ($toko) {
-            // PERBAIKAN: Gunakan key session yang sama dengan TokoController
             session([
                 'toko_active_id'   => $toko->id_toko,
                 'toko_active_nama' => $toko->nama_toko,
@@ -63,8 +58,6 @@ class KasirController extends Controller
         $toko      = Toko::find($id_toko);
         $nama_toko = $toko ? $toko->nama_toko : 'Toko Tidak Diketahui';
 
-        // PERBAIKAN: Tambahkan where('is_active', 1)
-        // Load awal: Hanya produk dengan stok > 0 DAN is_active = 1
         $produk = Produk::where('is_active', 1)
             ->whereHas('stokToko', function ($q) use ($id_toko) {
                 $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
@@ -89,7 +82,6 @@ class KasirController extends Controller
 
         $keyword = $request->get('keyword');
 
-        // PERBAIKAN: Tambahkan where('is_active', 1) pada query dasar
         $query = Produk::where('is_active', 1)
             ->whereHas('stokToko', function ($q) use ($id_toko) {
                 $q->where('id_toko', $id_toko);
@@ -117,7 +109,7 @@ class KasirController extends Controller
             'items.*.id'   => 'required|exists:produk,id_produk',
             'items.*.qty'  => 'required|numeric|min:1',
             'bayar'        => 'required|numeric|min:0',
-            'metode_bayar' => 'required|in:Tunai,Transfer,Hutang', // Validasi input
+            'metode_bayar' => 'required|in:Tunai,Transfer,Hutang',
         ]);
 
         $id_toko = $this->getTokoAktif();
@@ -132,7 +124,6 @@ class KasirController extends Controller
             $total_bruto = 0;
             $items_fix   = [];
 
-            // 1. Cek Stok & Hitung Total
             foreach ($request->items as $item) {
                 $produk = Produk::with(['stokToko' => function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko);
@@ -160,7 +151,6 @@ class KasirController extends Controller
                 ];
             }
 
-            // 2. Kalkulasi Angka
             $diskon      = $request->diskon ?? 0;
             $pajak       = 0;
             $total_netto = ($total_bruto - $diskon) + $pajak;
@@ -170,7 +160,6 @@ class KasirController extends Controller
             $status_bayar = 'Lunas';
             $kembalian    = $bayar - $total_netto;
 
-            // 3. LOGIKA KHUSUS HUTANG & LIMIT PIUTANG
             if ($metode == 'Hutang') {
                 if (empty($request->id_pelanggan)) {
                     throw new \Exception("Transaksi Hutang WAJIB memilih Pelanggan.");
@@ -181,48 +170,18 @@ class KasirController extends Controller
                     throw new \Exception("Data pelanggan tidak valid.");
                 }
 
-                // Cek apakah bayar kurang dari total (benar-benar hutang)
                 if ($bayar < $total_netto) {
                     $status_bayar   = 'Belum Lunas';
                     $kembalian      = 0;
-                    $nominal_hutang = $total_netto - $bayar;
-
-                    // === FITUR LIMIT PIUTANG ===
-                    // Hitung total hutang yang belum lunas dari pelanggan ini
-                    $total_hutang_berjalan = KartuPiutang::where('id_pelanggan', $pelanggan->id_pelanggan)
-                        ->where('status', 'Belum Lunas')
-                        ->sum('sisa_piutang');
-
-                    // Hitung sisa limit yang tersedia
-                    $sisa_limit = $pelanggan->limit_piutang - $total_hutang_berjalan;
-
-                    // Cek apakah penambahan hutang baru melebihi sisa limit
-                    if ($nominal_hutang > $sisa_limit) {
-                        $format_sisa   = number_format($sisa_limit, 0, ',', '.');
-                        $format_hutang = number_format($total_hutang_berjalan, 0, ',', '.');
-                        $format_limit  = number_format($pelanggan->limit_piutang, 0, ',', '.');
-
-                        throw new \Exception(
-                            "Limit Piutang Tidak Mencukupi!\n\n" .
-                            "Limit Pelanggan: Rp $format_limit\n" .
-                            "Hutang Berjalan: Rp $format_hutang\n" .
-                            "Sisa Limit: Rp $format_sisa\n" .
-                            "Transaksi ini butuh: Rp " . number_format($nominal_hutang, 0, ',', '.')
-                        );
-                    }
-                    // === END FITUR LIMIT PIUTANG ===
                 } else {
-                    // Jika user pilih 'Hutang' tapi bayarnya Lunas/Lebih
                     $status_bayar = 'Lunas';
                 }
             } else {
-                // Metode Tunai/Transfer
                 if ($kembalian < 0) {
                     throw new \Exception("Uang pembayaran kurang Rp " . number_format(abs($kembalian), 0, ',', '.'));
                 }
             }
 
-            // 4. Simpan Penjualan
             $penjualan = Penjualan::create([
                 'id_toko'          => $id_toko,
                 'id_user'          => $user->id_user,
@@ -236,31 +195,14 @@ class KasirController extends Controller
                 'total_netto'      => $total_netto,
                 'jumlah_bayar'     => $bayar,
                 'kembalian'        => max(0, $kembalian),
-                'metode_bayar'     => $metode, // Sekarang 'Hutang' bisa masuk
+                'metode_bayar'     => $metode,
                 'status_transaksi' => 'Selesai',
                 'status_bayar'     => $status_bayar,
             ]);
 
-            // 5. Simpan Kartu Piutang
             if ($metode == 'Hutang' && $status_bayar == 'Belum Lunas') {
-                KartuPiutang::create([
-                    'id_toko'         => $id_toko,
-                    'id_pelanggan'    => $request->id_pelanggan,
-                    'id_penjualan'    => $penjualan->id_penjualan,
-                    'tanggal_piutang' => now(),                 // PERBAIKAN: tanggal_piutang bukan tgl_jatuh_tempo
-                    'tgl_jatuh_tempo' => now()->addDays(30),    // Simpan tanggal jatuh tempo
-                    'total_piutang'   => $total_netto - $bayar, // PERBAIKAN: Simpan total awal
-                    'jumlah_piutang'  => 0,                     // Field ini mungkin redundant jika ada total_piutang, sesuaikan dengan struktur tabel
-                    'sudah_dibayar'   => 0,
-                    'sisa_piutang'    => $total_netto - $bayar,
-                    'status'          => 'Belum Lunas',
-                    // 'keterangan'      => 'Penjualan Kasir ...' // Opsional jika ada kolom keterangan
-                ]);
-
-                // Note: Pastikan field di create() sesuai dengan migration KartuPiutang
             }
 
-            // 6. Simpan Detail & Kurangi Stok
             foreach ($items_fix as $data) {
                 PenjualanDetail::create([
                     'id_penjualan'          => $penjualan->id_penjualan,
@@ -272,26 +214,12 @@ class KasirController extends Controller
                     'subtotal'              => $data['subtotal'],
                 ]);
 
-                // Update Stok
                 $stokToko = StokToko::where('id_toko', $id_toko)
                     ->where('id_produk', $data['produk']->id_produk)
                     ->first();
 
                 if ($stokToko) {
-                    $stok_awal = $stokToko->stok_fisik;
                     $stokToko->decrement('stok_fisik', $data['qty']);
-
-                    LogStok::create([
-                        'id_toko'         => $id_toko,
-                        'id_produk'       => $data['produk']->id_produk,
-                        'id_user'         => $user->id_user,
-                        'jenis_transaksi' => 'Penjualan',
-                        'no_referensi'    => $penjualan->no_faktur,
-                        'qty_masuk'       => 0,
-                        'qty_keluar'      => $data['qty'],
-                        'stok_akhir'      => $stok_awal - $data['qty'],
-                        'keterangan'      => "Kasir ($metode)",
-                    ]);
                 }
             }
 
@@ -320,7 +248,6 @@ class KasirController extends Controller
             abort(403, 'Akses Toko Ditolak');
         }
 
-        // Pastikan penjualan milik toko yang sedang aktif
         $penjualan = Penjualan::with(['details.produk', 'pelanggan', 'user'])
             ->where('id_toko', $id_toko)
             ->findOrFail($id);
@@ -332,14 +259,11 @@ class KasirController extends Controller
 
     public function cetakFaktur($id)
     {
-        // Pastikan load relasi pelanggan lengkap
         $transaksi = Penjualan::with(['details.produk', 'pelanggan', 'toko', 'user'])
             ->findOrFail($id);
 
-        // Generate terbilang
         $terbilang = $this->terbilang($transaksi->total_netto) . ' Rupiah';
 
-        // Return ke view faktur
         return view('owner.kasir.faktur', compact('transaksi', 'terbilang'));
     }
 
@@ -368,7 +292,6 @@ class KasirController extends Controller
         return $temp;
     }
 
-    // ... method index() dan searchProduk() yang sudah ada ...
 
     /**
      * Menampilkan halaman riwayat transaksi hari ini / terbaru
@@ -380,17 +303,15 @@ class KasirController extends Controller
             return redirect()->back()->with('error', 'Akses Toko Ditolak');
         }
 
-        // Ambil filter tanggal dari request, default hari ini
         $tanggal = $request->get('tanggal', date('Y-m-d'));
 
         $transaksi = Penjualan::with(['pelanggan', 'user'])
             ->where('id_toko', $id_toko)
             ->whereDate('tgl_transaksi', $tanggal)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(15);
 
         return view('owner.kasir.riwayat', compact('transaksi', 'tanggal'));
     }
 
-    // ... method store(), print(), dll ...
 }

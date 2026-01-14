@@ -50,7 +50,7 @@
             <div class="absolute inset-0 flex flex-col justify-end p-12 text-white">
                 <h2 class="text-4xl font-bold mb-4">Mulai Perjalanan Digital Anda</h2>
                 <p class="text-lg text-green-100 max-w-lg">Bergabunglah dengan ribuan pemilik toko tani yang telah
-                    beralih ke manajemen modern bersama Teratani.</p>
+                    beralih ke manajemen modern dengan sistem digital.</p>
             </div>
         </div>
 

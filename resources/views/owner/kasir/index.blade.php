@@ -3,16 +3,11 @@
 @section('title', 'Kasir')
 
 @section('content')
-    {{-- 
-        PERBAIKAN UTAMA:
-        Ganti 'min-height: 100vh' menjadi 'height: calc(100vh - 160px)'.
-        Angka '160px' adalah estimasi tinggi Header Hijau + Menu Biru + Breadcrumb.
-        Silakan sesuaikan angka 160px ini jika masih kurang pas (misal jadi 180px atau 140px).
-    --}}
+    
     <div class="w-full flex flex-col font-sans text-[11px] bg-[#c0c0c0]"
         style="font-family: 'MS Sans Serif', Arial, sans-serif; height: calc(100vh - 160px); overflow: hidden;">
 
-        {{-- 1. HEADER KASIR (Internal) --}}
+        
         <div class="shrink-0 p-2 border-b border-gray-500 flex justify-between items-end bg-[#c0c0c0]">
             <div>
                 <h1 class="font-bold text-lg text-blue-900 uppercase leading-none">Point of Sale (POS)</h1>
@@ -31,13 +26,13 @@
             </div>
         </div>
 
-        {{-- 2. MAIN CONTENT (Mengisi sisa ruang dibawah header kasir) --}}
+        
         <div class="flex-1 flex gap-2 p-2 min-h-0 overflow-hidden">
 
-            {{-- KOLOM KIRI: DAFTAR PRODUK --}}
+            
             <div class="flex-1 flex flex-col h-full min-h-0">
 
-                {{-- Search Bar (Fixed Height) --}}
+                
                 <div class="shrink-0 bg-[#d4d0c8] border-2 border-white border-r-black border-b-black p-2 mb-2 shadow-sm">
                     <div class="flex gap-2 items-center">
                         <span class="font-bold whitespace-nowrap">CARI [F2]:</span>
@@ -52,7 +47,7 @@
                     </div>
                 </div>
 
-                {{-- Product Grid (Scrollable Area) --}}
+                
                 <div
                     class="flex-1 bg-white border-2 border-gray-400 border-l-black border-t-black overflow-y-auto p-2 custom-scrollbar">
                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2" id="productList">
@@ -86,17 +81,17 @@
                 </div>
             </div>
 
-            {{-- KOLOM KANAN: KERANJANG --}}
+            
             <div
                 class="w-[380px] flex flex-col h-full bg-[#d4d0c8] border-2 border-white border-r-black border-b-black shadow-lg p-1 shrink-0 min-h-0">
 
-                {{-- Title (Fixed) --}}
+                
                 <div
                     class="shrink-0 bg-blue-800 text-white px-2 py-1 font-bold text-center mb-1 text-[11px] bg-gradient-to-r from-blue-800 to-blue-600">
                     KERANJANG BELANJA
                 </div>
 
-                {{-- Tabel Keranjang (Scrollable - Mengisi sisa ruang vertikal) --}}
+                
                 <div
                     class="flex-1 bg-white border-2 border-gray-400 border-l-black border-t-black overflow-y-auto mb-1 relative custom-scrollbar">
                     <table class="w-full border-collapse">
@@ -109,22 +104,22 @@
                             </tr>
                         </thead>
                         <tbody id="cartTableBody" class="text-[11px] font-mono">
-                            {{-- JS akan mengisi ini --}}
+                            
                         </tbody>
                     </table>
                 </div>
 
-                {{-- Panel Pembayaran (Fixed Bottom - Selalu terlihat) --}}
+                
                 <div class="shrink-0 border-t border-white pt-1 space-y-1">
 
-                    {{-- Total Box --}}
+                    
                     <div
                         class="bg-black text-green-500 p-2 font-mono text-right border-2 border-gray-500 border-b-white border-r-white mb-2">
                         <div class="text-[9px] text-green-700">TOTAL TAGIHAN</div>
                         <div class="text-3xl font-bold leading-none" id="displayTotal">0</div>
                     </div>
 
-                    {{-- Inputs --}}
+                    
                     <div class="grid grid-cols-3 gap-1 items-center mb-1">
                         <label class="font-bold text-right col-span-1">Pelanggan:</label>
                         <select id="pelanggan"
@@ -172,7 +167,7 @@
         </div>
     </div>
 
-    {{-- MODAL PILIHAN CETAK --}}
+    
     <div id="modalCetak" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white p-6 rounded-lg shadow-2xl border-2 border-gray-800 w-96 text-center">
             <div class="mb-4 text-green-600">
@@ -184,19 +179,19 @@
             <p class="text-gray-600 mb-6">Pilih jenis struk yang ingin dicetak:</p>
 
             <div class="flex flex-col gap-3">
-                {{-- Tombol Cetak Thermal --}}
+                
                 <button onclick="printStruk()"
                     class="w-full py-2 px-4 bg-gray-200 border-2 border-gray-400 hover:bg-gray-300 font-bold text-gray-800 flex items-center justify-center gap-2">
                     <i class="fas fa-receipt"></i> CETAK STRUK KECIL (THERMAL)
                 </button>
 
-                {{-- Tombol Cetak Faktur --}}
+                
                 <button onclick="printFaktur()"
                     class="w-full py-2 px-4 bg-blue-600 border-2 border-blue-800 hover:bg-blue-700 text-white font-bold flex items-center justify-center gap-2">
                     <i class="fas fa-file-invoice"></i> CETAK FAKTUR (A4)
                 </button>
 
-                {{-- Tombol Tutup --}}
+                
                 <button onclick="tutupModal()" class="mt-2 text-sm text-red-600 underline hover:text-red-800">
                     Tutup / Transaksi Baru
                 </button>
@@ -204,7 +199,7 @@
         </div>
     </div>
 
-    {{-- Script JavaScript (Tetap Sama) --}}
+    
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         let cart = [];
@@ -266,7 +261,7 @@
                     <tr class="border-b border-gray-300 hover:bg-blue-50 group">
                         <td class="px-1 py-1 text-center"><button class="text-red-600 font-bold hover:bg-red-200 px-1" onclick="hapusItem(${idx})">x</button></td>
                         
-                        {{-- PERBAIKAN DISINI: Ganti item.name menjadi item.nama --}}
+                        
                         <td class="px-1 py-1 truncate max-w-[120px]" title="${item.nama}">
                             ${item.nama}
                             <div class="text-[9px] text-gray-500">@ ${new Intl.NumberFormat('id-ID').format(item.harga)}</div>
@@ -451,7 +446,7 @@
         }
     </script>
 
-    {{-- Style Tambahan --}}
+    
     <style>
         .custom-scrollbar::-webkit-scrollbar {
             width: 10px;

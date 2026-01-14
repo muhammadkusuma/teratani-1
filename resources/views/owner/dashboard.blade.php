@@ -5,7 +5,7 @@
 @section('content')
 <div class="h-full flex flex-col p-2 gap-2 overflow-hidden bg-slate-100">
 
-    {{-- INFO TOKO AKTIF (BARU) --}}
+    
     <div class="flex-shrink-0">
         <div class="bg-blue-50 border border-blue-200 text-blue-800 text-xs px-3 py-2 rounded flex justify-between items-center shadow-sm">
             <span class="flex items-center gap-2">
@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    {{-- BARIS 1: KARTU STATISTIK --}}
+    
     <div class="grid grid-cols-4 gap-2 h-24 flex-shrink-0">
         <div class="bg-gradient-to-br from-blue-600 to-blue-800 text-white p-3 shadow-sm flex flex-col justify-between border-l-4 border-yellow-400 rounded-sm">
             <div class="text-[10px] uppercase tracking-wider opacity-80">Omset Hari Ini</div>
@@ -60,13 +60,13 @@
         </div>
     </div>
 
-    {{-- BARIS 2: KONTEN UTAMA --}}
+    
     <div class="flex-1 grid grid-cols-3 gap-2 overflow-hidden min-h-0">
         
-        {{-- KOLOM KIRI: Grafik & Top Produk --}}
+        
         <div class="col-span-2 flex flex-col gap-2 h-full">
             
-            {{-- Grafik --}}
+            
             <div class="flex-1 bg-white border border-slate-300 shadow-sm p-3 flex flex-col rounded-sm">
                 <h3 class="text-[11px] font-bold text-slate-700 mb-3 border-l-4 border-blue-600 pl-2 uppercase">Tren Penjualan (7 Hari)</h3>
                 <div class="flex-1 flex items-end gap-2 border-b border-l border-slate-200 p-2 pb-0">
@@ -86,7 +86,7 @@
                 </div>
             </div>
 
-            {{-- Top Produk --}}
+            
             <div class="h-40 bg-white border border-slate-300 shadow-sm p-2 overflow-auto rounded-sm">
                 <h3 class="text-[11px] font-bold text-slate-700 mb-2 border-l-4 border-orange-500 pl-2 uppercase">
                     <i class="fas fa-crown text-yellow-500 mr-1"></i> Top 5 Produk Bulan Ini
@@ -121,7 +121,7 @@
 
         </div>
 
-        {{-- KOLOM KANAN: Alert Stok --}}
+        
         <div class="col-span-1 bg-white border border-red-200 shadow-sm flex flex-col h-full rounded-sm">
             <div class="bg-red-50 p-2 border-b border-red-200 flex justify-between items-center rounded-t-sm">
                 <h3 class="text-[11px] font-bold text-red-800 uppercase flex items-center">
@@ -166,9 +166,7 @@
                 </table>
             </div>
 
-            <div class="p-2 bg-slate-50 border-t border-slate-200 text-center rounded-b-sm">
-                <a href="#" class="text-[10px] text-blue-600 hover:underline">Lihat Inventory &rarr;</a>
-            </div>
+            
         </div>
 
     </div>

@@ -14,7 +14,7 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             
-            {{-- Kolom Kiri: Identitas --}}
+            
             <div class="space-y-3">
                 <h3 class="font-bold text-blue-800 border-b border-gray-300 pb-1 text-xs">A. IDENTITAS BARANG</h3>
                 
@@ -45,7 +45,7 @@
                 </div>
             </div>
 
-            {{-- Kolom Kanan: Satuan & Harga --}}
+            
             <div class="space-y-3">
                 <h3 class="font-bold text-blue-800 border-b border-gray-300 pb-1 text-xs">B. SATUAN & HARGA</h3>
 
@@ -93,7 +93,7 @@
                 </div>
             </div>
 
-            {{-- Full Width: Foto & Status --}}
+            
             <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-gray-300 pt-3 mt-1">
                 <div>
                     <label class="block font-bold text-xs mb-1">Foto Produk</label>

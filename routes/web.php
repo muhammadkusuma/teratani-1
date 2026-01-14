@@ -7,6 +7,8 @@ use App\Http\Controllers\Owner\BisnisController;
 use App\Http\Controllers\Owner\KasirController;
 use App\Http\Controllers\Owner\PelangganController;
 use App\Http\Controllers\Owner\ProdukController;
+use App\Http\Controllers\Owner\ProfileController;
+use App\Http\Controllers\Owner\StokController;
 use App\Http\Controllers\Owner\TokoController as OwnerTokoController;
 use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\SettingController;
@@ -44,12 +46,24 @@ Route::middleware('auth')->group(function () {
         Route::resource('kategori', KategoriController::class);
         Route::resource('satuan', SatuanController::class);
 
+        Route::get('/satuan', [SatuanController::class, 'index'])->name('satuan.index');
+        Route::post('/satuan', [SatuanController::class, 'store'])->name('satuan.store');
+        Route::put('/satuan/{id}', [SatuanController::class, 'update'])->name('satuan.update');
+        Route::delete('/satuan/{id}', [SatuanController::class, 'destroy'])->name('satuan.destroy');
+
+        Route::get('/stok', [StokController::class, 'index'])->name('stok.index');
+        Route::get('/stok/tambah', [StokController::class, 'tambah'])->name('stok.tambah');
+        Route::post('/stok/tambah', [StokController::class, 'store'])->name('stok.store');
+
         Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
         Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
         Route::get('/kasir/riwayat', [KasirController::class, 'riwayat'])->name('kasir.riwayat');
         Route::get('/kasir/ajax-search', [KasirController::class, 'searchProduk'])->name('kasir.search');
         Route::get('/kasir/cetak/{id}', [KasirController::class, 'print'])->name('kasir.print');
         Route::get('/kasir/cetak-faktur/{id}', [KasirController::class, 'cetakFaktur'])->name('kasir.cetak-faktur');
+
+        Route::get('/profile/edit-password', [ProfileController::class, 'editPassword'])->name('profile.edit-password');
+        Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
     });
 
     Route::middleware(EnsureSuperAdmin::class)->group(function () {
@@ -59,11 +73,3 @@ Route::middleware('auth')->group(function () {
         Route::resource('settings', SettingController::class);
     });
 });
-Route::get('/transaksi/{id}/faktur', [KasirController::class, 'cetakFaktur'])
-    ->name('kasir.cetak-faktur');
-
-Route::post('/ajax/kategori', [KategoriController::class, 'storeAjax'])
-    ->name('ajax.kategori.store');
-
-Route::post('/ajax/satuan', [SatuanController::class, 'storeAjax'])
-    ->name('ajax.satuan.store');

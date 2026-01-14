@@ -4,13 +4,12 @@
 
 @section('content')
 <div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">DAFTAR PELANGGAN (CRM)</h2>
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">👥 DAFTAR PELANGGAN (CRM)</h2>
     <a href="{{ route('owner.pelanggan.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
         + TAMBAH PELANGGAN
     </a>
 </div>
 
-{{-- Search Bar Sederhana --}}
 <form method="GET" action="{{ route('owner.pelanggan.index') }}" class="mb-3 flex gap-2">
     <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama / No HP..." class="border border-gray-400 p-1 text-xs w-64 shadow-inner">
     <button type="submit" class="bg-gray-200 border border-gray-400 px-3 py-1 text-xs hover:bg-gray-300">CARI</button>
@@ -49,7 +48,7 @@
                 <td class="border border-gray-300 p-2 text-center">
                     <div class="flex justify-center gap-1">
                         <a href="{{ route('owner.pelanggan.edit', $row->id_pelanggan) }}" class="bg-yellow-400 border border-yellow-600 px-2 py-0.5 text-[10px] hover:bg-yellow-300">EDIT</a>
-                        <form action="{{ route('owner.pelanggan.destroy', $row->id_pelanggan) }}" method="POST" onsubmit="return confirm('Hapus pelanggan ini?')">
+                        <form action="{{ route('owner.pelanggan.destroy', $row->id_pelanggan) }}" method="POST" onsubmit="return confirm('Hapus pelanggan ini?')" class="inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="bg-red-600 text-white border border-red-800 px-2 py-0.5 text-[10px] hover:bg-red-500">HAPUS</button>
@@ -59,7 +58,7 @@
             </tr>
             @empty
             <tr>
-                <td colspan="7" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada data pelanggan.</td>
+                <td colspan="7" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada data pelanggan</td>
             </tr>
             @endforelse
         </tbody>

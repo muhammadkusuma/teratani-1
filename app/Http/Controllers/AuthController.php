@@ -28,11 +28,9 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            // Cek Role
             if (Auth::user()->is_superadmin) {
                 return redirect()->intended('dashboard');
             } else {
-                // Redirect ke dashboard khusus Owner
                 return redirect()->intended('owner/dashboard');
             }
         }
@@ -52,7 +50,6 @@ class AuthController extends Controller
             'terms'    => ['required'],
         ]);
 
-        // Buat User Baru
         $user = User::create([
             'nama_lengkap'  => $validated['name'],
             'username'      => $validated['username'],
@@ -62,10 +59,8 @@ class AuthController extends Controller
             'is_active'     => true,
         ]);
 
-        // Login otomatis setelah register
         Auth::login($user);
 
-        // Redirect ke dashboard owner (atau ke pembuatan bisnis baru jika diperlukan)
         return redirect()->route('owner.dashboard');
     }
 

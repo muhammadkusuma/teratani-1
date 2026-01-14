@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\Validator;
 
 class KategoriController extends Controller
 {
-    // Menampilkan halaman list kategori
     public function index()
     {
         $idToko = session('toko_active_id');
@@ -18,7 +17,6 @@ class KategoriController extends Controller
 
         $toko = Toko::findOrFail($idToko);
         
-        // Ambil kategori berdasarkan tenant dari toko yang sedang aktif
         $kategori = Kategori::where('id_tenant', $toko->id_tenant)
             ->orderBy('nama_kategori', 'asc')
             ->get();
@@ -26,7 +24,6 @@ class KategoriController extends Controller
         return view('owner.kategori.index', compact('kategori'));
     }
 
-    // Simpan Kategori Baru (Form Standar)
     public function store(Request $request)
     {
         $request->validate([
@@ -44,7 +41,6 @@ class KategoriController extends Controller
         return redirect()->back()->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-    // Update Kategori
     public function update(Request $request, $id)
     {
         $request->validate([
@@ -59,13 +55,10 @@ class KategoriController extends Controller
         return redirect()->back()->with('success', 'Kategori berhasil diperbarui.');
     }
 
-    // Hapus Kategori
     public function destroy($id)
     {
         $kategori = Kategori::findOrFail($id);
         
-        // Opsional: Cek apakah kategori sedang dipakai produk sebelum hapus
-        // if($kategori->produk()->exists()) { return back()->with('error', 'Gagal...'); }
 
         $kategori->delete();
 

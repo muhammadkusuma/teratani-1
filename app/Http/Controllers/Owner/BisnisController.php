@@ -29,20 +29,16 @@ class BisnisController extends Controller
         DB::transaction(function () use ($request) {
             $user = Auth::user();
 
-            // 1. Buat Data Tenant
-            // PERBAIKAN: Sesuaikan key array dengan nama kolom di database (migration)
             $tenant = Tenant::create([
-                'nama_bisnis'         => $request->nama_bisnis, // Sesuai migration: nama_bisnis
-                'alamat_kantor_pusat' => $request->alamat,      // Sesuai migration: alamat_kantor_pusat
-                'owner_contact'       => $request->no_telp,     // Sesuai migration: owner_contact
-                                                                // Kolom lain seperti paket_layanan, max_toko menggunakan default value dari database
+                'nama_bisnis'         => $request->nama_bisnis,
+                'alamat_kantor_pusat' => $request->alamat,
+                'owner_contact'       => $request->no_telp,
             ]);
 
-            // 2. Hubungkan User dengan Tenant (Pivot Table)
             DB::table('user_tenant_mapping')->insert([
                 'id_user'        => $user->id_user,
                 'id_tenant'      => $tenant->id_tenant,
-                'role_in_tenant' => 'OWNER', // Tambahkan role jika di migration kolom ini tidak nullable/default
+                'role_in_tenant' => 'OWNER',
                 'is_primary'     => true,
             ]);
         });

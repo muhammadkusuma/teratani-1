@@ -5,7 +5,7 @@
 @section('content')
     <div x-data="{ openModal: false, editMode: false, formAction: '', kategoriId: '', namaKategori: '' }">
 
-        {{-- Header Section --}}
+        
         <div class="flex justify-between items-center mb-3">
             <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">MASTER DATA KATEGORI</h2>
             <button
@@ -15,14 +15,14 @@
             </button>
         </div>
 
-        {{-- Flash Message --}}
+        
         @if (session('success'))
             <div class="bg-green-100 border border-green-400 text-green-700 px-2 py-1 mb-2 text-xs">
                 {{ session('success') }}
             </div>
         @endif
 
-        {{-- Table Section --}}
+        
         <div class="overflow-x-auto border border-gray-400 bg-white">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -39,7 +39,7 @@
                             <td class="border border-gray-300 p-2 font-semibold">{{ $item->nama_kategori }}</td>
                             <td class="border border-gray-300 p-2 text-center">
                                 <div class="flex justify-center gap-1">
-                                    {{-- Tombol Edit --}}
+                                    
                                     <button
                                         @click="
                                             openModal = true; 
@@ -51,7 +51,7 @@
                                         EDIT
                                     </button>
 
-                                    {{-- Tombol Hapus --}}
+                                    
                                     <form action="{{ route('owner.kategori.destroy', $item->id_kategori) }}" method="POST"
                                         onsubmit="return confirm('Yakin ingin menghapus kategori ini?')" class="inline">
                                         @csrf
@@ -75,7 +75,7 @@
             </table>
         </div>
 
-        {{-- Modal (Alpine.js) --}}
+        
         <div x-show="openModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
             style="display: none;" x-transition>
             <div class="bg-white w-full max-w-sm p-4 shadow-lg border border-gray-400">

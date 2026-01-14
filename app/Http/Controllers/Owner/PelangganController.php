@@ -18,28 +18,24 @@ class PelangganController extends Controller
         return $tenant ? $tenant->id_tenant : null;
     }
 
-    // Helper baru untuk mengambil ID Toko yang sedang aktif
     private function getActiveTokoId()
     {
-        // Session ini diset di TokoController@select
         return session('toko_active_id');
     }
 
     public function index(Request $request)
     {
         $id_tenant = $this->getTenantId();
-        $id_toko   = $this->getActiveTokoId(); // Ambil toko aktif
+        $id_toko   = $this->getActiveTokoId();
 
         if (! $id_tenant) {
             return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan Bisnis/Tenant manapun.');
         }
 
-        // Validasi: User harus memilih toko terlebih dahulu
         if (! $id_toko) {
             return redirect()->route('owner.toko.index')->with('warning', 'Silakan pilih Toko/Cabang terlebih dahulu.');
         }
 
-        // Filter berdasarkan Tenant DAN Toko
         $query = Pelanggan::where('id_tenant', $id_tenant)
             ->where('id_toko', $id_toko);
 
@@ -59,7 +55,6 @@ class PelangganController extends Controller
 
     public function create()
     {
-        // Pastikan ada toko aktif sebelum tambah data
         if (! $this->getActiveTokoId()) {
             return redirect()->route('owner.toko.index')->with('warning', 'Pilih toko terlebih dahulu.');
         }
@@ -81,13 +76,12 @@ class PelangganController extends Controller
             return back()->with('error', 'Gagal menyimpan: Tenant atau Toko tidak aktif.');
         }
 
-        // Generate Kode Pelanggan (scope per toko atau per tenant, di sini saya buat per toko agar unik di toko tsb)
         $count = Pelanggan::where('id_tenant', $id_tenant)->where('id_toko', $id_toko)->count();
         $kode  = 'CUST-' . str_pad($count + 1, 4, '0', STR_PAD_LEFT);
 
         Pelanggan::create([
             'id_tenant'      => $id_tenant,
-            'id_toko'        => $id_toko, // Simpan ID Toko
+            'id_toko'        => $id_toko,
             'kode_pelanggan' => $request->kode_pelanggan ?? $kode,
             'nama_pelanggan' => $request->nama_pelanggan,
             'wilayah'        => $request->wilayah,
@@ -104,7 +98,6 @@ class PelangganController extends Controller
         $id_tenant = $this->getTenantId();
         $id_toko   = $this->getActiveTokoId();
 
-        // Pastikan data milik tenant dan toko yang sedang aktif
         $pelanggan = Pelanggan::where('id_tenant', $id_tenant)
             ->where('id_toko', $id_toko)
             ->findOrFail($id);

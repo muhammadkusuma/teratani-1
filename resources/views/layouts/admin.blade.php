@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard Superadmin') - Teratani</title>
+    <title>@yield('title', 'Dashboard Superadmin') - Sistem Toko Tani</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -22,7 +22,7 @@
 
         <aside class="w-64 bg-gray-900 text-white hidden md:flex flex-col transition-all duration-300" id="sidebar">
             <div class="h-16 flex items-center justify-center border-b border-gray-800 shadow-md">
-                <h1 class="text-2xl font-bold text-green-500 tracking-wider">TERATANI</h1>
+                <h1 class="text-2xl font-bold text-green-500 tracking-wider">SISTEM TOKO TANI</h1>
             </div>
 
             <nav class="flex-1 overflow-y-auto py-4">

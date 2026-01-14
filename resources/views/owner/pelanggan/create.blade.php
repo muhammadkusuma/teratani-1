@@ -15,35 +15,35 @@
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                {{-- Kode Pelanggan (Opsional / Auto) --}}
+                
                 <div>
                     <label class="block font-bold text-xs mb-1">Kode Pelanggan (Opsional)</label>
                     <input type="text" name="kode_pelanggan" class="w-full border border-gray-400 p-1 text-sm bg-gray-50"
                         placeholder="Kosongkan untuk auto-generate">
                 </div>
 
-                {{-- Nama --}}
+                
                 <div>
                     <label class="block font-bold text-xs mb-1">Nama Pelanggan <span class="text-red-600">*</span></label>
                     <input type="text" name="nama_pelanggan" class="w-full border border-gray-400 p-1 text-sm" required
                         placeholder="Contoh: Toko Sejahtera">
                 </div>
 
-                {{-- No HP --}}
+                
                 <div>
                     <label class="block font-bold text-xs mb-1">No. Handphone / WA</label>
                     <input type="text" name="no_hp" class="w-full border border-gray-400 p-1 text-sm"
                         placeholder="Contoh: 0812...">
                 </div>
 
-                {{-- Wilayah --}}
+                
                 <div>
                     <label class="block font-bold text-xs mb-1">Wilayah / Area</label>
                     <input type="text" name="wilayah" class="w-full border border-gray-400 p-1 text-sm"
                         placeholder="Contoh: Pasar Induk">
                 </div>
 
-                {{-- Limit Piutang --}}
+                
                 <div>
                     <label class="block font-bold text-xs mb-1">Limit Piutang (Rp)</label>
                     <input type="number" name="limit_piutang" value="0"
@@ -51,7 +51,7 @@
                     <small class="text-[10px] text-gray-500">Batas maksimal hutang yang diperbolehkan.</small>
                 </div>
 
-                {{-- Alamat --}}
+                
                 <div class="md:col-span-2">
                     <label class="block font-bold text-xs mb-1">Alamat Lengkap</label>
                     <textarea name="alamat" rows="3" class="w-full border border-gray-400 p-1 text-sm"></textarea>
