@@ -12,7 +12,6 @@ use App\Http\Controllers\Owner\StokController;
 use App\Http\Controllers\Owner\TokoController as OwnerTokoController;
 use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\TenantController;
 use App\Http\Controllers\UserController;
 use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
@@ -69,7 +68,6 @@ Route::middleware('auth')->group(function () {
     Route::middleware(EnsureSuperAdmin::class)->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('users', UserController::class);
-        Route::resource('tenants', TenantController::class);
         Route::resource('settings', SettingController::class);
     });
 });

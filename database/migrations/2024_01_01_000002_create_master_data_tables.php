@@ -10,55 +10,54 @@ return new class extends Migration
     {
         Schema::create('toko', function (Blueprint $table) {
             $table->id('id_toko');
-            $table->foreignId('id_tenant')->constrained('tenants', 'id_tenant')->onDelete('cascade');
-            $table->string('kode_toko', 20)->nullable();
+            $table->string('kode_toko', 20)->unique();
             $table->string('nama_toko', 100);
             $table->text('alamat')->nullable();
             $table->string('kota', 50)->nullable();
             $table->string('no_telp', 20)->nullable();
+            $table->text('info_rekening')->nullable();
             $table->boolean('is_pusat')->default(false);
             $table->boolean('is_active')->default(true);
+            $table->timestamps();
         });
 
         Schema::create('kategori', function (Blueprint $table) {
             $table->id('id_kategori');
-            $table->foreignId('id_tenant')->constrained('tenants', 'id_tenant')->onDelete('cascade');
             $table->string('nama_kategori', 50);
+            $table->timestamps();
         });
 
         Schema::create('satuan', function (Blueprint $table) {
             $table->id('id_satuan');
-            $table->foreignId('id_tenant')->constrained('tenants', 'id_tenant')->onDelete('cascade');
             $table->string('nama_satuan', 20);
+            $table->timestamps();
         });
 
         Schema::create('produk', function (Blueprint $table) {
             $table->id('id_produk');
-            $table->foreignId('id_tenant')->constrained('tenants', 'id_tenant')->onDelete('cascade');
-            $table->foreignId('id_kategori')->nullable()->constrained('kategori', 'id_kategori')->onDelete('set null');
-            $table->foreignId('id_satuan_kecil')->nullable()->constrained('satuan', 'id_satuan');
-            $table->foreignId('id_satuan_besar')->nullable()->constrained('satuan', 'id_satuan');
-            $table->string('sku', 50)->nullable();
-            $table->string('barcode', 100)->nullable();
+            $table->string('sku', 50)->unique();
+            $table->string('barcode', 50)->nullable()->unique();
             $table->string('nama_produk', 150);
-            $table->text('deskripsi')->nullable();
-            $table->decimal('harga_beli_rata_rata', 15, 2)->default(0);
+            $table->foreignId('id_kategori')->nullable()->constrained('kategori', 'id_kategori')->onDelete('set null');
+            $table->foreignId('id_satuan_kecil')->constrained('satuan', 'id_satuan')->onDelete('restrict');
+            $table->foreignId('id_satuan_besar')->nullable()->constrained('satuan', 'id_satuan')->onDelete('set null');
+            $table->integer('nilai_konversi')->nullable();
+            $table->decimal('harga_beli', 15, 2)->default(0);
             $table->decimal('harga_jual_umum', 15, 2)->default(0);
-            $table->integer('nilai_konversi')->default(1);
+            $table->decimal('harga_jual_grosir', 15, 2)->nullable();
             $table->string('gambar_produk')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
-            $table->unique(['id_tenant', 'sku']);
         });
 
         Schema::create('pelanggan', function (Blueprint $table) {
             $table->id('id_pelanggan');
-            $table->foreignId('id_tenant')->constrained('tenants', 'id_tenant')->onDelete('cascade');
-            $table->string('kode_pelanggan', 20)->nullable();
+            $table->foreignId('id_toko')->constrained('toko', 'id_toko')->onDelete('cascade');
+            $table->string('kode_pelanggan', 30)->unique();
             $table->string('nama_pelanggan', 100);
-            $table->string('wilayah', 100)->nullable();
             $table->string('no_hp', 20)->nullable();
             $table->text('alamat')->nullable();
+            $table->string('wilayah', 50)->nullable();
             $table->decimal('limit_piutang', 15, 2)->default(0);
             $table->timestamps();
         });

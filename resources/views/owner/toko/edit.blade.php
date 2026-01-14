@@ -1,152 +1,104 @@
 @extends('layouts.owner')
 
-@section('title', 'Edit Cabang Toko')
+@section('title', 'Edit Toko')
 
 @section('content')
-    <div style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; max-width: 800px; margin: 0 auto;">
+<div class="flex justify-between items-center mb-3">
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
+        <i class="fa fa-edit"></i> EDIT TOKO
+    </h2>
+    <a href="{{ route('owner.toko.index') }}" class="px-3 py-1 bg-gray-200 border border-gray-400 hover:bg-gray-300 text-xs">
+        <i class="fa fa-arrow-left"></i> KEMBALI
+    </a>
+</div>
 
-        
-        <div class="mb-2 pb-1 border-b border-gray-400 flex justify-between items-end">
-            <div>
-                <h1 class="font-bold text-lg text-orange-800 uppercase leading-none">Koreksi Data Cabang</h1>
-                <div class="mt-1 text-gray-500">
-                    <a href="{{ route('owner.toko.index') }}" class="text-blue-700 hover:text-red-600 hover:underline">Daftar
-                        Toko</a>
-                    <span>&gt;</span>
-                    <span class="font-bold text-gray-800">Edit: {{ $toko->kode_toko ?? 'N/A' }}</span>
-                </div>
-            </div>
-            <div class="text-right text-[10px] text-gray-500">
-                <div>Last Update: {{ $toko->updated_at ? $toko->updated_at->format('d/m/Y H:i') : '-' }}</div>
-                <div>Mode: <b>EDIT / UPDATE</b></div>
-            </div>
-        </div>
-
-        
-        @if ($errors->any())
-            <div class="mb-4 bg-red-100 border-2 border-red-600 p-2 text-red-900">
-                <div class="font-bold border-b border-red-400 mb-1 pb-1">(!) GAGAL MENYIMPAN PERUBAHAN:</div>
-                <ul class="list-square list-inside pl-1">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        
-        <div class="bg-gray-100 border-2 border-white border-r-gray-500 border-b-gray-500 shadow-[1px_1px_0_0_black]">
-
-            
-            <div class="bg-orange-700 text-white px-2 py-1 font-bold flex justify-between items-center">
-                <span>FORM PERUBAHAN DATA</span>
-                <span class="cursor-pointer hover:bg-red-600 px-1 border border-white leading-none">x</span>
-            </div>
-
-            <div class="p-4">
-                <form action="{{ route('owner.toko.update', $toko->id_toko) }}" method="POST">
-                    @csrf
-                    @method('PUT')
-
-                    
-                    <fieldset class="border border-gray-400 p-3 mb-4 bg-white relative">
-                        <legend
-                            class="px-1 bg-white text-orange-800 font-bold border border-gray-400 absolute -top-2.5 left-2 text-[10px]">
-                            A. IDENTITAS & STATUS
-                        </legend>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                            
-                            <div>
-                                <label for="nama_toko" class="block font-bold text-gray-700 mb-1">
-                                    Nama Toko / Cabang <span class="text-red-600">*</span>
-                                </label>
-                                <input type="text" id="nama_toko" name="nama_toko" required
-                                    value="{{ old('nama_toko', $toko->nama_toko) }}"
-                                    class="w-full px-2 py-1 border-2 border-gray-300 border-l-gray-500 border-t-gray-500 bg-yellow-50 focus:bg-white focus:outline-none focus:border-blue-600">
-                            </div>
-
-                            
-                            <div>
-                                <label for="is_active" class="block font-bold text-gray-700 mb-1">Status Operasional</label>
-                                <select name="is_active" id="is_active"
-                                    class="w-full px-2 py-1 border border-gray-400 bg-gray-100 focus:outline-none focus:bg-white">
-                                    <option value="1" {{ $toko->is_active == 1 ? 'selected' : '' }}>[ v ] AKTIF / BUKA
-                                    </option>
-                                    <option value="0" {{ $toko->is_active == 0 ? 'selected' : '' }}>[ x ] NON-AKTIF /
-                                        TUTUP</option>
-                                </select>
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    
-                    <fieldset class="border border-gray-400 p-3 mb-4 bg-white relative">
-                        <legend
-                            class="px-1 bg-white text-orange-800 font-bold border border-gray-400 absolute -top-2.5 left-2 text-[10px]">
-                            B. LOKASI & KONTAK
-                        </legend>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                            
-                            <div>
-                                <label for="kota" class="block font-bold text-gray-700 mb-1">Kota</label>
-                                <input type="text" id="kota" name="kota" value="{{ old('kota', $toko->kota) }}"
-                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50">
-                            </div>
-
-                            
-                            <div>
-                                <label for="no_telp" class="block font-bold text-gray-700 mb-1">No. Telepon / WA</label>
-                                <input type="text" id="no_telp" name="no_telp"
-                                    value="{{ old('no_telp', $toko->no_telp) }}"
-                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50">
-                            </div>
-
-                            
-                            <div class="col-span-1 md:col-span-2">
-                                <label for="alamat" class="block font-bold text-gray-700 mb-1">Alamat Lengkap</label>
-                                <textarea id="alamat" name="alamat" rows="2"
-                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50 font-mono text-[10px]">{{ old('alamat', $toko->alamat) }}</textarea>
-                            </div>
-
-                            <div class="col-span-1 md:col-span-2">
-                                <label for="info_rekening" class="block font-bold text-gray-700 mb-1">Info Rekening Bank (untuk Faktur)</label>
-                                <textarea id="info_rekening" name="info_rekening" rows="3" placeholder="Contoh:&#10;BCA 1234567890 a.n. Toko Tani&#10;BRI 9876543210 a.n. Toko Tani"
-                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50 font-mono text-[10px]">{{ old('info_rekening', $toko->info_rekening) }}</textarea>
-                                <div class="text-[9px] text-gray-500 mt-1">Info ini akan muncul di faktur penjualan. Pisahkan dengan Enter untuk baris baru.</div>
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-300">
-                        
-                        <a href="{{ route('owner.toko.index') }}"
-                            class="px-4 py-1 bg-gray-200 text-black border-2 border-white border-r-gray-600 border-b-gray-600 hover:bg-gray-300 active:border-gray-600 active:border-r-white active:border-b-white text-[11px] font-bold no-underline text-center w-24">
-                            BATAL
-                        </a>
-
-                        
-                        <button type="submit"
-                            class="px-4 py-1 bg-gray-200 text-black border-2 border-white border-r-black border-b-black hover:bg-gray-300 active:border-gray-600 active:border-r-white active:border-b-white text-[11px] font-bold flex items-center justify-center gap-1 min-w-[140px] shadow-md">
-                            <svg class="w-3 h-3 text-green-700" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M0 0h24v24H0z" fill="none" />
-                                <path
-                                    d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
-                            </svg>
-                            UPDATE DATA
-                        </button>
-                    </div>
-
-                </form>
-            </div>
-
-            
-            <div class="bg-gray-200 border-t border-gray-400 p-1 text-[9px] text-gray-500 flex justify-between">
-                <span>Record ID: {{ $toko->id_toko }}</span>
-                <span>Status: Ready to edit.</span>
-            </div>
-        </div>
+@if($errors->any())
+    <div class="bg-red-100 border border-red-400 text-red-700 px-2 py-1 mb-2 text-xs">
+        <ul class="list-disc ml-4">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
+@endif
+
+<div class="bg-white border border-gray-400 p-4 max-w-2xl">
+    <form action="{{ route('owner.toko.update', $toko->id_toko) }}" method="POST">
+        @csrf
+        @method('PUT')
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold mb-1">Kode Toko <span class="text-red-600">*</span></label>
+                <input type="text" name="kode_toko" value="{{ old('kode_toko', $toko->kode_toko) }}" required
+                       class="w-full border border-gray-400 p-1 text-xs shadow-inner">
+                @error('kode_toko')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold mb-1">Nama Toko <span class="text-red-600">*</span></label>
+                <input type="text" name="nama_toko" value="{{ old('nama_toko', $toko->nama_toko) }}" required
+                       class="w-full border border-gray-400 p-1 text-xs shadow-inner">
+                @error('nama_toko')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <label class="block text-xs font-bold mb-1">Alamat</label>
+            <textarea name="alamat" rows="2" class="w-full border border-gray-400 p-1 text-xs shadow-inner">{{ old('alamat', $toko->alamat) }}</textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-3">
+            <div>
+                <label class="block text-xs font-bold mb-1">Kota</label>
+                <input type="text" name="kota" value="{{ old('kota', $toko->kota) }}"
+                       class="w-full border border-gray-400 p-1 text-xs shadow-inner">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold mb-1">No. Telepon</label>
+                <input type="text" name="no_telp" value="{{ old('no_telp', $toko->no_telp) }}"
+                       class="w-full border border-gray-400 p-1 text-xs shadow-inner">
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <label class="block text-xs font-bold mb-1">Info Rekening</label>
+            <textarea name="info_rekening" rows="2" class="w-full border border-gray-400 p-1 text-xs shadow-inner">{{ old('info_rekening', $toko->info_rekening) }}</textarea>
+        </div>
+
+        <div class="mt-4 border-t border-gray-300 pt-3">
+            <div class="flex items-center gap-4 mb-3">
+                <label class="flex items-center gap-2 text-xs">
+                    <input type="checkbox" name="is_pusat" value="1" {{ old('is_pusat', $toko->is_pusat) ? 'checked' : '' }}
+                           class="border border-gray-400">
+                    <span class="font-bold"><i class="fa fa-building"></i> Toko Pusat</span>
+                    <span class="text-gray-500">(centang jika ini toko pusat/utama)</span>
+                </label>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2 text-xs">
+                    <input type="checkbox" name="is_active" value="1" {{ old('is_active', $toko->is_active) ? 'checked' : '' }}
+                           class="border border-gray-400">
+                    <span class="font-bold"><i class="fa fa-check-circle"></i> Status Aktif</span>
+                    <span class="text-gray-500">(centang jika toko masih beroperasi)</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="flex gap-2 mt-4">
+            <button type="submit" class="bg-blue-700 text-white border border-blue-900 px-4 py-2 text-xs hover:bg-blue-600">
+                <i class="fa fa-save"></i> UPDATE TOKO
+            </button>
+            <a href="{{ route('owner.toko.index') }}" class="bg-gray-200 border border-gray-400 px-4 py-2 text-xs hover:bg-gray-300">
+                BATAL
+            </a>
+        </div>
+    </form>
+</div>
 @endsection

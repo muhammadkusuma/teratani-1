@@ -4,9 +4,11 @@
 
 @section('content')
 <div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">🏪 DAFTAR TOKO / CABANG</h2>
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
+        <i class="fa fa-store"></i> DAFTAR TOKO / CABANG
+    </h2>
     <a href="{{ route('owner.toko.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
-        + TAMBAH TOKO
+        <i class="fa fa-plus"></i> TAMBAH TOKO
     </a>
 </div>
 

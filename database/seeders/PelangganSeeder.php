@@ -4,15 +4,13 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Pelanggan;
-use App\Models\Tenant;
 use App\Models\Toko;
 
 class PelangganSeeder extends Seeder
 {
     public function run(): void
     {
-        $tenant = Tenant::where('kode_unik_tenant', 'tts001')->first();
-        $tokoPusat = Toko::where('kode_toko', 'TKO-001')->first();
+        $tokoPusat = Toko::where('kode_toko', 'TK001')->first();
 
         $customers = [
             [
@@ -83,7 +81,6 @@ class PelangganSeeder extends Seeder
 
         foreach ($customers as $customer) {
             Pelanggan::create(array_merge($customer, [
-                'id_tenant' => $tenant->id_tenant,
                 'id_toko' => $tokoPusat->id_toko,
             ]));
         }

@@ -4,7 +4,9 @@
 
 @section('content')
 <div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">🔐 UBAH PASSWORD</h2>
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
+        <i class="fa fa-key"></i> UBAH PASSWORD
+    </h2>
 </div>
 
 @if(session('success'))
@@ -60,7 +62,7 @@
 </div>
 
 <div class="mt-4 bg-yellow-50 border border-yellow-400 p-3 text-xs max-w-md">
-    <strong>⚠️ Perhatian:</strong>
+    <strong><i class="fa fa-exclamation-triangle"></i> Perhatian:</strong>
     <ul class="list-disc ml-4 mt-1">
         <li>Pastikan Anda mengingat password baru</li>
         <li>Password minimal 6 karakter</li>

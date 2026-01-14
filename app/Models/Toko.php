@@ -7,10 +7,8 @@ class Toko extends Model
 {
     protected $table      = 'toko';
     protected $primaryKey = 'id_toko';
-    public $timestamps    = false;
 
     protected $fillable = [
-        'id_tenant',
         'kode_toko',
         'nama_toko',
         'alamat',
@@ -21,14 +19,9 @@ class Toko extends Model
         'is_active',
     ];
 
-    public function tenant()
-    {
-        return $this->belongsTo(Tenant::class, 'id_tenant', 'id_tenant');
-    }
-
     public function produks()
     {
-        return $this->hasMany(Produk::class, 'id_tenant', 'id_tenant');
+        return $this->hasMany(Produk::class, 'id_toko', 'id_toko');
     }
 
     public function stokToko()

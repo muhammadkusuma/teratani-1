@@ -2,48 +2,42 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Toko;
-use App\Models\Tenant;
+use Illuminate\Database\Seeder;
 
 class TokoSeeder extends Seeder
 {
     public function run(): void
     {
-        $tenant = Tenant::where('kode_unik_tenant', 'tts001')->first();
-
         Toko::create([
-            'id_tenant' => $tenant->id_tenant,
-            'kode_toko' => 'TKO-001',
+            'kode_toko' => 'TK001',
             'nama_toko' => 'Toko Tani Pusat',
-            'alamat' => 'Jl. Raya Pertanian No. 123, Malang',
+            'alamat' => 'Jl. Raya Pertanian No. 123',
             'kota' => 'Malang',
             'no_telp' => '0341-123456',
-            'info_rekening' => 'BCA 1234567890 a.n. Toko Tani Sejahtera',
+            'info_rekening' => 'BCA 1234567890 a.n. Toko Tani',
             'is_pusat' => true,
             'is_active' => true,
         ]);
 
         Toko::create([
-            'id_tenant' => $tenant->id_tenant,
-            'kode_toko' => 'TKO-002',
+            'kode_toko' => 'TK002',
             'nama_toko' => 'Toko Tani Cabang Lawang',
-            'alamat' => 'Jl. Raya Lawang No. 45, Lawang',
+            'alamat' => 'Jl. Raya Lawang No. 45',
             'kota' => 'Lawang',
             'no_telp' => '0341-234567',
-            'info_rekening' => 'BCA 1234567890 a.n. Toko Tani Sejahtera',
+            'info_rekening' => 'BCA 1234567890 a.n. Toko Tani',
             'is_pusat' => false,
             'is_active' => true,
         ]);
 
         Toko::create([
-            'id_tenant' => $tenant->id_tenant,
-            'kode_toko' => 'TKO-003',
-            'nama_toko' => 'Toko Tani Cabang Batu',
-            'alamat' => 'Jl. Raya Batu No. 78, Batu',
-            'kota' => 'Batu',
+            'kode_toko' => 'TK003',
+            'nama_toko' => 'Toko Tani Cabang Singosari',
+            'alamat' => 'Jl. Raya Singosari No. 67',
+            'kota' => 'Singosari',
             'no_telp' => '0341-345678',
-            'info_rekening' => 'BCA 1234567890 a.n. Toko Tani Sejahtera',
+            'info_rekening' => 'BCA 1234567890 a.n. Toko Tani',
             'is_pusat' => false,
             'is_active' => true,
         ]);

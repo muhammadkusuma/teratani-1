@@ -8,7 +8,6 @@ use App\Models\Satuan;
 use App\Models\StokToko;
 use App\Models\Toko;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -17,13 +16,9 @@ class ProdukController extends Controller
 {
     public function index(Request $request, $id_toko)
     {
-        $toko = Toko::find($id_toko);
+        $toko = Toko::findOrFail($id_toko);
 
-        if ($toko->id_tenant !== Auth::user()->tenants->first()->id_tenant) {
-            abort(403);
-        }
-
-        $query = Produk::where('id_tenant', $toko->id_tenant);
+        $query = Produk::query();
 
         $query->whereHas('stokTokos', function ($q) use ($id_toko) {
             $q->where('id_toko', $id_toko);
@@ -47,39 +42,34 @@ class ProdukController extends Controller
         return view('owner.produk.index', compact('toko', 'produks'));
     }
 
-    public function create(Toko $toko)
+    public function create($id_toko)
     {
-        $kategoris = Kategori::where('id_tenant', $toko->id_tenant)->get();
-        $satuans   = Satuan::where('id_tenant', $toko->id_tenant)->get();
+        $toko = Toko::findOrFail($id_toko);
+        $kategoris = Kategori::all();
+        $satuans = Satuan::all();
         return view('owner.produk.create', compact('toko', 'kategoris', 'satuans'));
     }
 
-    public function store(Request $request, Toko $toko)
+    public function store(Request $request, $id_toko)
     {
-        $tenantId = $toko->id_tenant;
+        $toko = Toko::findOrFail($id_toko);
 
         $request->validate([
-            'nama_produk'          => 'required|string|max:150',
-            'sku'                  => [
-                'nullable', 'string', 'max:50',
-                Rule::unique('produk')->where(function ($query) use ($tenantId) {
-                    return $query->where('id_tenant', $tenantId);
-                }),
-            ],
-            'id_kategori'          => 'nullable|exists:kategori,id_kategori',
-            'id_satuan_kecil'      => 'required|exists:satuan,id_satuan',
-            'id_satuan_besar'      => 'nullable|exists:satuan,id_satuan',
-            'nilai_konversi'       => 'required|integer|min:1',
-            'harga_beli_rata_rata' => 'required|numeric|min:0',
-            'harga_jual_umum'      => 'required|numeric|min:0',
-            'stok_awal'            => 'nullable|integer|min:0',
-            'gambar_produk'        => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'nama_produk'     => 'required|string|max:150',
+            'sku'             => 'nullable|string|max:50|unique:produk,sku',
+            'id_kategori'     => 'nullable|exists:kategori,id_kategori',
+            'id_satuan_kecil' => 'required|exists:satuan,id_satuan',
+            'id_satuan_besar' => 'nullable|exists:satuan,id_satuan',
+            'nilai_konversi'  => 'required|integer|min:1',
+            'harga_beli'      => 'required|numeric|min:0',
+            'harga_jual_umum' => 'required|numeric|min:0',
+            'stok_awal'       => 'nullable|integer|min:0',
+            'gambar_produk'   => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         DB::beginTransaction();
         try {
-            $data              = $request->except(['gambar_produk', 'stok_awal', '_token']);
-            $data['id_tenant'] = $tenantId;
+            $data = $request->except(['gambar_produk', 'stok_awal', '_token']);
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
             if ($request->hasFile('gambar_produk')) {
@@ -113,14 +103,12 @@ class ProdukController extends Controller
         }
     }
 
-    public function edit(Toko $toko, Produk $produk)
+    public function edit($id_toko, $id_produk)
     {
-        if ($produk->id_tenant !== $toko->id_tenant) {
-            abort(403);
-        }
-
-        $kategoris = Kategori::where('id_tenant', $toko->id_tenant)->get();
-        $satuans   = Satuan::where('id_tenant', $toko->id_tenant)->get();
+        $toko = Toko::findOrFail($id_toko);
+        $produk = Produk::findOrFail($id_produk);
+        $kategoris = Kategori::all();
+        $satuans = Satuan::all();
 
         $stokToko = StokToko::where('id_toko', $toko->id_toko)
             ->where('id_produk', $produk->id_produk)
@@ -129,20 +117,14 @@ class ProdukController extends Controller
         return view('owner.produk.edit', compact('toko', 'produk', 'kategoris', 'satuans', 'stokToko'));
     }
 
-    public function update(Request $request, Toko $toko, Produk $produk)
+    public function update(Request $request, $id_toko, $id_produk)
     {
-        if ($produk->id_tenant !== $toko->id_tenant) {
-            abort(403);
-        }
+        $toko = Toko::findOrFail($id_toko);
+        $produk = Produk::findOrFail($id_produk);
 
         $request->validate([
             'nama_produk'     => 'required|string|max:150',
-            'sku'             => [
-                'nullable', 'string', 'max:50',
-                Rule::unique('produk')->ignore($produk->id_produk, 'id_produk')->where(function ($query) use ($toko) {
-                    return $query->where('id_tenant', $toko->id_tenant);
-                }),
-            ],
+            'sku'             => 'nullable|string|max:50|unique:produk,sku,' . $produk->id_produk . ',id_produk',
             'id_satuan_kecil' => 'required|exists:satuan,id_satuan',
             'nilai_konversi'  => 'required|integer|min:1',
             'harga_jual_umum' => 'required|numeric|min:0',
@@ -151,7 +133,7 @@ class ProdukController extends Controller
 
         DB::beginTransaction();
         try {
-            $data              = $request->except(['gambar_produk', '_token', '_method']);
+            $data = $request->except(['gambar_produk', '_token', '_method']);
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
             if ($request->hasFile('gambar_produk')) {
@@ -172,11 +154,10 @@ class ProdukController extends Controller
         }
     }
 
-    public function destroy(Toko $toko, Produk $produk)
+    public function destroy($id_toko, $id_produk)
     {
-        if ($produk->id_tenant !== $toko->id_tenant) {
-            abort(403);
-        }
+        $toko = Toko::findOrFail($id_toko);
+        $produk = Produk::findOrFail($id_produk);
 
         if ($produk->gambar_produk && Storage::disk('public')->exists($produk->gambar_produk)) {
             Storage::disk('public')->delete($produk->gambar_produk);

@@ -1,96 +1,97 @@
 <?php
+
 namespace App\Http\Controllers;
 
+use App\Models\Pelanggan;
 use App\Models\Penjualan;
 use App\Models\Produk;
 use App\Models\Toko;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
-    {
-        return view('dashboard');
-    }
-
     public function ownerIndex()
     {
-        $user = Auth::user();
+        $id_toko = session('toko_active_id');
+        $nama_toko_aktif = session('toko_active_nama', 'Semua Toko');
 
-        $tenant = $user->tenants->first();
-        if (! $tenant) {
-            return redirect()->route('owner.bisnis.create')
-                ->with('info', 'Halo! Silakan daftarkan Bisnis Utama Anda terlebih dahulu.');
-        }
+        $total_toko = Toko::count();
+        $total_produk = Produk::count();
+        $total_pelanggan = Pelanggan::count();
 
-        $activeTokoId  = session('toko_active_id');
-        $tokoIds       = [];
-        $namaTokoAktif = 'Semua Cabang (Global)';
+        if ($id_toko) {
+            $omset_hari_ini = Penjualan::where('id_toko', $id_toko)
+                ->whereDate('tgl_transaksi', today())
+                ->sum('total_netto');
 
-        if ($activeTokoId) {
-            $tokoAktif = Toko::where('id_tenant', $tenant->id_tenant)
-                ->where('id_toko', $activeTokoId)
-                ->first();
+            $transaksi_hari_ini = Penjualan::where('id_toko', $id_toko)
+                ->whereDate('tgl_transaksi', today())
+                ->count();
 
-            if ($tokoAktif) {
-                $tokoIds       = collect([$tokoAktif->id_toko]);
-                $namaTokoAktif = $tokoAktif->nama_toko;
-            } else {
-                $tokoIds = Toko::where('id_tenant', $tenant->id_tenant)->pluck('id_toko');
-            }
+            $total_pelanggan = Pelanggan::where('id_toko', $id_toko)->count();
         } else {
-            $tokoIds = Toko::where('id_tenant', $tenant->id_tenant)->pluck('id_toko');
+            $omset_hari_ini = Penjualan::whereDate('tgl_transaksi', today())->sum('total_netto');
+            $transaksi_hari_ini = Penjualan::whereDate('tgl_transaksi', today())->count();
         }
 
-        $data['tenant']          = $tenant;
-        $data['nama_toko_aktif'] = $namaTokoAktif;
-        $data['total_toko']      = Toko::where('id_tenant', $tenant->id_tenant)->count();
+        // Chart data untuk 7 hari terakhir
+        $chart_data = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = today()->subDays($i);
+            $total = $id_toko 
+                ? Penjualan::where('id_toko', $id_toko)->whereDate('tgl_transaksi', $date)->sum('total_netto')
+                : Penjualan::whereDate('tgl_transaksi', $date)->sum('total_netto');
+            
+            $chart_data[] = [
+                'hari' => $date->format('D'),
+                'total' => $total
+            ];
+        }
 
-        $data['total_produk'] = Produk::where('id_tenant', $tenant->id_tenant)->count();
-
-        $data['omset_hari_ini'] = Penjualan::whereIn('id_toko', $tokoIds)
-            ->whereDate('tgl_transaksi', Carbon::today())
-            ->sum('total_netto');
-
-        $data['transaksi_hari_ini'] = Penjualan::whereIn('id_toko', $tokoIds)
-            ->whereDate('tgl_transaksi', Carbon::today())
-            ->count();
-
-        $data['stok_menipis'] = DB::table('stok_toko')
+        // Stok menipis
+        $stok_menipis = DB::table('stok_toko')
             ->join('produk', 'stok_toko.id_produk', '=', 'produk.id_produk')
             ->join('toko', 'stok_toko.id_toko', '=', 'toko.id_toko')
-            ->whereIn('stok_toko.id_toko', $tokoIds)
             ->where('stok_toko.stok_fisik', '<=', 10)
+            ->when($id_toko, function($q) use ($id_toko) {
+                return $q->where('stok_toko.id_toko', $id_toko);
+            })
             ->select('produk.nama_produk', 'toko.nama_toko', 'stok_toko.stok_fisik as sisa_stok')
             ->orderBy('stok_toko.stok_fisik', 'asc')
             ->limit(5)
             ->get();
 
-        $data['produk_terlaris'] = DB::table('penjualan_detail')
+        // Produk terlaris bulan ini
+        $produk_terlaris = DB::table('penjualan_detail')
             ->join('penjualan', 'penjualan_detail.id_penjualan', '=', 'penjualan.id_penjualan')
             ->join('produk', 'penjualan_detail.id_produk', '=', 'produk.id_produk')
-            ->whereIn('penjualan.id_toko', $tokoIds)
-            ->whereMonth('penjualan.tgl_transaksi', Carbon::now()->month)
+            ->whereMonth('penjualan.tgl_transaksi', now()->month)
+            ->when($id_toko, function($q) use ($id_toko) {
+                return $q->where('penjualan.id_toko', $id_toko);
+            })
             ->select('produk.nama_produk', DB::raw('sum(penjualan_detail.qty) as total_terjual'))
             ->groupBy('produk.id_produk', 'produk.nama_produk')
             ->orderByDesc('total_terjual')
             ->limit(5)
             ->get();
 
-        $chartData = [];
-        for ($i = 6; $i >= 0; $i--) {
-            $date        = Carbon::now()->subDays($i);
-            $chartData[] = [
-                'hari'  => $date->format('D'),
-                'total' => Penjualan::whereIn('id_toko', $tokoIds)
-                    ->whereDate('tgl_transaksi', $date)
-                    ->sum('total_netto'),
-            ];
-        }
-        $data['chart_data'] = $chartData;
+        return view('owner.dashboard', compact(
+            'nama_toko_aktif',
+            'total_toko',
+            'total_produk',
+            'total_pelanggan',
+            'omset_hari_ini',
+            'transaksi_hari_ini',
+            'chart_data',
+            'stok_menipis',
+            'produk_terlaris'
+        ));
+    }
 
-        return view('owner.dashboard', $data);
+    public function index()
+    {
+        return view('dashboard');
     }
 }

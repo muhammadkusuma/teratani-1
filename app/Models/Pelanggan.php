@@ -7,15 +7,19 @@ class Pelanggan extends Model
 {
     protected $table      = 'pelanggan';
     protected $primaryKey = 'id_pelanggan';
-    protected $guarded    = ['id_pelanggan'];
+
+    protected $fillable = [
+        'id_toko',
+        'kode_pelanggan',
+        'nama_pelanggan',
+        'no_hp',
+        'alamat',
+        'wilayah',
+        'limit_piutang',
+    ];
 
     public function toko()
     {
-        return $this->belongsTo(Toko::class, 'id_toko');
-    }
-
-    public function penjualans()
-    {
-        return $this->hasMany(Penjualan::class, 'id_pelanggan');
+        return $this->belongsTo(Toko::class, 'id_toko', 'id_toko');
     }
 }

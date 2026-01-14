@@ -1,147 +1,95 @@
 @extends('layouts.owner')
 
-@section('title', 'Buat Cabang Baru')
+@section('title', 'Tambah Toko')
 
 @section('content')
-    <div style="font-family: Arial, Helvetica, sans-serif; font-size: 11px; max-width: 800px; margin: 0 auto;">
+<div class="flex justify-between items-center mb-3">
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
+        <i class="fa fa-plus-circle"></i> TAMBAH TOKO BARU
+    </h2>
+    <a href="{{ route('owner.toko.index') }}" class="px-3 py-1 bg-gray-200 border border-gray-400 hover:bg-gray-300 text-xs">
+        <i class="fa fa-arrow-left"></i> KEMBALI
+    </a>
+</div>
 
-        
-        <div class="mb-2 pb-1 border-b border-gray-400 flex justify-between items-end">
-            <div>
-                <h1 class="font-bold text-lg text-blue-900 uppercase leading-none">Form Tambah Cabang</h1>
-                <div class="mt-1 text-gray-500">
-                    <a href="{{ route('owner.toko.index') }}" class="text-blue-700 hover:text-red-600 hover:underline">Daftar
-                        Toko</a>
-                    <span>&gt;</span>
-                    <span class="font-bold text-gray-800">Input Baru</span>
-                </div>
-            </div>
-            <div class="text-[10px] text-gray-400">
-                Form ID: FRM-ADD-TOKO-V1
-            </div>
-        </div>
-
-        
-        @if ($errors->any())
-            <div class="mb-4 bg-red-100 border-2 border-red-600 p-2 text-red-900">
-                <div class="font-bold border-b border-red-400 mb-1 pb-1">(!) TERJADI KESALAHAN VALIDASI:</div>
-                <ul class="list-square list-inside pl-1">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        
-        <div class="bg-gray-100 border-2 border-white border-r-gray-500 border-b-gray-500 shadow-[1px_1px_0_0_black]">
-
-            
-            <div
-                class="bg-blue-800 text-white px-2 py-1 font-bold flex justify-between items-center bg-gradient-to-r from-blue-800 to-blue-600">
-                <span>ENTRI DATA TOKO</span>
-                <span class="cursor-pointer hover:bg-red-600 px-1 border border-white leading-none">x</span>
-            </div>
-
-            <div class="p-4">
-                <form action="{{ route('owner.toko.store') }}" method="POST">
-                    @csrf
-
-                    
-                    <fieldset class="border border-gray-400 p-3 mb-4 bg-white relative">
-                        <legend
-                            class="px-1 bg-white text-blue-800 font-bold border border-gray-400 absolute -top-2.5 left-2 text-[10px]">
-                            A. IDENTITAS UNIT BISNIS
-                        </legend>
-
-                        <div class="grid grid-cols-1 gap-3 mt-1">
-                            
-                            <div>
-                                <label for="nama_toko" class="block font-bold text-gray-700 mb-1">
-                                    Nama Toko / Cabang <span class="text-red-600">*</span>
-                                </label>
-                                <input type="text" id="nama_toko" name="nama_toko" required
-                                    value="{{ old('nama_toko') }}"
-                                    class="w-full px-2 py-1 border-2 border-gray-300 border-l-gray-500 border-t-gray-500 bg-yellow-50 focus:bg-white focus:outline-none focus:border-blue-600"
-                                    placeholder="Wajib Diisi...">
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    
-                    <fieldset class="border border-gray-400 p-3 mb-4 bg-white relative">
-                        <legend
-                            class="px-1 bg-white text-blue-800 font-bold border border-gray-400 absolute -top-2.5 left-2 text-[10px]">
-                            B. LOKASI & KONTAK
-                        </legend>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-1">
-                            
-                            <div>
-                                <label for="kota" class="block font-bold text-gray-700 mb-1">Kota / Kabupaten</label>
-                                <input type="text" id="kota" name="kota" value="{{ old('kota') }}"
-                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50">
-                            </div>
-
-                            
-                            <div>
-                                <label for="no_telp" class="block font-bold text-gray-700 mb-1">No. Telepon / WA</label>
-                                <div class="flex">
-                                    <span
-                                        class="bg-gray-200 border border-gray-400 border-r-0 px-2 py-1 text-gray-600 font-mono">+62</span>
-                                    <input type="text" id="no_telp" name="no_telp" value="{{ old('no_telp') }}"
-                                        class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50">
-                                </div>
-                            </div>
-
-                            
-                            <div class="col-span-1 md:col-span-2">
-                                <label for="alamat" class="block font-bold text-gray-700 mb-1">Alamat Lengkap</label>
-                                <textarea id="alamat" name="alamat" rows="2"
-                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50 font-mono text-[10px]">{{ old('alamat') }}</textarea>
-                                <p class="text-[9px] text-gray-500 mt-0.5">* Masukkan nama jalan, RT/RW, dan Kode Pos.</p>
-                            </div>
-                            
-                            <div class="col-span-1 md:col-span-2 mt-2">
-                                <label for="info_rekening" class="block font-bold text-gray-700 mb-1">
-                                    Info Pembayaran / No. Rekening
-                                </label>
-                                <textarea id="info_rekening" name="info_rekening" rows="2"
-                                    placeholder="Contoh: BCA 123456 a.n Toko Tani&#10;BRI 98765 a.n Toko Tani"
-                                    class="w-full px-2 py-1 border border-gray-400 shadow-inner focus:outline-none focus:bg-blue-50 font-mono text-[10px]">{{ old('info_rekening') }}</textarea>
-                                <p class="text-[9px] text-gray-500 mt-0.5">* Info ini akan muncul di bagian bawah struk dan
-                                    faktur.</p>
-                            </div>
-                        </div>
-                    </fieldset>
-
-                    
-                    <div class="flex items-center justify-end gap-2 pt-2 border-t border-gray-300">
-                        
-                        <a href="{{ route('owner.toko.index') }}"
-                            class="px-4 py-1 bg-gray-200 text-black border-2 border-white border-r-gray-600 border-b-gray-600 hover:bg-gray-300 active:border-gray-600 active:border-r-white active:border-b-white text-[11px] font-bold no-underline text-center w-24">
-                            BATAL
-                        </a>
-
-                        
-                        <button type="submit"
-                            class="px-4 py-1 bg-gray-200 text-black border-2 border-white border-r-black border-b-black hover:bg-gray-300 active:border-gray-600 active:border-r-white active:border-b-white text-[11px] font-bold flex items-center justify-center gap-1 w-32 shadow-md">
-                            <svg class="w-3 h-3 text-blue-800" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M0 0h24v24H0z" fill="none" />
-                                <path
-                                    d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" />
-                            </svg>
-                            SIMPAN
-                        </button>
-                    </div>
-
-                </form>
-            </div>
-
-            
-            <div class="bg-gray-200 border-t border-gray-400 p-1 text-[9px] text-gray-500">
-                Ready.
-            </div>
-        </div>
+@if($errors->any())
+    <div class="bg-red-100 border border-red-400 text-red-700 px-2 py-1 mb-2 text-xs">
+        <ul class="list-disc ml-4">
+            @foreach($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
     </div>
+@endif
+
+<div class="bg-white border border-gray-400 p-4 max-w-2xl">
+    <form action="{{ route('owner.toko.store') }}" method="POST">
+        @csrf
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold mb-1">Kode Toko <span class="text-red-600">*</span></label>
+                <input type="text" name="kode_toko" value="{{ old('kode_toko') }}" required
+                       class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="TK001">
+                @error('kode_toko')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold mb-1">Nama Toko <span class="text-red-600">*</span></label>
+                <input type="text" name="nama_toko" value="{{ old('nama_toko') }}" required
+                       class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="Toko Tani Cabang...">
+                @error('nama_toko')
+                    <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <label class="block text-xs font-bold mb-1">Alamat</label>
+            <textarea name="alamat" rows="2" class="w-full border border-gray-400 p-1 text-xs shadow-inner">{{ old('alamat') }}</textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mt-3">
+            <div>
+                <label class="block text-xs font-bold mb-1">Kota</label>
+                <input type="text" name="kota" value="{{ old('kota') }}"
+                       class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="Malang">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold mb-1">No. Telepon</label>
+                <input type="text" name="no_telp" value="{{ old('no_telp') }}"
+                       class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="0341-123456">
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <label class="block text-xs font-bold mb-1">Info Rekening</label>
+            <textarea name="info_rekening" rows="2" class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="BCA 1234567890 a.n. Toko Tani">{{ old('info_rekening') }}</textarea>
+        </div>
+
+        <div class="mt-4 border-t border-gray-300 pt-3">
+            <div class="flex items-center gap-4">
+                <label class="flex items-center gap-2 text-xs">
+                    <input type="checkbox" name="is_pusat" value="1" {{ old('is_pusat') ? 'checked' : '' }}
+                           class="border border-gray-400">
+                    <span class="font-bold"><i class="fa fa-building"></i> Toko Pusat</span>
+                    <span class="text-gray-500">(centang jika ini toko pusat/utama)</span>
+                </label>
+            </div>
+            <p class="text-xs text-gray-500 mt-1 ml-5">Hanya boleh ada 1 toko pusat. Jika dicentang, toko lain akan otomatis menjadi cabang.</p>
+        </div>
+
+        <div class="flex gap-2 mt-4">
+            <button type="submit" class="bg-blue-700 text-white border border-blue-900 px-4 py-2 text-xs hover:bg-blue-600">
+                <i class="fa fa-save"></i> SIMPAN TOKO
+            </button>
+            <a href="{{ route('owner.toko.index') }}" class="bg-gray-200 border border-gray-400 px-4 py-2 text-xs hover:bg-gray-300">
+                BATAL
+            </a>
+        </div>
+    </form>
+</div>
 @endsection

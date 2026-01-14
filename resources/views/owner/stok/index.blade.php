@@ -4,9 +4,11 @@
 
 @section('content')
 <div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">📊 KELOLA STOK PRODUK</h2>
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
+        <i class="fa fa-warehouse"></i> KELOLA STOK PRODUK
+    </h2>
     <a href="{{ route('owner.stok.tambah') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
-        + TAMBAH STOK
+        <i class="fa fa-plus"></i> TAMBAH STOK
     </a>
 </div>
 

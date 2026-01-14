@@ -1,23 +1,13 @@
 <?php
+
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pelanggan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class PelangganController extends Controller
 {
-    private function getTenantId()
-    {
-        $user = Auth::user();
-        if (session()->has('id_tenant')) {
-            return session('id_tenant');
-        }
-        $tenant = $user->tenants->first();
-        return $tenant ? $tenant->id_tenant : null;
-    }
-
     private function getActiveTokoId()
     {
         return session('toko_active_id');
@@ -25,19 +15,13 @@ class PelangganController extends Controller
 
     public function index(Request $request)
     {
-        $id_tenant = $this->getTenantId();
-        $id_toko   = $this->getActiveTokoId();
+        $id_toko = $this->getActiveTokoId();
 
-        if (! $id_tenant) {
-            return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan Bisnis/Tenant manapun.');
-        }
-
-        if (! $id_toko) {
+        if (!$id_toko) {
             return redirect()->route('owner.toko.index')->with('warning', 'Silakan pilih Toko/Cabang terlebih dahulu.');
         }
 
-        $query = Pelanggan::where('id_tenant', $id_tenant)
-            ->where('id_toko', $id_toko);
+        $query = Pelanggan::where('id_toko', $id_toko);
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -55,93 +39,73 @@ class PelangganController extends Controller
 
     public function create()
     {
-        if (! $this->getActiveTokoId()) {
-            return redirect()->route('owner.toko.index')->with('warning', 'Pilih toko terlebih dahulu.');
+        $id_toko = $this->getActiveTokoId();
+
+        if (!$id_toko) {
+            return redirect()->route('owner.toko.index')->with('warning', 'Silakan pilih Toko/Cabang terlebih dahulu.');
         }
+
         return view('owner.pelanggan.create');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'nama_pelanggan' => 'required|string|max:100',
-            'no_hp'          => 'nullable|string|max:20',
-            'limit_piutang'  => 'required|numeric|min:0',
-        ]);
+        $id_toko = $this->getActiveTokoId();
 
-        $id_tenant = $this->getTenantId();
-        $id_toko   = $this->getActiveTokoId();
-
-        if (! $id_tenant || ! $id_toko) {
-            return back()->with('error', 'Gagal menyimpan: Tenant atau Toko tidak aktif.');
+        if (!$id_toko) {
+            return redirect()->route('owner.toko.index')->with('error', 'Toko belum dipilih');
         }
 
-        $count = Pelanggan::where('id_tenant', $id_tenant)->where('id_toko', $id_toko)->count();
-        $kode  = 'CUST-' . str_pad($count + 1, 4, '0', STR_PAD_LEFT);
+        $count = Pelanggan::where('id_toko', $id_toko)->count();
+        $kode = 'PLG-' . str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+
+        $request->validate([
+            'nama_pelanggan' => 'required',
+        ]);
 
         Pelanggan::create([
-            'id_tenant'      => $id_tenant,
             'id_toko'        => $id_toko,
-            'kode_pelanggan' => $request->kode_pelanggan ?? $kode,
+            'kode_pelanggan' => $kode,
             'nama_pelanggan' => $request->nama_pelanggan,
-            'wilayah'        => $request->wilayah,
             'no_hp'          => $request->no_hp,
             'alamat'         => $request->alamat,
+            'wilayah'        => $request->wilayah,
             'limit_piutang'  => $request->limit_piutang ?? 0,
         ]);
 
-        return redirect()->route('owner.pelanggan.index')->with('success', 'Data Pelanggan berhasil disimpan di toko aktif.');
+        return redirect()->route('owner.pelanggan.index')->with('success', 'Pelanggan berhasil ditambahkan');
     }
 
     public function edit($id)
     {
-        $id_tenant = $this->getTenantId();
-        $id_toko   = $this->getActiveTokoId();
-
-        $pelanggan = Pelanggan::where('id_tenant', $id_tenant)
-            ->where('id_toko', $id_toko)
-            ->findOrFail($id);
-
+        $pelanggan = Pelanggan::findOrFail($id);
         return view('owner.pelanggan.edit', compact('pelanggan'));
     }
 
     public function update(Request $request, $id)
     {
+        $pelanggan = Pelanggan::findOrFail($id);
+
         $request->validate([
-            'nama_pelanggan' => 'required|string|max:100',
-            'limit_piutang'  => 'required|numeric|min:0',
+            'nama_pelanggan' => 'required',
         ]);
-
-        $id_tenant = $this->getTenantId();
-        $id_toko   = $this->getActiveTokoId();
-
-        $pelanggan = Pelanggan::where('id_tenant', $id_tenant)
-            ->where('id_toko', $id_toko)
-            ->findOrFail($id);
 
         $pelanggan->update([
             'nama_pelanggan' => $request->nama_pelanggan,
-            'kode_pelanggan' => $request->kode_pelanggan,
-            'wilayah'        => $request->wilayah,
             'no_hp'          => $request->no_hp,
             'alamat'         => $request->alamat,
-            'limit_piutang'  => $request->limit_piutang,
+            'wilayah'        => $request->wilayah,
+            'limit_piutang'  => $request->limit_piutang ?? 0,
         ]);
 
-        return redirect()->route('owner.pelanggan.index')->with('success', 'Data Pelanggan berhasil diperbarui.');
+        return redirect()->route('owner.pelanggan.index')->with('success', 'Pelanggan berhasil diupdate');
     }
 
     public function destroy($id)
     {
-        $id_tenant = $this->getTenantId();
-        $id_toko   = $this->getActiveTokoId();
-
-        $pelanggan = Pelanggan::where('id_tenant', $id_tenant)
-            ->where('id_toko', $id_toko)
-            ->findOrFail($id);
-
+        $pelanggan = Pelanggan::findOrFail($id);
         $pelanggan->delete();
 
-        return redirect()->route('owner.pelanggan.index')->with('success', 'Data Pelanggan berhasil dihapus.');
+        return redirect()->route('owner.pelanggan.index')->with('success', 'Pelanggan berhasil dihapus');
     }
 }

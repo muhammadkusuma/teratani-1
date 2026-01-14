@@ -14,31 +14,7 @@ class StokController extends Controller
 {
     private function getTokoAktif()
     {
-        if (session()->has('toko_active_id')) {
-            return session('toko_active_id');
-        }
-
-        $user   = Auth::user();
-        $tenant = $user->tenants()->first();
-
-        if (!$tenant) {
-            return null;
-        }
-
-        $toko = Toko::where('id_tenant', $tenant->id_tenant)
-            ->orderBy('is_pusat', 'desc')
-            ->orderBy('id_toko', 'asc')
-            ->first();
-
-        if ($toko) {
-            session([
-                'toko_active_id'   => $toko->id_toko,
-                'toko_active_nama' => $toko->nama_toko,
-            ]);
-            return $toko->id_toko;
-        }
-
-        return null;
+        return session('toko_active_id');
     }
 
     public function index()
@@ -50,11 +26,8 @@ class StokController extends Controller
         }
 
         $toko = Toko::find($id_toko);
-        $user = Auth::user();
-        $tenant = $user->tenants()->first();
 
-        $produk = Produk::where('id_tenant', $tenant->id_tenant)
-            ->with(['stokToko' => function ($q) use ($id_toko) {
+        $produk = Produk::with(['stokToko' => function ($q) use ($id_toko) {
                 $q->where('id_toko', $id_toko);
             }, 'kategori', 'satuanKecil'])
             ->orderBy('nama_produk')
@@ -68,17 +41,12 @@ class StokController extends Controller
         $id_toko = $this->getTokoAktif();
 
         if (!$id_toko) {
-            return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan Toko/Cabang manapun.');
+            return redirect()->back()->with('error', 'Toko belum dipilih');
         }
 
         $toko = Toko::find($id_toko);
-        $user = Auth::user();
-        $tenant = $user->tenants()->first();
 
-        $produk = Produk::where('id_tenant', $tenant->id_tenant)
-            ->where('is_active', 1)
-            ->orderBy('nama_produk')
-            ->get();
+        $produk = Produk::orderBy('nama_produk')->get();
 
         return view('owner.stok.tambah', compact('produk', 'toko'));
     }
@@ -87,43 +55,38 @@ class StokController extends Controller
     {
         $request->validate([
             'id_produk' => 'required|exists:produk,id_produk',
-            'qty'       => 'required|numeric|min:1',
-            'keterangan' => 'nullable|string|max:255',
+            'jumlah'    => 'required|numeric|min:1',
         ]);
 
         $id_toko = $this->getTokoAktif();
 
         if (!$id_toko) {
-            return redirect()->back()->with('error', 'Sesi toko kadaluarsa.');
+            return redirect()->back()->with('error', 'Toko belum dipilih');
         }
 
         DB::beginTransaction();
         try {
-            $stokToko = StokToko::where('id_toko', $id_toko)
+            $stok = StokToko::where('id_toko', $id_toko)
                 ->where('id_produk', $request->id_produk)
                 ->first();
 
-            if ($stokToko) {
-                $stokToko->increment('stok_fisik', $request->qty);
+            if ($stok) {
+                $stok->stok_fisik += $request->jumlah;
+                $stok->save();
             } else {
                 StokToko::create([
-                    'id_toko'    => $id_toko,
-                    'id_produk'  => $request->id_produk,
-                    'stok_fisik' => $request->qty,
+                    'id_toko'      => $id_toko,
+                    'id_produk'    => $request->id_produk,
+                    'stok_fisik'   => $request->jumlah,
                     'stok_minimal' => 5,
                 ]);
             }
 
             DB::commit();
-
-            return redirect()->route('owner.stok.index')
-                ->with('success', 'Stok berhasil ditambahkan sebanyak ' . $request->qty . ' unit');
-
+            return redirect()->route('owner.stok.index')->with('success', 'Stok berhasil ditambahkan');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Gagal menambah stok: ' . $e->getMessage())
-                ->withInput();
+            return redirect()->back()->with('error', 'Gagal menambah stok: ' . $e->getMessage());
         }
     }
 }

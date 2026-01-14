@@ -15,36 +15,11 @@ use Illuminate\Support\Facades\DB;
 class KasirController extends Controller
 {
     /**
-     * Mendapatkan ID Toko yang sedang aktif.
-     * Logika: Session -> Toko Pusat -> Toko Pertama
+     * Helper: ambil ID toko yang sedang aktif di session
      */
     private function getTokoAktif()
     {
-        if (session()->has('toko_active_id')) {
-            return session('toko_active_id');
-        }
-
-        $user   = Auth::user();
-        $tenant = $user->tenants()->first();
-
-        if (! $tenant) {
-            return null;
-        }
-
-        $toko = Toko::where('id_tenant', $tenant->id_tenant)
-            ->orderBy('is_pusat', 'desc')
-            ->orderBy('id_toko', 'asc')
-            ->first();
-
-        if ($toko) {
-            session([
-                'toko_active_id'   => $toko->id_toko,
-                'toko_active_nama' => $toko->nama_toko,
-            ]);
-            return $toko->id_toko;
-        }
-
-        return null;
+        return session('toko_active_id');
     }
 
     public function index()
@@ -68,7 +43,7 @@ class KasirController extends Controller
             ->limit(20)
             ->get();
 
-        $pelanggan = Pelanggan::where('id_tenant', Auth::user()->tenants()->first()->id_tenant ?? 0)->get();
+        $pelanggan = Pelanggan::where('id_toko', $id_toko)->get();
 
         return view('owner.kasir.index', compact('produk', 'pelanggan', 'nama_toko'));
     }
