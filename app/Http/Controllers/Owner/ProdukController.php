@@ -45,8 +45,8 @@ class ProdukController extends Controller
     public function create($id_toko)
     {
         $toko = Toko::findOrFail($id_toko);
-        $kategoris = Kategori::all();
-        $satuans = Satuan::all();
+        $kategoris = Kategori::select('id_kategori', 'nama_kategori')->orderBy('nama_kategori')->get();
+        $satuans = Satuan::select('id_satuan', 'nama_satuan')->orderBy('nama_satuan')->get();
         return view('owner.produk.create', compact('toko', 'kategoris', 'satuans'));
     }
 
@@ -107,8 +107,8 @@ class ProdukController extends Controller
     {
         $toko = Toko::findOrFail($id_toko);
         $produk = Produk::findOrFail($id_produk);
-        $kategoris = Kategori::all();
-        $satuans = Satuan::all();
+        $kategoris = Kategori::select('id_kategori', 'nama_kategori')->orderBy('nama_kategori')->get();
+        $satuans = Satuan::select('id_satuan', 'nama_satuan')->orderBy('nama_satuan')->get();
 
         $stokToko = StokToko::where('id_toko', $toko->id_toko)
             ->where('id_produk', $produk->id_produk)

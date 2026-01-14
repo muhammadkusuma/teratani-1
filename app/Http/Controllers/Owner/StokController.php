@@ -46,7 +46,11 @@ class StokController extends Controller
 
         $toko = Toko::find($id_toko);
 
-        $produk = Produk::orderBy('nama_produk')->get();
+        // Select only needed columns for dropdown
+        $produk = Produk::select('id_produk', 'nama_produk', 'sku')
+            ->where('is_active', 1)
+            ->orderBy('nama_produk')
+            ->get();
 
         return view('owner.stok.tambah', compact('produk', 'toko'));
     }

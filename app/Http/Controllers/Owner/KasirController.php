@@ -26,13 +26,17 @@ class KasirController extends Controller
     {
         $id_toko = $this->getTokoAktif();
 
-        if (! $id_toko) {
-            return redirect()->back()->with('error', 'Akun Anda belum terhubung dengan Toko/Cabang manapun.');
+        if (!$id_toko) {
+            return redirect()->route('owner.toko.index')->with('error', 'Pilih toko terlebih dahulu');
         }
 
-        $toko      = Toko::find($id_toko);
-        $nama_toko = $toko ? $toko->nama_toko : 'Toko Tidak Diketahui';
+        $toko = Toko::find($id_toko);
 
+        if (!$toko) {
+            return redirect()->route('owner.toko.index')->with('error', 'Toko tidak ditemukan');
+        }
+
+        // Limit to 50 most recent active products with stock
         $produk = Produk::where('is_active', 1)
             ->whereHas('stokToko', function ($q) use ($id_toko) {
                 $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
@@ -40,12 +44,19 @@ class KasirController extends Controller
             ->with(['stokToko' => function ($q) use ($id_toko) {
                 $q->where('id_toko', $id_toko);
             }, 'satuanKecil'])
-            ->limit(20)
+            ->orderBy('nama_produk')
+            ->limit(50)
             ->get();
 
-        $pelanggan = Pelanggan::where('id_toko', $id_toko)->get();
+        $metodeBayar = ['Tunai', 'Transfer', 'Hutang'];
 
-        return view('owner.kasir.index', compact('produk', 'pelanggan', 'nama_toko'));
+        // Select only needed columns for pelanggan dropdown
+        $pelanggan = Pelanggan::where('id_toko', $id_toko)
+            ->select('id_pelanggan', 'kode_pelanggan', 'nama_pelanggan')
+            ->orderBy('nama_pelanggan')
+            ->get();
+
+        return view('owner.kasir.index', compact('toko', 'produk', 'metodeBayar', 'pelanggan'));
     }
 
     public function searchProduk(Request $request)

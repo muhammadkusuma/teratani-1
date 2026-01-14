@@ -11,7 +11,7 @@ class TokoController extends Controller
 {
     public function index()
     {
-        $toko = Toko::all();
+        $toko = Toko::orderBy('is_pusat', 'desc')->orderBy('nama_toko')->paginate(20);
         return view('owner.toko.index', compact('toko'));
     }
 
