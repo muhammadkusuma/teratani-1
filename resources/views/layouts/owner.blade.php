@@ -133,61 +133,70 @@
         </div>
 
         <!-- Menu Bar -->
-        <div class="bg-gray-300 border-b-2 border-gray-400 p-1 flex flex-wrap gap-1">
-            <a href="{{ route('owner.dashboard') }}" 
-               class="menu-item {{ request()->routeIs('owner.dashboard') ? 'active' : '' }} text-black no-underline">
-                🏠 Beranda
-            </a>
+        <div class="bg-gray-300 border-b-2 border-gray-400 p-1 flex flex-wrap gap-1 relative items-center">
+            
+            <!-- Hamburger Button (Mobile Only) -->
+            <button id="mobile-menu-btn" class="md:hidden win98-button flex items-center gap-2">
+                <i class="fa-solid fa-bars"></i> Menu
+            </button>
 
-            @if (session('toko_active_id'))
-                <a href="{{ route('owner.kasir.index') }}" 
-                   class="menu-item {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }} text-black no-underline">
-                    💰 Kasir
+            <!-- Menu Items Container -->
+            <div id="nav-menu" class="hidden md:flex flex-wrap gap-1 w-full md:w-auto absolute md:relative top-full left-0 md:top-auto md:left-auto z-50 bg-gray-300 md:bg-transparent p-2 md:p-0 win98-border md:border-none shadow-lg md:shadow-none flex-col md:flex-row">
+                <a href="{{ route('owner.dashboard') }}" 
+                class="menu-item {{ request()->routeIs('owner.dashboard') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                    🏠 Beranda
                 </a>
-                <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}" 
-                   class="menu-item {{ request()->routeIs('owner.toko.produk.*') ? 'active' : '' }} text-black no-underline">
-                    📦 Produk
-                </a>
-                <a href="{{ route('owner.stok.index') }}" 
-                   class="menu-item {{ request()->routeIs('owner.stok.*') ? 'active' : '' }} text-black no-underline">
-                    📊 Stok
-                </a>
-                <a href="{{ route('owner.pelanggan.index') }}" 
-                   class="menu-item {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }} text-black no-underline">
-                    👥 Pelanggan
-                </a>
-                <a href="{{ route('owner.distributor.index') }}" 
-                   class="menu-item {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }} text-black no-underline">
-                    🚚 Distributor
-                </a>
-                <a href="{{ route('owner.karyawan.index') }}" 
-                   class="menu-item {{ request()->routeIs('owner.karyawan.*') ? 'active' : '' }} text-black no-underline">
-                    👨‍💼 Karyawan
-                </a>
-                <a href="{{ route('owner.pengeluaran.index') }}" 
-                   class="menu-item {{ request()->routeIs('owner.pengeluaran.*') ? 'active' : '' }} text-black no-underline">
-                    💸 Pengeluaran
-                </a>
-                <a href="{{ route('owner.pendapatan_pasif.index') }}" 
-                   class="menu-item {{ request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black no-underline">
-                    💰 Pendapatan
-                </a>
-            @endif
 
-            <a href="{{ route('owner.perusahaan.index') }}" 
-               class="menu-item {{ request()->routeIs('owner.perusahaan.*') ? 'active' : '' }} text-black no-underline">
-                🏢 Detail Perusahaan
-            </a>
+                @if (session('toko_active_id'))
+                    <a href="{{ route('owner.kasir.index') }}" 
+                    class="menu-item {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        💰 Kasir
+                    </a>
+                    <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}" 
+                    class="menu-item {{ request()->routeIs('owner.toko.produk.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        📦 Produk
+                    </a>
+                    <a href="{{ route('owner.stok.index') }}" 
+                    class="menu-item {{ request()->routeIs('owner.stok.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        📊 Stok
+                    </a>
+                    <a href="{{ route('owner.pelanggan.index') }}" 
+                    class="menu-item {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        👥 Pelanggan
+                    </a>
+                    <a href="{{ route('owner.distributor.index') }}" 
+                    class="menu-item {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        🚚 Distributor
+                    </a>
+                    <a href="{{ route('owner.karyawan.index') }}" 
+                    class="menu-item {{ request()->routeIs('owner.karyawan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        👨‍💼 Karyawan
+                    </a>
+                    <a href="{{ route('owner.pengeluaran.index') }}" 
+                    class="menu-item {{ request()->routeIs('owner.pengeluaran.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        💸 Pengeluaran
+                    </a>
+                    <a href="{{ route('owner.pendapatan_pasif.index') }}" 
+                    class="menu-item {{ request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        💰 Pendapatan
+                    </a>
+                @endif
 
-            <a href="{{ route('owner.toko.index') }}" 
-               class="menu-item {{ request()->routeIs('owner.toko.index') ? 'active' : '' }} text-black no-underline">
-                🏪 Toko
-            </a>
+                <a href="{{ route('owner.perusahaan.index') }}" 
+                class="menu-item {{ request()->routeIs('owner.perusahaan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                    🏢 Detail Perusahaan
+                </a>
 
-            <a href="{{ route('owner.profile.edit-password') }}" 
-               class="menu-item {{ request()->routeIs('owner.profile.*') ? 'active' : '' }} text-black no-underline">
-                🔐 Ubah Password
-            </a>
+                <a href="{{ route('owner.toko.index') }}" 
+                class="menu-item {{ request()->routeIs('owner.toko.index') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                    🏪 Toko
+                </a>
+
+                <a href="{{ route('owner.profile.edit-password') }}" 
+                class="menu-item {{ request()->routeIs('owner.profile.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                    🔐 Ubah Password
+                </a>
+            </div>
         </div>
 
         <!-- Content Area -->
@@ -230,6 +239,25 @@
         }
         setInterval(updateClock, 1000);
         updateClock();
+
+        // Hamburger Menu Toggle
+        const menuBtn = document.getElementById('mobile-menu-btn');
+        const navMenu = document.getElementById('nav-menu');
+
+        menuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('hidden');
+            navMenu.classList.toggle('flex');
+        });
+
+        // Close menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!menuBtn.contains(e.target) && !navMenu.contains(e.target)) {
+                if (!navMenu.classList.contains('hidden') && window.innerWidth < 768) {
+                    navMenu.classList.add('hidden');
+                    navMenu.classList.remove('flex');
+                }
+            }
+        });
     </script>
 
     @stack('scripts')
