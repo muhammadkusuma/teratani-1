@@ -8,16 +8,25 @@
 @if(session('success'))
 <div class="bg-green-100 border border-green-400 text-green-700 px-2 py-1 mb-2 text-xs">{{ session('success') }}</div>
 @endif
+@if(session('error'))
+<div class="bg-red-100 border border-red-400 text-red-700 px-2 py-1 mb-2 text-xs">{{ session('error') }}</div>
+@endif
 <div class="bg-white border border-gray-400 p-3 mb-3">
-    <form method="GET" class="grid grid-cols-4 gap-3">
+    <form method="GET" class="grid grid-cols-5 gap-3">
         <div><label class="block text-xs font-bold mb-1">Dari Tanggal</label><input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full border border-gray-400 p-1 text-xs shadow-inner"></div>
         <div><label class="block text-xs font-bold mb-1">Sampai Tanggal</label><input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full border border-gray-400 p-1 text-xs shadow-inner"></div>
         <div><label class="block text-xs font-bold mb-1">Kategori</label>
             <select name="kategori" class="w-full border border-gray-400 p-1 text-xs shadow-inner">
                 <option value="">Semua</option>
-                @foreach(['Bunga Bank', 'Investasi Aset', 'Komisi', 'Investasi', 'Lainnya', 'Lainnya', 'Lainnya', 'Lainnya', 'Lainnya'] as $kat)
+                @foreach(['Penjualan', 'Bunga Bank', 'Sewa Aset', 'Komisi', 'Investasi', 'Lainnya'] as $kat)
                 <option value="{{ $kat }}" {{ request('kategori') == $kat ? 'selected' : '' }}>{{ $kat }}</option>
                 @endforeach
+            </select></div>
+        <div><label class="block text-xs font-bold mb-1">Tipe</label>
+            <select name="tipe" class="w-full border border-gray-400 p-1 text-xs shadow-inner">
+                <option value="">Semua</option>
+                <option value="otomatis" {{ request('tipe') == 'otomatis' ? 'selected' : '' }}>Otomatis</option>
+                <option value="manual" {{ request('tipe') == 'manual' ? 'selected' : '' }}>Manual</option>
             </select></div>
         <div class="flex items-end gap-2">
             <button type="submit" class="bg-blue-600 text-white border border-blue-800 px-4 py-1 text-xs hover:bg-blue-500"><i class="fa fa-filter"></i> FILTER</button>
@@ -26,9 +35,9 @@
     </form>
 </div>
 <div class="grid grid-cols-2 gap-3 mb-3">
-    <div class="bg-green-50 border border-red-300 p-3">
+    <div class="bg-green-50 border border-green-300 p-3">
         <div class="text-xs text-green-700 font-bold">Total Pendapatan</div>
-        <div class="text-2xl font-bold text-green-900">Rp {{ number_format($summary['total_pendapatan_pasif'], 0, ',', '.') }}</div>
+        <div class="text-2xl font-bold text-green-900">Rp {{ number_format($summary['total_pendapatan'], 0, ',', '.') }}</div>
     </div>
     <div class="bg-blue-50 border border-blue-300 p-3">
         <div class="text-xs text-blue-700 font-bold">Jumlah Transaksi</div>
@@ -45,39 +54,47 @@
                 <th class="border border-gray-400 p-2">Kategori</th>
                 <th class="border border-gray-400 p-2">Sumber</th>
                 <th class="border border-gray-400 p-2">Jumlah</th>
-                <th class="border border-gray-400 p-2">Pembayaran</th>
+                <th class="border border-gray-400 p-2">Tipe</th>
                 <th class="border border-gray-400 p-2 text-center w-32">Aksi</th>
             </tr>
         </thead>
         <tbody>
-            @forelse($pendapatan_pasifs as $key => $row)
+            @forelse($pendapatanPasifs as $key => $row)
             <tr class="hover:bg-yellow-50 text-xs">
-                <td class="border border-gray-300 p-2 text-center">{{ $pendapatan_pasifs->firstItem() + $key }}</td>
-                <td class="border border-gray-300 p-2 font-mono">{{ $row->kode_pendapatan_pasif }}</td>
-                <td class="border border-gray-300 p-2">{{ $row->tanggal_pendapatan_pasif->format('d/m/Y') }}</td>
+                <td class="border border-gray-300 p-2 text-center">{{ $pendapatanPasifs->firstItem() + $key }}</td>
+                <td class="border border-gray-300 p-2 font-mono">{{ $row->kode_pendapatan }}</td>
+                <td class="border border-gray-300 p-2">{{ $row->tanggal_pendapatan->format('d/m/Y') }}</td>
                 <td class="border border-gray-300 p-2"><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-[10px] font-bold">{{ $row->kategori }}</span></td>
                 <td class="border border-gray-300 p-2">{{ Str::limit($row->sumber, 50) }}</td>
                 <td class="border border-gray-300 p-2 font-bold text-green-700">Rp {{ number_format($row->jumlah, 0, ',', '.') }}</td>
-                <td class="border border-gray-300 p-2"><span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold">{{ $row->metode_terima }}</span></td>
+                <td class="border border-gray-300 p-2 text-center">
+                    @if($row->is_otomatis)
+                    <span class="px-2 py-0.5 rounded bg-blue-200 text-blue-800 text-[10px] font-bold"><i class="fa fa-robot"></i> OTOMATIS</span>
+                    @else
+                    <span class="px-2 py-0.5 rounded bg-gray-200 text-gray-800 text-[10px] font-bold"><i class="fa fa-hand-paper"></i> MANUAL</span>
+                    @endif
+                </td>
                 <td class="border border-gray-300 p-2 text-center">
                     <div class="flex justify-center gap-1">
-                        <a href="{{ route('owner.pendapatan_pasif.show', $row->id_pendapatan_pasif) }}" class="bg-blue-500 text-white border border-blue-700 px-2 py-0.5 text-[10px] hover:bg-blue-400">LIHAT</a>
-                        <a href="{{ route('owner.pendapatan_pasif.edit', $row->id_pendapatan_pasif) }}" class="bg-yellow-400 border border-yellow-600 px-2 py-0.5 text-[10px] hover:bg-yellow-300">EDIT</a>
-                        <form action="{{ route('owner.pendapatan_pasif.destroy', $row->id_pendapatan_pasif) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus pendapatan_pasif ini?')">
+                        <a href="{{ route('owner.pendapatan_pasif.show', $row->id_pendapatan) }}" class="bg-blue-500 text-white border border-blue-700 px-2 py-0.5 text-[10px] hover:bg-blue-400">LIHAT</a>
+                        @if(!$row->is_otomatis)
+                        <a href="{{ route('owner.pendapatan_pasif.edit', $row->id_pendapatan) }}" class="bg-yellow-400 border border-yellow-600 px-2 py-0.5 text-[10px] hover:bg-yellow-300">EDIT</a>
+                        <form action="{{ route('owner.pendapatan_pasif.destroy', $row->id_pendapatan) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus pendapatan ini?')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="bg-green-500 text-white border border-red-700 px-2 py-0.5 text-[10px] hover:bg-green-400">HAPUS</button>
+                            <button type="submit" class="bg-red-500 text-white border border-red-700 px-2 py-0.5 text-[10px] hover:bg-red-400">HAPUS</button>
                         </form>
+                        @endif
                     </div>
                 </td>
             </tr>
             @empty
-            <tr><td colspan="8" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada pendapatan_pasif</td></tr>
+            <tr><td colspan="8" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada pendapatan</td></tr>
             @endforelse
         </tbody>
     </table>
 </div>
-@if($pendapatan_pasifs->hasPages())
-<div class="mt-3">{{ $pendapatan_pasifs->links() }}</div>
+@if($pendapatanPasifs->hasPages())
+<div class="mt-3">{{ $pendapatanPasifs->links() }}</div>
 @endif
 @endsection

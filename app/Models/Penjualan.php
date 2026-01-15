@@ -36,4 +36,9 @@ class Penjualan extends Model
     {
         return $this->belongsTo(Toko::class, 'id_toko');
     }
+
+    public function pendapatanPasif()
+    {
+        return $this->hasOne(PendapatanPasif::class, 'id_penjualan', 'id_penjualan');
+    }
 }

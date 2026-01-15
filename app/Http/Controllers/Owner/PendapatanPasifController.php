@@ -20,7 +20,7 @@ class PendapatanPasifController extends Controller
                            ->with('error', 'Silakan pilih toko terlebih dahulu');
         }
 
-        $query = PendapatanPasif::with(['user'])
+        $query = PendapatanPasif::with(['user', 'penjualan'])
             ->where('id_toko', $idToko);
 
         if ($request->filled('tanggal_dari')) {
@@ -32,15 +32,24 @@ class PendapatanPasifController extends Controller
         if ($request->filled('kategori')) {
             $query->where('kategori', $request->kategori);
         }
+        if ($request->filled('tipe')) {
+            if ($request->tipe == 'otomatis') {
+                $query->where('is_otomatis', true);
+            } elseif ($request->tipe == 'manual') {
+                $query->where('is_otomatis', false);
+            }
+        }
 
-        $pendapatan_pasifs = $query->orderBy('tanggal_pendapatan', 'desc')->paginate(20);
-
+        // Calculate summary BEFORE pagination
         $summary = [
-            'total_pendapatan_pasif' => $query->sum('jumlah'),
+            'total_pendapatan' => $query->sum('jumlah'),
             'jumlah_transaksi' => $query->count(),
         ];
 
-        return view('owner.pendapatan_pasif.index', compact('pendapatan_pasifs', 'summary'));
+        // Then paginate
+        $pendapatanPasifs = $query->orderBy('tanggal_pendapatan', 'desc')->paginate(20);
+
+        return view('owner.pendapatan_pasif.index', compact('pendapatanPasifs', 'summary'));
     }
 
     public function create()
@@ -65,9 +74,9 @@ class PendapatanPasifController extends Controller
             $newNumber = 1;
         }
 
-        $kodePendapatanPasif = "INC-{$today}-" . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+        $kodePendapatan = "INC-{$today}-" . str_pad($newNumber, 3, '0', STR_PAD_LEFT);
 
-        return view('owner.pendapatan_pasif.create', compact('kodePendapatanPasif'));
+        return view('owner.pendapatan_pasif.create', compact('kodePendapatan'));
     }
 
     public function store(Request $request)
@@ -82,7 +91,7 @@ class PendapatanPasifController extends Controller
         $request->validate([
             'kode_pendapatan' => 'required|unique:pendapatan_pasif,kode_pendapatan|max:20',
             'tanggal_pendapatan' => 'required|date',
-            'kategori' => 'required|in:Bunga Bank,Sewa Aset,Komisi,Investasi,Lainnya',
+            'kategori' => 'required|in:Penjualan,Bunga Bank,Sewa Aset,Komisi,Investasi,Lainnya',
             'sumber' => 'required',
             'jumlah' => 'required|numeric|min:0',
             'metode_terima' => 'required|in:Tunai,Transfer',
@@ -100,6 +109,7 @@ class PendapatanPasifController extends Controller
             'jumlah' => $request->jumlah,
             'metode_terima' => $request->metode_terima,
             'keterangan' => $request->keterangan,
+            'is_otomatis' => false,
         ];
 
         if ($request->hasFile('bukti_penerimaan')) {
@@ -110,46 +120,51 @@ class PendapatanPasifController extends Controller
         PendapatanPasif::create($data);
 
         return redirect()->route('owner.pendapatan_pasif.index')
-                       ->with('success', 'PendapatanPasif berhasil ditambahkan');
+                       ->with('success', 'Pendapatan berhasil ditambahkan');
     }
 
     public function show($id)
     {
-        $pendapatan_pasif = PendapatanPasif::with(['toko', 'user'])->findOrFail($id);
+        $pendapatanPasif = PendapatanPasif::with(['toko', 'user', 'penjualan'])->findOrFail($id);
         
-        if ($pendapatan_pasif->toko->id_perusahaan != Auth::user()->id_perusahaan) {
+        if ($pendapatanPasif->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.pendapatan_pasif.index')
-                           ->with('error', 'Anda tidak memiliki akses ke pendapatan_pasif ini');
+                           ->with('error', 'Anda tidak memiliki akses ke pendapatan ini');
         }
 
-        return view('owner.pendapatan_pasif.show', compact('pendapatan_pasif'));
+        return view('owner.pendapatan_pasif.show', compact('pendapatanPasif'));
     }
 
     public function edit($id)
     {
-        $pendapatan_pasif = PendapatanPasif::findOrFail($id);
+        $pendapatanPasif = PendapatanPasif::findOrFail($id);
         
-        if ($pendapatan_pasif->toko->id_perusahaan != Auth::user()->id_perusahaan) {
+        if ($pendapatanPasif->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.pendapatan_pasif.index')
-                           ->with('error', 'Anda tidak memiliki akses ke pendapatan_pasif ini');
+                           ->with('error', 'Anda tidak memiliki akses ke pendapatan ini');
         }
 
-        return view('owner.pendapatan_pasif.edit', compact('pendapatan_pasif'));
+        if ($pendapatanPasif->is_otomatis) {
+            return redirect()->route('owner.pendapatan_pasif.index')
+                           ->with('error', 'Pendapatan otomatis tidak dapat diedit');
+        }
+
+        return view('owner.pendapatan_pasif.edit', compact('pendapatanPasif'));
     }
 
     public function update(Request $request, $id)
     {
-        $pendapatan_pasif = PendapatanPasif::findOrFail($id);
+        $pendapatanPasif = PendapatanPasif::findOrFail($id);
         
-        if ($pendapatan_pasif->toko->id_perusahaan != Auth::user()->id_perusahaan) {
+        if ($pendapatanPasif->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.pendapatan_pasif.index')
-                           ->with('error', 'Anda tidak memiliki akses ke pendapatan_pasif ini');
+                           ->with('error', 'Anda tidak memiliki akses ke pendapatan ini');
         }
 
         $request->validate([
             'kode_pendapatan' => 'required|max:20|unique:pendapatan_pasif,kode_pendapatan,' . $id . ',id_pendapatan',
             'tanggal_pendapatan' => 'required|date',
-            'kategori' => 'required|in:Bunga Bank,Sewa Aset,Komisi,Investasi,Lainnya',
+            'kategori' => 'required|in:Penjualan,Bunga Bank,Sewa Aset,Komisi,Investasi,Lainnya',
             'sumber' => 'required',
             'jumlah' => 'required|numeric|min:0',
             'metode_terima' => 'required|in:Tunai,Transfer',
@@ -168,36 +183,41 @@ class PendapatanPasifController extends Controller
         ];
 
         if ($request->hasFile('bukti_penerimaan')) {
-            if ($pendapatan_pasif->bukti_penerimaan && Storage::disk('public')->exists($pendapatan_pasif->bukti_penerimaan)) {
-                Storage::disk('public')->delete($pendapatan_pasif->bukti_penerimaan);
+            if ($pendapatanPasif->bukti_penerimaan && Storage::disk('public')->exists($pendapatanPasif->bukti_penerimaan)) {
+                Storage::disk('public')->delete($pendapatanPasif->bukti_penerimaan);
             }
             
             $buktiPath = $request->file('bukti_penerimaan')->store('pendapatan_pasif', 'public');
             $data['bukti_penerimaan'] = $buktiPath;
         }
 
-        $pendapatan_pasif->update($data);
+        $pendapatanPasif->update($data);
 
         return redirect()->route('owner.pendapatan_pasif.index')
-                       ->with('success', 'PendapatanPasif berhasil diupdate');
+                       ->with('success', 'Pendapatan berhasil diupdate');
     }
 
     public function destroy($id)
     {
-        $pendapatan_pasif = PendapatanPasif::findOrFail($id);
+        $pendapatanPasif = PendapatanPasif::findOrFail($id);
         
-        if ($pendapatan_pasif->toko->id_perusahaan != Auth::user()->id_perusahaan) {
+        if ($pendapatanPasif->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.pendapatan_pasif.index')
-                           ->with('error', 'Anda tidak memiliki akses ke pendapatan_pasif ini');
+                           ->with('error', 'Anda tidak memiliki akses ke pendapatan ini');
         }
 
-        if ($pendapatan_pasif->bukti_penerimaan && Storage::disk('public')->exists($pendapatan_pasif->bukti_penerimaan)) {
-            Storage::disk('public')->delete($pendapatan_pasif->bukti_penerimaan);
+        if ($pendapatanPasif->is_otomatis) {
+            return redirect()->route('owner.pendapatan_pasif.index')
+                           ->with('error', 'Pendapatan otomatis tidak dapat dihapus');
         }
 
-        $pendapatan_pasif->delete();
+        if ($pendapatanPasif->bukti_penerimaan && Storage::disk('public')->exists($pendapatanPasif->bukti_penerimaan)) {
+            Storage::disk('public')->delete($pendapatanPasif->bukti_penerimaan);
+        }
+
+        $pendapatanPasif->delete();
         
         return redirect()->route('owner.pendapatan_pasif.index')
-                       ->with('success', 'PendapatanPasif berhasil dihapus');
+                       ->with('success', 'Pendapatan berhasil dihapus');
     }
 }
