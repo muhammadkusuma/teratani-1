@@ -6,6 +6,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\Owner\BisnisController;
 use App\Http\Controllers\Owner\KasirController;
 use App\Http\Controllers\Owner\PelangganController;
+use App\Http\Controllers\Owner\PerusahaanController;
 use App\Http\Controllers\Owner\ProdukController;
 use App\Http\Controllers\Owner\ProfileController;
 use App\Http\Controllers\Owner\StokController;
@@ -34,6 +35,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/bisnis/baru', [BisnisController::class, 'create'])->name('bisnis.create');
         Route::post('/bisnis/baru', [BisnisController::class, 'store'])->name('bisnis.store');
+
+        Route::get('/perusahaan', [PerusahaanController::class, 'index'])->name('perusahaan.index');
+        Route::get('/perusahaan/edit', [PerusahaanController::class, 'edit'])->name('perusahaan.edit');
+        Route::put('/perusahaan', [PerusahaanController::class, 'update'])->name('perusahaan.update');
 
         Route::resource('toko', OwnerTokoController::class)->except('show');
         Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');

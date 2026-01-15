@@ -10,7 +10,11 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Get the first company (created by PerusahaanSeeder)
+        $idPerusahaan = \App\Models\Perusahaan::first()->id_perusahaan;
+
         User::create([
+            'id_perusahaan' => $idPerusahaan,
             'username' => 'superadmin',
             'password' => Hash::make('password'),
             'nama_lengkap' => 'Super Administrator',
@@ -21,6 +25,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
+            'id_perusahaan' => $idPerusahaan,
             'username' => 'owner',
             'password' => Hash::make('password'),
             'nama_lengkap' => 'Budi Santoso',
@@ -31,6 +36,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
+            'id_perusahaan' => $idPerusahaan,
             'username' => 'kasir1',
             'password' => Hash::make('password'),
             'nama_lengkap' => 'Siti Aminah',

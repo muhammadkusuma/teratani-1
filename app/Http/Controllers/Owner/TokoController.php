@@ -11,7 +11,11 @@ class TokoController extends Controller
 {
     public function index()
     {
-        $toko = Toko::orderBy('is_pusat', 'desc')->orderBy('nama_toko')->paginate(20);
+        $idPerusahaan = Auth::user()->id_perusahaan;
+        $toko = Toko::where('id_perusahaan', $idPerusahaan)
+                    ->orderBy('is_pusat', 'desc')
+                    ->orderBy('nama_toko')
+                    ->paginate(20);
         return view('owner.toko.index', compact('toko'));
     }
 
@@ -31,7 +35,11 @@ class TokoController extends Controller
             'is_pusat'   => 'boolean',
         ]);
 
+        // Use the logged-in user's company
+        $idPerusahaan = Auth::user()->id_perusahaan;
+
         Toko::create([
+            'id_perusahaan'  => $idPerusahaan,
             'kode_toko'      => $request->kode_toko,
             'nama_toko'      => $request->nama_toko,
             'alamat'         => $request->alamat,
@@ -60,6 +68,7 @@ class TokoController extends Controller
             'nama_toko'  => 'required',
         ]);
 
+        // Keep the existing company, don't allow changing
         $toko->update([
             'kode_toko'      => $request->kode_toko,
             'nama_toko'      => $request->nama_toko,

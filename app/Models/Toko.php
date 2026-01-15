@@ -9,6 +9,7 @@ class Toko extends Model
     protected $primaryKey = 'id_toko';
 
     protected $fillable = [
+        'id_perusahaan',
         'kode_toko',
         'nama_toko',
         'alamat',
@@ -18,6 +19,11 @@ class Toko extends Model
         'is_pusat',
         'is_active',
     ];
+
+    public function perusahaan()
+    {
+        return $this->belongsTo(Perusahaan::class, 'id_perusahaan', 'id_perusahaan');
+    }
 
     public function produks()
     {

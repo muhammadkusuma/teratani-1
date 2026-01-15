@@ -12,4 +12,9 @@ class User extends Authenticatable
     protected $primaryKey = 'id_user';
     protected $guarded    = ['id_user'];
     protected $hidden = ['password'];
+
+    public function perusahaan()
+    {
+        return $this->belongsTo(Perusahaan::class, 'id_perusahaan', 'id_perusahaan');
+    }
 }

@@ -9,7 +9,11 @@ class TokoSeeder extends Seeder
 {
     public function run(): void
     {
+        // Get the first company
+        $idPerusahaan = \App\Models\Perusahaan::first()->id_perusahaan;
+
         Toko::create([
+            'id_perusahaan' => $idPerusahaan,
             'kode_toko' => 'TK001',
             'nama_toko' => 'Toko Tani Pusat',
             'alamat' => 'Jl. Raya Pertanian No. 123',
@@ -21,6 +25,7 @@ class TokoSeeder extends Seeder
         ]);
 
         Toko::create([
+            'id_perusahaan' => $idPerusahaan,
             'kode_toko' => 'TK002',
             'nama_toko' => 'Toko Tani Cabang Lawang',
             'alamat' => 'Jl. Raya Lawang No. 45',
@@ -32,6 +37,7 @@ class TokoSeeder extends Seeder
         ]);
 
         Toko::create([
+            'id_perusahaan' => $idPerusahaan,
             'kode_toko' => 'TK003',
             'nama_toko' => 'Toko Tani Cabang Singosari',
             'alamat' => 'Jl. Raya Singosari No. 67',

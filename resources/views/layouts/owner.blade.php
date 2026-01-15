@@ -158,6 +158,11 @@
                 </a>
             @endif
 
+            <a href="{{ route('owner.perusahaan.index') }}" 
+               class="menu-item {{ request()->routeIs('owner.perusahaan.*') ? 'active' : '' }} text-black no-underline">
+                🏢 Detail Perusahaan
+            </a>
+
             <a href="{{ route('owner.toko.index') }}" 
                class="menu-item {{ request()->routeIs('owner.toko.index') ? 'active' : '' }} text-black no-underline">
                 🏪 Toko
