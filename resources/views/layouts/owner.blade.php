@@ -282,9 +282,9 @@
                     </a>
                 @endif
 
-                <a href="{{ route('owner.profile.edit-password') }}" 
+                <a href="{{ route('owner.profile.index') }}" 
                 class="menu-item {{ request()->routeIs('owner.profile.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                    🔐 Ubah Password
+                    👤 Profil Saya
                 </a>
             </div>
         </div>

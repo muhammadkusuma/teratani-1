@@ -81,8 +81,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/kasir/cetak/{id}', [KasirController::class, 'print'])->name('kasir.print');
         Route::get('/kasir/cetak-faktur/{id}', [KasirController::class, 'cetakFaktur'])->name('kasir.cetak-faktur');
 
-        Route::get('/profile/edit-password', [ProfileController::class, 'editPassword'])->name('profile.edit-password');
-        Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+        Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+        Route::put('/profile', [ProfileController::class, 'updateProfile'])->name('profile.update');
+        Route::get('/profile/edit-password', [ProfileController::class, 'editPassword'])->name('profile.edit-password'); // Keep for backward compatibility/redirect
+        Route::put('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
     });
 
     Route::middleware(EnsureSuperAdmin::class)->group(function () {
