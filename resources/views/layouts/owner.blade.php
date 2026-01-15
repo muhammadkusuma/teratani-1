@@ -190,60 +190,101 @@
 
             <!-- Menu Items Container -->
             <div id="nav-menu" class="hidden md:flex flex-wrap gap-1 w-full md:w-auto absolute md:relative top-full left-0 md:top-auto md:left-auto z-50 bg-gray-300 md:bg-transparent p-2 md:p-0 win98-border md:border-none shadow-lg md:shadow-none flex-col md:flex-row">
+                
+                @php
+                    $jabatan = Auth::user()->jabatan;
+                    
+                    // Definisi Level Akses
+                    $level_full   = ['Superadmin', 'Owner', 'Manager', 'Supervisor', 'Admin'];
+                    $level_kasir  = array_merge($level_full, ['Kasir', 'Sales']); 
+                    $level_gudang = array_merge($level_full, ['Staff Gudang']);
+                    // Note: Level Kasir & Gudang can be additive or distinct.
+                    // For logic below:
+                    // Full accesses everything.
+                    // Kasir checks strict array or exclusion.
+                    // Let's use simple in_array checks for each item group.
+                @endphp
+
                 <a href="{{ route('owner.dashboard') }}" 
                 class="menu-item {{ request()->routeIs('owner.dashboard') ? 'active' : '' }} text-black no-underline block md:inline-block">
                     🏠 Beranda
                 </a>
 
-                <a href="{{ route('owner.users.index') }}" 
-                   class="menu-item {{ request()->routeIs('owner.users.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                    👥 Akun Pengguna
-                </a>
-
-                @if (session('toko_active_id'))
-                    <a href="{{ route('owner.kasir.index') }}" 
-                    class="menu-item {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        💰 Kasir
-                    </a>
-                    <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}" 
-                    class="menu-item {{ request()->routeIs('owner.toko.produk.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        📦 Produk
-                    </a>
-                    <a href="{{ route('owner.stok.index') }}" 
-                    class="menu-item {{ request()->routeIs('owner.stok.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        📊 Stok
-                    </a>
-                    <a href="{{ route('owner.pelanggan.index') }}" 
-                    class="menu-item {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        👥 Pelanggan
-                    </a>
-                    <a href="{{ route('owner.distributor.index') }}" 
-                    class="menu-item {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        🚚 Distributor
-                    </a>
-                    <a href="{{ route('owner.karyawan.index') }}" 
-                    class="menu-item {{ request()->routeIs('owner.karyawan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        👨‍💼 Karyawan
-                    </a>
-                    <a href="{{ route('owner.pengeluaran.index') }}" 
-                    class="menu-item {{ request()->routeIs('owner.pengeluaran.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        💸 Pengeluaran
-                    </a>
-                    <a href="{{ route('owner.pendapatan_pasif.index') }}" 
-                    class="menu-item {{ request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        💰 Pendapatan
+                @if(in_array($jabatan, $level_full))
+                    <a href="{{ route('owner.users.index') }}" 
+                       class="menu-item {{ request()->routeIs('owner.users.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        👥 Akun Pengguna
                     </a>
                 @endif
 
-                <a href="{{ route('owner.perusahaan.index') }}" 
-                class="menu-item {{ request()->routeIs('owner.perusahaan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                    🏢 Detail Perusahaan
-                </a>
+                @if (session('toko_active_id'))
+                    @if(in_array($jabatan, $level_kasir))
+                        <a href="{{ route('owner.kasir.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            💰 Kasir
+                        </a>
+                    @endif
 
-                <a href="{{ route('owner.toko.index') }}" 
-                class="menu-item {{ request()->routeIs('owner.toko.index') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                    🏪 Toko
-                </a>
+                    @if(in_array($jabatan, $level_gudang))
+                        <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}" 
+                        class="menu-item {{ request()->routeIs('owner.toko.produk.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            📦 Produk
+                        </a>
+                        <a href="{{ route('owner.stok.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.stok.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            📊 Stok
+                        </a>
+                    @endif
+
+                    @if(in_array($jabatan, $level_kasir))
+                        <a href="{{ route('owner.pelanggan.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            👥 Pelanggan
+                        </a>
+                    @endif
+
+                    @if(in_array($jabatan, $level_gudang))
+                        <a href="{{ route('owner.distributor.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            🚚 Distributor
+                        </a>
+                    @endif
+
+                    @if(in_array($jabatan, $level_full))
+                        <a href="{{ route('owner.karyawan.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.karyawan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            👨‍💼 Karyawan
+                        </a>
+                    @endif
+
+                    @if(in_array($jabatan, $level_gudang))
+                        <a href="{{ route('owner.pengeluaran.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.pengeluaran.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            💸 Pengeluaran
+                        </a>
+                    @endif
+
+                    @if(in_array($jabatan, $level_full))
+                        <a href="{{ route('owner.pendapatan_pasif.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            💰 Pendapatan
+                        </a>
+                    @endif
+                @endif
+
+                @if(in_array($jabatan, $level_full))
+                    <a href="{{ route('owner.perusahaan.index') }}" 
+                    class="menu-item {{ request()->routeIs('owner.perusahaan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        🏢 Detail Perusahaan
+                    </a>
+                @endif
+                
+                @if(in_array($jabatan, $level_full))
+                    <a href="{{ route('owner.toko.index') }}" 
+                    class="menu-item {{ request()->routeIs('owner.toko.index') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        🏪 Toko
+                    </a>
+                @endif
 
                 <a href="{{ route('owner.profile.edit-password') }}" 
                 class="menu-item {{ request()->routeIs('owner.profile.*') ? 'active' : '' }} text-black no-underline block md:inline-block">

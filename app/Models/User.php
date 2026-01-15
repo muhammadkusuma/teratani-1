@@ -22,4 +22,13 @@ class User extends Authenticatable
     {
         return $this->belongsTo(Perusahaan::class, 'id_perusahaan', 'id_perusahaan');
     }
+
+    public function getJabatanAttribute()
+    {
+        if ($this->is_superadmin) {
+            return 'Superadmin';
+        }
+
+        return $this->karyawan?->jabatan ?? 'Unknown';
+    }
 }
