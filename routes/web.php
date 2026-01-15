@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\Owner\BisnisController;
 use App\Http\Controllers\Owner\DistributorController;
+use App\Http\Controllers\Owner\KaryawanController;
 use App\Http\Controllers\Owner\KasirController;
 use App\Http\Controllers\Owner\PelangganController;
 use App\Http\Controllers\Owner\PerusahaanController;
@@ -49,6 +50,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('pelanggan', PelangganController::class);
 
         Route::resource('distributor', DistributorController::class);
+
+        Route::resource('karyawan', KaryawanController::class);
 
         Route::resource('kategori', KategoriController::class);
         Route::resource('satuan', SatuanController::class);

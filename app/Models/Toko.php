@@ -39,4 +39,9 @@ class Toko extends Model
     {
         return $this->hasMany(Distributor::class, 'id_toko', 'id_toko');
     }
+
+    public function karyawans()
+    {
+        return $this->hasMany(Karyawan::class, 'id_toko', 'id_toko');
+    }
 }

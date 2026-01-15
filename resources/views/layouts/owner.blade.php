@@ -160,6 +160,10 @@
                    class="menu-item {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }} text-black no-underline">
                     🚚 Distributor
                 </a>
+                <a href="{{ route('owner.karyawan.index') }}" 
+                   class="menu-item {{ request()->routeIs('owner.karyawan.*') ? 'active' : '' }} text-black no-underline">
+                    👨‍💼 Karyawan
+                </a>
             @endif
 
             <a href="{{ route('owner.perusahaan.index') }}" 
