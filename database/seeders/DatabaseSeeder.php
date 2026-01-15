@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             DistributorSeeder::class,
             KaryawanSeeder::class,
             PengeluaranSeeder::class,
+            PendapatanPasifSeeder::class,
             StokTokoSeeder::class,
             SettingSeeder::class,
         ]);

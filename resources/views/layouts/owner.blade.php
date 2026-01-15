@@ -168,6 +168,10 @@
                    class="menu-item {{ request()->routeIs('owner.pengeluaran.*') ? 'active' : '' }} text-black no-underline">
                     💸 Pengeluaran
                 </a>
+                <a href="{{ route('owner.pendapatan_pasif.index') }}" 
+                   class="menu-item {{ request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black no-underline">
+                    💰 Pendapatan Pasif
+                </a>
             @endif
 
             <a href="{{ route('owner.perusahaan.index') }}" 

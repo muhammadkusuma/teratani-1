@@ -7,6 +7,7 @@ use App\Http\Controllers\Owner\BisnisController;
 use App\Http\Controllers\Owner\DistributorController;
 use App\Http\Controllers\Owner\KaryawanController;
 use App\Http\Controllers\Owner\PengeluaranController;
+use App\Http\Controllers\Owner\PendapatanPasifController;
 use App\Http\Controllers\Owner\KasirController;
 use App\Http\Controllers\Owner\PelangganController;
 use App\Http\Controllers\Owner\PerusahaanController;
@@ -55,6 +56,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('karyawan', KaryawanController::class);
 
         Route::resource('pengeluaran', PengeluaranController::class);
+
+        Route::resource('pendapatan_pasif', PendapatanPasifController::class);
 
         Route::resource('kategori', KategoriController::class);
         Route::resource('satuan', SatuanController::class);

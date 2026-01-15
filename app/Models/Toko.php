@@ -49,4 +49,9 @@ class Toko extends Model
     {
         return $this->hasMany(Pengeluaran::class, 'id_toko', 'id_toko');
     }
+
+    public function pendapatanPasifs()
+    {
+        return $this->hasMany(PendapatanPasif::class, 'id_toko', 'id_toko');
+    }
 }
