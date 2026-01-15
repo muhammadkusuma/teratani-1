@@ -43,8 +43,8 @@
         }
 
         .menu-item {
-            padding: 8px 16px;
-            font-size: 16px;
+            padding: 4px 12px;
+            font-size: 13px;
             font-weight: bold;
             border: 2px solid transparent;
         }
