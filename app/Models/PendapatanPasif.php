@@ -11,6 +11,7 @@ class PendapatanPasif extends Model
     protected $fillable = [
         'id_toko',
         'id_user',
+        'id_penjualan',
         'kode_pendapatan',
         'tanggal_pendapatan',
         'kategori',
@@ -19,11 +20,13 @@ class PendapatanPasif extends Model
         'metode_terima',
         'bukti_penerimaan',
         'keterangan',
+        'is_otomatis',
     ];
 
     protected $casts = [
         'tanggal_pendapatan' => 'date',
         'jumlah' => 'decimal:2',
+        'is_otomatis' => 'boolean',
     ];
 
     public function toko()
@@ -34,6 +37,11 @@ class PendapatanPasif extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'id_user', 'id_user');
+    }
+
+    public function penjualan()
+    {
+        return $this->belongsTo(Penjualan::class, 'id_penjualan', 'id_penjualan');
     }
 
     public function scopeByKategori($query, $kategori)

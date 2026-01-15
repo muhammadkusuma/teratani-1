@@ -1,8 +1,8 @@
 @extends('layouts.owner')
-@section('title', 'Detail Pendapatan Pasif')
+@section('title', 'Detail Pendapatan')
 @section('content')
 <div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4"><i class="fa fa-file-invoice"></i> DETAIL PENDAPATAN PASIF</h2>
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4"><i class="fa fa-file-invoice"></i> DETAIL PENDAPATAN</h2>
     <div class="flex gap-2">
         <a href="{{ route('owner.pendapatan_pasif.edit', $pendapatan_pasif->id_pendapatan_pasif) }}" class="px-3 py-1 bg-yellow-400 border border-yellow-600 hover:bg-yellow-300 text-xs"><i class="fa fa-edit"></i> EDIT</a>
         <a href="{{ route('owner.pendapatan_pasif.index') }}" class="px-3 py-1 bg-gray-200 border border-gray-400 hover:bg-gray-300 text-xs"><i class="fa fa-arrow-left"></i> KEMBALI</a>
@@ -11,7 +11,7 @@
 <div class="bg-white border border-gray-400 p-4">
     <div class="grid grid-cols-2 gap-4">
         <div>
-            <h3 class="font-bold text-sm border-b border-gray-300 pb-2 mb-3"><i class="fa fa-info-circle"></i> INFORMASI PENDAPATAN PASIF</h3>
+            <h3 class="font-bold text-sm border-b border-gray-300 pb-2 mb-3"><i class="fa fa-info-circle"></i> INFORMASI PENDAPATAN</h3>
             <div class="space-y-2 text-xs">
                 <div class="flex"><span class="w-32 text-gray-600">Kode:</span><span class="font-mono font-bold">{{ $pendapatan_pasif->kode_pendapatan_pasif }}</span></div>
                 <div class="flex"><span class="w-32 text-gray-600">Tanggal:</span><span class="font-semibold">{{ $pendapatan_pasif->tanggal_pendapatan_pasif->format('d/m/Y') }}</span></div>

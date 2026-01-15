@@ -1,9 +1,9 @@
 @extends('layouts.owner')
-@section('title', 'Daftar Pendapatan Pasif')
+@section('title', 'Daftar Pendapatan')
 @section('content')
 <div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4"><i class="fa fa-coins"></i> DAFTAR PENDAPATAN PASIF</h2>
-    <a href="{{ route('owner.pendapatan_pasif.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs"><i class="fa fa-plus"></i> TAMBAH PENDAPATAN PASIF</a>
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4"><i class="fa fa-coins"></i> DAFTAR PENDAPATAN</h2>
+    <a href="{{ route('owner.pendapatan_pasif.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs"><i class="fa fa-plus"></i> TAMBAH PENDAPATAN</a>
 </div>
 @if(session('success'))
 <div class="bg-green-100 border border-green-400 text-green-700 px-2 py-1 mb-2 text-xs">{{ session('success') }}</div>

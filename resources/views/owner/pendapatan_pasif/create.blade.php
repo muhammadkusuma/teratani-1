@@ -1,8 +1,8 @@
 @extends('layouts.owner')
-@section('title', 'Tambah Pendapatan Pasif')
+@section('title', 'Tambah Pendapatan')
 @section('content')
 <div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4"><i class="fa fa-plus-circle"></i> TAMBAH PENDAPATAN PASIF BARU</h2>
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4"><i class="fa fa-plus-circle"></i> TAMBAH PENDAPATAN BARU</h2>
     <a href="{{ route('owner.pendapatan_pasif.index') }}" class="px-3 py-1 bg-gray-200 border border-gray-400 hover:bg-gray-300 text-xs"><i class="fa fa-arrow-left"></i> KEMBALI</a>
 </div>
 @if($errors->any())
@@ -12,7 +12,7 @@
     <form action="{{ route('owner.pendapatan_pasif.store') }}" method="POST" enctype="multipart/form-data">
         @csrf
         <div class="grid grid-cols-2 gap-4">
-            <div><label class="block text-xs font-bold mb-1">Kode Pendapatan Pasif <span class="text-green-600">*</span></label><input type="text" name="kode_pendapatan_pasif" value="{{ old('kode_pendapatan_pasif', $kodePendapatan Pasif) }}" required class="w-full border border-gray-400 p-1 text-xs shadow-inner font-mono"></div>
+            <div><label class="block text-xs font-bold mb-1">Kode Pendapatan <span class="text-green-600">*</span></label><input type="text" name="kode_pendapatan_pasif" value="{{ old('kode_pendapatan_pasif', $kodePendapatan) }}" required class="w-full border border-gray-400 p-1 text-xs shadow-inner font-mono"></div>
             <div><label class="block text-xs font-bold mb-1">Tanggal <span class="text-green-600">*</span></label><input type="date" name="tanggal_pendapatan_pasif" value="{{ old('tanggal_pendapatan_pasif', now()->format('Y-m-d')) }}" required class="w-full border border-gray-400 p-1 text-xs shadow-inner"></div>
         </div>
         <div class="grid grid-cols-2 gap-4 mt-3">
@@ -37,7 +37,7 @@
         </div>
         <div class="mt-3"><label class="block text-xs font-bold mb-1">Keterangan</label><textarea name="keterangan" rows="2" class="w-full border border-gray-400 p-1 text-xs shadow-inner">{{ old('keterangan') }}</textarea></div>
         <div class="flex gap-2 mt-4">
-            <button type="submit" class="bg-blue-700 text-white border border-blue-900 px-4 py-2 text-xs hover:bg-blue-600"><i class="fa fa-save"></i> SIMPAN PENDAPATAN PASIF</button>
+            <button type="submit" class="bg-blue-700 text-white border border-blue-900 px-4 py-2 text-xs hover:bg-blue-600"><i class="fa fa-save"></i> SIMPAN PENDAPATAN</button>
             <a href="{{ route('owner.pendapatan_pasif.index') }}" class="bg-gray-200 border border-gray-400 px-4 py-2 text-xs hover:bg-gray-300">BATAL</a>
         </div>
     </form>

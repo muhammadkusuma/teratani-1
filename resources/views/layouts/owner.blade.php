@@ -170,7 +170,7 @@
                 </a>
                 <a href="{{ route('owner.pendapatan_pasif.index') }}" 
                    class="menu-item {{ request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black no-underline">
-                    💰 Pendapatan Pasif
+                    💰 Pendapatan
                 </a>
             @endif
 
