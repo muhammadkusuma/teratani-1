@@ -57,6 +57,10 @@
             <td class="font-bold py-2">NPWP</td>
             <td class="py-2">: {{ $perusahaan->npwp ?? '-' }}</td>
         </tr>
+        <tr>
+            <td class="font-bold py-2">Pemilik</td>
+            <td class="py-2">: {{ $perusahaan->pemilik ?? '-' }}</td>
+        </tr>
         @if($perusahaan->logo)
         <tr>
             <td class="font-bold py-2">Logo</td>

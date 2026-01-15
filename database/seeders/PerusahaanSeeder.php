@@ -11,6 +11,7 @@ class PerusahaanSeeder extends Seeder
     {
         DB::table('perusahaan')->insert([
             'nama_perusahaan' => 'PT Toko Tani Sejahtera',
+            'pemilik' => 'Budi Santoso',
             'alamat' => 'Jl. Raya Pertanian No. 123',
             'kota' => 'Jakarta',
             'provinsi' => 'DKI Jakarta',

@@ -48,6 +48,7 @@ class PerusahaanController extends Controller
 
         $request->validate([
             'nama_perusahaan' => 'required|max:150',
+            'pemilik'         => 'nullable|string|max:150',
             'alamat'          => 'nullable',
             'kota'            => 'nullable|max:50',
             'provinsi'        => 'nullable|max:50',
@@ -61,6 +62,7 @@ class PerusahaanController extends Controller
 
         $data = [
             'nama_perusahaan' => $request->nama_perusahaan,
+            'pemilik'         => $request->pemilik,
             'alamat'          => $request->alamat,
             'kota'            => $request->kota,
             'provinsi'        => $request->provinsi,

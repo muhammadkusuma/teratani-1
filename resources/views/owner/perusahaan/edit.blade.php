@@ -35,6 +35,12 @@
             </div>
 
             <div>
+                <label class="block font-bold mb-1 text-base">Owner / Pemilik Perusahaan</label>
+                <input type="text" name="pemilik" value="{{ old('pemilik', $perusahaan->pemilik) }}" 
+                       class="win98-input w-full">
+            </div>
+
+            <div>
                 <label class="block font-bold mb-1 text-base">Alamat</label>
                 <textarea name="alamat" rows="3" class="win98-input w-full">{{ old('alamat', $perusahaan->alamat) }}</textarea>
             </div>
