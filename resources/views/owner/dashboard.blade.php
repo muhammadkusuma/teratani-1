@@ -70,7 +70,7 @@
             <div class="flex-1 bg-white border border-slate-300 shadow-sm p-3 flex flex-col rounded-sm">
                 <h3 class="text-[11px] font-bold text-slate-700 mb-3 border-l-4 border-blue-600 pl-2 uppercase">Tren Penjualan (7 Hari)</h3>
                 <div class="flex-1 flex items-end gap-2 border-b border-l border-slate-200 p-2 pb-0">
-                    @php $maxChart = collect($chart_data)->max('total') ?: 1; @endphp
+                    @php $maxChart = max(collect($chart_data)->max('total'), 1); @endphp
                     @foreach($chart_data as $d)
                         <div class="flex-1 flex flex-col items-center group">
                             <div class="relative w-full bg-blue-100 hover:bg-blue-200 transition-all duration-300 flex items-end justify-center rounded-t-sm" 

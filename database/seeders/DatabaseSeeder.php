@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             PengeluaranSeeder::class,
             PendapatanPasifSeeder::class,
             StokTokoSeeder::class,
+            PenjualanSeeder::class,
+            SyncPendapatanFromPenjualanSeeder::class,
             SettingSeeder::class,
         ]);
     }
