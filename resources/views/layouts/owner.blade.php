@@ -193,16 +193,12 @@
                 
                 @php
                     $jabatan = Auth::user()->jabatan;
-                    
+
                     // Definisi Level Akses
-                    $level_full   = ['Superadmin', 'Owner', 'Manager', 'Supervisor', 'Admin'];
+                    // "Unknown" included for Owner accounts that aren't linked to Karyawan yet.
+                    $level_full   = ['Owner', 'Manager', 'Supervisor', 'Admin', 'Unknown']; 
                     $level_kasir  = array_merge($level_full, ['Kasir', 'Sales']); 
                     $level_gudang = array_merge($level_full, ['Staff Gudang']);
-                    // Note: Level Kasir & Gudang can be additive or distinct.
-                    // For logic below:
-                    // Full accesses everything.
-                    // Kasir checks strict array or exclusion.
-                    // Let's use simple in_array checks for each item group.
                 @endphp
 
                 <a href="{{ route('owner.dashboard') }}" 
