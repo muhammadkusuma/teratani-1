@@ -36,6 +36,11 @@ class Karyawan extends Model
         'gaji_pokok'     => 'decimal:2',
     ];
 
+    public function user()
+    {
+        return $this->hasOne(User::class, 'id_karyawan', 'id_karyawan');
+    }
+
     public function toko()
     {
         return $this->belongsTo(Toko::class, 'id_toko', 'id_toko');

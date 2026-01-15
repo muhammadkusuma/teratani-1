@@ -147,6 +147,11 @@
                     🏠 Beranda
                 </a>
 
+                <a href="{{ route('owner.users.index') }}" 
+                   class="menu-item {{ request()->routeIs('owner.users.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                    👥 Akun Pengguna
+                </a>
+
                 @if (session('toko_active_id'))
                     <a href="{{ route('owner.kasir.index') }}" 
                     class="menu-item {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }} text-black no-underline block md:inline-block">

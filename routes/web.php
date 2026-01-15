@@ -18,6 +18,7 @@ use App\Http\Controllers\Owner\TokoController as OwnerTokoController;
 use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Owner\UserController as OwnerUserController;
 use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('pengeluaran', PengeluaranController::class);
 
         Route::resource('pendapatan_pasif', PendapatanPasifController::class);
+        
+        Route::resource('users', OwnerUserController::class);
 
         Route::resource('kategori', KategoriController::class);
         Route::resource('satuan', SatuanController::class);
