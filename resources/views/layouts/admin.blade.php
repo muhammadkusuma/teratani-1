@@ -18,12 +18,12 @@
             background-color: #f3f4f6;
             border-color: transparent;
             border-radius: 0.5rem;
-            height: 42px;
+            height: 38px; /* Tailwind h-9 is 36px, h-10 is 40px. 38px is a safe middle ground/bootstrap-ish */
             display: flex;
             align-items: center;
         }
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 40px;
+            height: 36px;
         }
         .select2-container--default .select2-selection--single:focus {
             outline: 2px solid #10b981;

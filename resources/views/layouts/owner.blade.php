@@ -10,8 +10,21 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         /* Select2 Windows 98 Theme Fixes */
+        /* Prevent FOUC: Style native select to match Select2 dimensions */
+        select {
+            height: 34px;
+            padding: 6px;
+            border: 2px solid #000;
+            border-color: #000000 #ffffff #ffffff #000000;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 14px;
+            width: 100%;
+            box-sizing: border-box;
+            background: #fff;
+        }
+        
         .select2-container .select2-selection--single {
-            height: 38px !important;
+            height: 34px !important; /* Reduced to match win98-input (approx 34px) */
             border: 2px solid !important;
             border-color: #000000 #ffffff #ffffff #000000 !important;
             border-radius: 0 !important;
@@ -20,24 +33,31 @@
             align-items: center !important;
         }
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 36px !important;
+            height: 30px !important; /* 34px - 4px border = 30px */
             width: 30px !important;
             background: #c0c0c0;
             border-left: 2px solid #fff;
             border-top: 2px solid #fff;
             border-right: 1px solid #000;
             border-bottom: 1px solid #000;
+            top: 0px !important;
+            right: 0px !important;
         }
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 36px !important;
+            line-height: 30px !important;
             padding-left: 8px !important;
             font-family: 'Tahoma', sans-serif;
-            font-size: 14px;
+            font-size: 14px !important; /* Back to 14px to ensure it fits well in 34px */
+            color: #000;
         }
         .select2-dropdown {
             border: 2px solid !important;
             border-color: #ffffff #000000 #000000 #ffffff !important;
             border-radius: 0 !important;
+            font-size: 16px !important;
+        }
+        .select2-results__option {
+            padding: 6px;
         }
     </style>
     
