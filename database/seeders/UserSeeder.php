@@ -24,32 +24,44 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        // Get random Karyawans to link
-        $karyawanOwner = \App\Models\Karyawan::where('jabatan', 'Manager')->first(); // Assume Manager = Owner for now, or create Owner role
-        $karyawanKasir = \App\Models\Karyawan::where('jabatan', 'Kasir')->first();
-
+        // Create specific OWNER account
+        // Try to find a Manager to link to, otherwise null (handled by Unknown role)
+        $managerKaryawan = \App\Models\Karyawan::where('jabatan', 'Manager')->first();
+        
         User::create([
             'id_perusahaan' => $idPerusahaan,
-            'id_karyawan'   => $karyawanOwner->id_karyawan ?? null,
-            'username' => 'owner',
-            'password' => Hash::make('password'),
-            'nama_lengkap' => 'Budi Santoso',
-            'email' => 'owner@tokotani.com',
-            'no_hp' => '081234567891',
-            'is_superadmin' => false, // Owner is NOT superadmin in this context
-            'is_active' => true,
-        ]);
-
-        User::create([
-            'id_perusahaan' => $idPerusahaan,
-            'id_karyawan'   => $karyawanKasir->id_karyawan ?? null,
-            'username' => 'kasir1',
-            'password' => Hash::make('password'),
-            'nama_lengkap' => 'Siti Aminah',
-            'email' => 'kasir1@tokotani.com',
-            'no_hp' => '081234567892',
+            'id_karyawan'   => $managerKaryawan?->id_karyawan,
+            'username'      => 'owner',
+            'password'      => Hash::make('password'),
+            'nama_lengkap'  => 'Owner Toko',
+            'email'         => 'owner@tokotani.com',
+            'no_hp'         => '081299999999',
             'is_superadmin' => false,
-            'is_active' => true,
+            'is_active'     => true,
         ]);
+
+        // Create accounts for ALL Karyawans
+        $karyawans = \App\Models\Karyawan::all();
+        
+        foreach($karyawans as $karyawan) {
+            // Check if user already exists (avoid duplicates if re-seeding without fresh)
+            if(User::where('id_karyawan', $karyawan->id_karyawan)->exists()) continue;
+
+            // Generate simple username: firstname + id (e.g., budi1, siti2)
+            $firstName = strtolower(explode(' ', $karyawan->nama_lengkap)[0]);
+            $username = $firstName . $karyawan->id_karyawan;
+
+            User::create([
+                'id_perusahaan' => $idPerusahaan,
+                'id_karyawan'   => $karyawan->id_karyawan,
+                'username'      => $username,
+                'password'      => Hash::make('password'),
+                'nama_lengkap'  => $karyawan->nama_lengkap,
+                'email'         => $karyawan->email ?? $username . '@tokotani.com',
+                'no_hp'         => $karyawan->no_hp,
+                'is_superadmin' => false,
+                'is_active'     => true,
+            ]);
+        }
     }
 }

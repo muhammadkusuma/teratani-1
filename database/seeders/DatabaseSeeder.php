@@ -10,14 +10,14 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             PerusahaanSeeder::class,  // Must run first
-            UserSeeder::class,
-            TokoSeeder::class,
+            TokoSeeder::class,        // Must run before Karyawan
+            KaryawanSeeder::class,    // Must run before User to link accounts
+            UserSeeder::class,        // Now runs after Karyawan
             KategoriSeeder::class,
             SatuanSeeder::class,
             ProdukSeeder::class,
             PelangganSeeder::class,
             DistributorSeeder::class,
-            KaryawanSeeder::class,
             PengeluaranSeeder::class,
             PendapatanPasifSeeder::class,
             StokTokoSeeder::class,

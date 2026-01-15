@@ -17,7 +17,7 @@ class SyncPendapatanFromPenjualanSeeder extends Seeder
                 'id_toko' => $penjualan->id_toko,
                 'id_user' => $penjualan->id_user,
                 'id_penjualan' => $penjualan->id_penjualan,
-                'kode_pendapatan' => 'INC-' . $penjualan->tgl_transaksi->format('Ymd') . '-' . str_pad($penjualan->id_penjualan, 3, '0', STR_PAD_LEFT),
+                'kode_pendapatan' => 'INC-SLS-' . $penjualan->tgl_transaksi->format('Ymd') . '-' . str_pad($penjualan->id_penjualan, 3, '0', STR_PAD_LEFT),
                 'tanggal_pendapatan' => $penjualan->tgl_transaksi,
                 'kategori' => 'Penjualan',
                 'sumber' => 'Penjualan #' . $penjualan->no_faktur,
