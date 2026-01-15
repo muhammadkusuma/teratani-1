@@ -5,12 +5,6 @@
     <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4"><i class="fa fa-coins"></i> DAFTAR PENDAPATAN</h2>
     <a href="{{ route('owner.pendapatan_pasif.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs"><i class="fa fa-plus"></i> TAMBAH PENDAPATAN</a>
 </div>
-@if(session('success'))
-<div class="bg-green-100 border border-green-400 text-green-700 px-2 py-1 mb-2 text-xs">{{ session('success') }}</div>
-@endif
-@if(session('error'))
-<div class="bg-red-100 border border-red-400 text-red-700 px-2 py-1 mb-2 text-xs">{{ session('error') }}</div>
-@endif
 <div class="bg-white border border-gray-400 p-3 mb-3">
     <form method="GET" class="grid grid-cols-5 gap-3">
         <div><label class="block text-xs font-bold mb-1">Dari Tanggal</label><input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full border border-gray-400 p-1 text-xs shadow-inner"></div>
