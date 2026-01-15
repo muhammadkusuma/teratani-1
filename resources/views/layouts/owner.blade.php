@@ -12,49 +12,44 @@
         /* Select2 Windows 98 Theme Fixes */
         /* Prevent FOUC: Style native select to match Select2 dimensions */
         select {
-            height: 34px;
-            padding: 6px;
-            border: 2px solid #000;
-            border-color: #000000 #ffffff #ffffff #000000;
+            height: 30px;
+            padding: 4px 6px; /* Approx p-1.5 */
+            border: 1px solid #9ca3af; /* border-gray-400 */
             font-family: 'Tahoma', sans-serif;
-            font-size: 14px;
+            font-size: 12px; /* text-xs */
             width: 100%;
             box-sizing: border-box;
             background: #fff;
         }
         
         .select2-container .select2-selection--single {
-            height: 34px !important; /* Reduced to match win98-input (approx 34px) */
-            border: 2px solid !important;
-            border-color: #000000 #ffffff #ffffff #000000 !important;
+            height: 30px !important; /* Match text-xs + p-1.5 input height */
+            border: 1px solid #9ca3af !important; /* Match border-gray-400 */
             border-radius: 0 !important;
             background-color: #ffffff !important;
             display: flex !important;
             align-items: center !important;
         }
+
         .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 30px !important; /* 34px - 4px border = 30px */
-            width: 30px !important;
-            background: #c0c0c0;
-            border-left: 2px solid #fff;
-            border-top: 2px solid #fff;
-            border-right: 1px solid #000;
-            border-bottom: 1px solid #000;
+            height: 28px !important; /* 30px - 2px border */
+            width: 20px !important;
+            background: #e5e7eb; /* gray-200 */
+            border-left: 1px solid #9ca3af;
             top: 0px !important;
             right: 0px !important;
         }
         .select2-container--default .select2-selection--single .select2-selection__rendered {
-            line-height: 30px !important;
-            padding-left: 8px !important;
+            line-height: 28px !important;
+            padding-left: 6px !important;
             font-family: 'Tahoma', sans-serif;
-            font-size: 14px !important; /* Back to 14px to ensure it fits well in 34px */
+            font-size: 12px !important; /* text-xs */
             color: #000;
         }
         .select2-dropdown {
-            border: 2px solid !important;
-            border-color: #ffffff #000000 #000000 #ffffff !important;
+            border: 1px solid #9ca3af !important;
             border-radius: 0 !important;
-            font-size: 16px !important;
+            font-size: 12px !important;
         }
         .select2-results__option {
             padding: 6px;
