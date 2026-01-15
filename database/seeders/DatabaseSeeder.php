@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             SatuanSeeder::class,
             ProdukSeeder::class,
             PelangganSeeder::class,
+            DistributorSeeder::class,
             StokTokoSeeder::class,
             SettingSeeder::class,
         ]);
