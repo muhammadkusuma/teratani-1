@@ -13,7 +13,23 @@
         body {
             font-family: 'Inter', sans-serif;
         }
+        /* Select2 Tailwind fix */
+        .select2-container--default .select2-selection--single {
+            background-color: #f3f4f6;
+            border-color: transparent;
+            border-radius: 0.5rem;
+            height: 42px;
+            display: flex;
+            align-items: center;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 40px;
+        }
+        .select2-container--default .select2-selection--single:focus {
+            outline: 2px solid #10b981;
+        }
     </style>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 </head>
 
 <body class="bg-gray-100 font-sans leading-normal tracking-normal">
@@ -139,7 +155,15 @@
         </div>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script>
+        $(document).ready(function() {
+            $('select').select2({
+                width: '100%'
+            });
+        });
+
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('hidden');

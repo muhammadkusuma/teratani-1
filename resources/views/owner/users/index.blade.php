@@ -13,12 +13,6 @@
         </a>
     </div>
 
-    @if (session('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-2 py-1 mb-2 text-xs">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <div class="overflow-x-auto border border-gray-400 bg-white">
         <table class="w-full text-left border-collapse">
             <thead>

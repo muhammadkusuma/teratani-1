@@ -7,6 +7,39 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        /* Select2 Windows 98 Theme Fixes */
+        .select2-container .select2-selection--single {
+            height: 38px !important;
+            border: 2px solid !important;
+            border-color: #000000 #ffffff #ffffff #000000 !important;
+            border-radius: 0 !important;
+            background-color: #ffffff !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px !important;
+            width: 30px !important;
+            background: #c0c0c0;
+            border-left: 2px solid #fff;
+            border-top: 2px solid #fff;
+            border-right: 1px solid #000;
+            border-bottom: 1px solid #000;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 36px !important;
+            padding-left: 8px !important;
+            font-family: 'Tahoma', sans-serif;
+            font-size: 14px;
+        }
+        .select2-dropdown {
+            border: 2px solid !important;
+            border-color: #ffffff #000000 #000000 #ffffff !important;
+            border-radius: 0 !important;
+        }
+    </style>
     
     <style>
         body {
@@ -265,6 +298,15 @@
         });
     </script>
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('select').select2({
+                width: '100%'
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>
