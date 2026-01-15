@@ -17,7 +17,13 @@ class DashboardController extends Controller
         $id_toko = session('toko_active_id');
         $nama_toko_aktif = session('toko_active_nama', 'Semua Toko');
 
-        $total_toko = Toko::count();
+        // Load user's stores for popup selection
+        $userStores = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)
+            ->orderBy('is_pusat', 'desc')
+            ->orderBy('nama_toko')
+            ->get();
+
+        $total_toko = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)->count();
         $total_produk = Produk::count();
         $total_pelanggan = Pelanggan::count();
 
@@ -79,6 +85,7 @@ class DashboardController extends Controller
 
         return view('owner.dashboard', compact(
             'nama_toko_aktif',
+            'userStores',
             'total_toko',
             'total_produk',
             'total_pelanggan',

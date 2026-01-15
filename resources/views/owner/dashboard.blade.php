@@ -172,4 +172,82 @@
     </div>
 
 </div>
+
+{{-- Store Selection Popup --}}
+@if(!session('toko_active_id'))
+<div id="storeSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-gray-300 border-4 border-gray-400 shadow-2xl max-w-2xl w-full mx-4" style="border-style: outset;">
+        {{-- Title Bar --}}
+        <div class="bg-gradient-to-r from-blue-900 to-blue-600 text-white px-3 py-2 flex justify-between items-center">
+            <span class="font-bold text-base flex items-center gap-2">
+                <i class="fa fa-store"></i> PILIH TOKO AKTIF
+            </span>
+        </div>
+
+        {{-- Content --}}
+        <div class="p-4">
+            <div class="bg-yellow-100 border-2 border-yellow-600 p-3 mb-4">
+                <p class="text-sm font-bold text-yellow-900">
+                    <i class="fa fa-info-circle mr-2"></i>
+                    Silakan pilih toko yang ingin Anda kelola. Anda dapat mengubahnya kapan saja melalui menu Toko.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 gap-3 max-h-96 overflow-y-auto pr-2">
+                @foreach($userStores as $store)
+                <a href="{{ route('owner.toko.select', $store->id_toko) }}" 
+                   class="block bg-white border-2 border-gray-400 p-4 hover:bg-blue-50 hover:border-blue-600 transition-all cursor-pointer no-underline"
+                   style="border-style: outset;">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="text-base font-bold text-gray-800 m-0">{{ $store->nama_toko }}</h3>
+                                @if($store->is_pusat)
+                                    <span class="bg-blue-600 text-white px-2 py-1 text-xs font-bold">PUSAT</span>
+                                @endif
+                                @if($store->is_active)
+                                    <span class="bg-green-500 text-white px-2 py-1 text-xs font-bold">AKTIF</span>
+                                @else
+                                    <span class="bg-red-500 text-white px-2 py-1 text-xs font-bold">TUTUP</span>
+                                @endif
+                            </div>
+                            <div class="text-sm text-gray-700">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <i class="fa fa-barcode text-gray-500 w-4"></i>
+                                    <span class="font-mono">{{ $store->kode_toko }}</span>
+                                </div>
+                                @if($store->alamat)
+                                <div class="flex items-start gap-2 mb-1">
+                                    <i class="fa fa-map-marker-alt text-gray-500 w-4 mt-1"></i>
+                                    <span>{{ $store->alamat }}, {{ $store->kota ?? '-' }}</span>
+                                </div>
+                                @endif
+                                @if($store->no_telp)
+                                <div class="flex items-center gap-2">
+                                    <i class="fa fa-phone text-gray-500 w-4"></i>
+                                    <span>{{ $store->no_telp }}</span>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="ml-4">
+                            <i class="fa fa-chevron-right text-2xl text-gray-400"></i>
+                        </div>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+
+            @if($userStores->isEmpty())
+            <div class="bg-red-100 border-2 border-red-600 p-6 text-center">
+                <i class="fa fa-exclamation-triangle text-4xl text-red-600 mb-3"></i>
+                <p class="text-base font-bold text-red-900 mb-2">Tidak ada toko tersedia</p>
+                <p class="text-sm text-red-700">Silakan hubungi administrator untuk menambahkan toko.</p>
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+@endif
+
 @endsection
