@@ -23,7 +23,7 @@ class PenjualanSeeder extends Seeder
         try {
             foreach ($tokos as $toko) {
                 // Get random products for this shop
-                $produks = Produk::inRandomOrder()->limit(10)->get();
+                $produks = Produk::with('satuanKecil')->inRandomOrder()->limit(10)->get();
                 
                 if ($produks->isEmpty()) {
                     continue;
@@ -72,7 +72,7 @@ class PenjualanSeeder extends Seeder
                             'id_penjualan' => $penjualan->id_penjualan,
                             'id_produk' => $produk->id_produk,
                             'qty' => $qty,
-                            'satuan_jual' => $produk->satuan->nama_satuan ?? 'Pcs',
+                            'satuan_jual' => $produk->satuanKecil->nama_satuan ?? 'Pcs',
                             'harga_modal_saat_jual' => $produk->harga_beli,
                             'harga_jual_satuan' => $harga,
                             'diskon_item' => 0,
