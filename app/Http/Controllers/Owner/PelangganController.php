@@ -71,6 +71,7 @@ class PelangganController extends Controller
             'alamat'         => $request->alamat,
             'wilayah'        => $request->wilayah,
             'limit_piutang'  => $request->limit_piutang ?? 0,
+            'kategori_harga' => $request->kategori_harga ?? 'umum',
         ]);
 
         return redirect()->route('owner.pelanggan.index')->with('success', 'Pelanggan berhasil ditambahkan');
@@ -96,6 +97,7 @@ class PelangganController extends Controller
             'alamat'         => $request->alamat,
             'wilayah'        => $request->wilayah,
             'limit_piutang'  => $request->limit_piutang ?? 0,
+            'kategori_harga' => $request->kategori_harga ?? 'umum',
         ]);
 
         return redirect()->route('owner.pelanggan.index')->with('success', 'Pelanggan berhasil diupdate');

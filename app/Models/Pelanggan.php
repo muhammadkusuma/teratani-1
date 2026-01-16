@@ -16,6 +16,11 @@ class Pelanggan extends Model
         'alamat',
         'wilayah',
         'limit_piutang',
+        'kategori_harga',
+    ];
+
+    protected $casts = [
+        'limit_piutang' => 'decimal:2',
     ];
 
     public function toko()
@@ -35,5 +40,16 @@ class Pelanggan extends Model
             ->orderBy('tanggal', 'desc')
             ->orderBy('id_piutang', 'desc')
             ->first()?->saldo_piutang ?? 0;
+    }
+
+    // Helper method untuk mendapatkan harga sesuai kategori pelanggan
+    public function getHargaForProduk($produk)
+    {
+        return match($this->kategori_harga) {
+            'r1' => $produk->harga_r1 ?? $produk->harga_jual_umum,
+            'r2' => $produk->harga_r2 ?? $produk->harga_jual_umum,
+            'grosir' => $produk->harga_jual_grosir ?? $produk->harga_jual_umum,
+            default => $produk->harga_jual_umum,
+        };
     }
 }

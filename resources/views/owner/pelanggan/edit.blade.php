@@ -47,6 +47,18 @@
                         class="w-full border border-gray-400 p-1 text-sm text-right">
                 </div>
 
+                {{-- Kategori Harga --}}
+                <div>
+                    <label class="block font-bold text-xs mb-1 bg-green-100 px-2 py-1 w-fit">💰 Kategori Harga</label>
+                    <select name="kategori_harga" class="w-full border border-gray-400 p-1 text-sm bg-white">
+                        <option value="umum" {{ ($pelanggan->kategori_harga ?? 'umum') == 'umum' ? 'selected' : '' }}>Umum / Eceran (Harga Normal)</option>
+                        <option value="grosir" {{ ($pelanggan->kategori_harga ?? 'umum') == 'grosir' ? 'selected' : '' }}>Grosir (Harga Grosir)</option>
+                        <option value="r1" {{ ($pelanggan->kategori_harga ?? 'umum') == 'r1' ? 'selected' : '' }}>Langganan R1 (Harga Khusus R1)</option>
+                        <option value="r2" {{ ($pelanggan->kategori_harga ?? 'umum') == 'r2' ? 'selected' : '' }}>Langganan R2 (Harga Khusus R2)</option>
+                    </select>
+                    <small class="text-[10px] text-gray-500">Harga yang akan digunakan di kasir untuk pelanggan ini.</small>
+                </div>
+
                 <div class="md:col-span-2">
                     <label class="block font-bold text-xs mb-1">Alamat Lengkap</label>
                     <textarea name="alamat" rows="3" class="w-full border border-gray-400 p-1 text-sm">{{ $pelanggan->alamat }}</textarea>

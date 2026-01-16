@@ -51,6 +51,18 @@
                     <small class="text-[10px] text-gray-500">Batas maksimal hutang yang diperbolehkan.</small>
                 </div>
 
+                {{-- Kategori Harga --}}
+                <div>
+                    <label class="block font-bold text-xs mb-1 bg-green-100 px-2 py-1 w-fit">💰 Kategori Harga</label>
+                    <select name="kategori_harga" class="w-full border border-gray-400 p-1 text-sm bg-white">
+                        <option value="umum" selected>Umum / Eceran (Harga Normal)</option>
+                        <option value="grosir">Grosir (Harga Grosir)</option>
+                        <option value="r1">Langganan R1 (Harga Khusus R1)</option>
+                        <option value="r2">Langganan R2 (Harga Khusus R2)</option>
+                    </select>
+                    <small class="text-[10px] text-gray-500">Harga yang akan digunakan di kasir untuk pelanggan ini.</small>
+                </div>
+
                 
                 <div class="md:col-span-2">
                     <label class="block font-bold text-xs mb-1">Alamat Lengkap</label>

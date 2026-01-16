@@ -19,8 +19,19 @@ class Produk extends Model
         'harga_beli',
         'harga_jual_umum',
         'harga_jual_grosir',
+        'harga_r1',
+        'harga_r2',
         'gambar_produk',
         'is_active',
+    ];
+
+    protected $casts = [
+        'harga_beli'        => 'decimal:2',
+        'harga_jual_umum'   => 'decimal:2',
+        'harga_jual_grosir' => 'decimal:2',
+        'harga_r1'          => 'decimal:2',
+        'harga_r2'          => 'decimal:2',
+        'is_active'         => 'boolean',
     ];
 
     public function kategori()

@@ -55,16 +55,19 @@ class ProdukController extends Controller
         $toko = Toko::findOrFail($id_toko);
 
         $request->validate([
-            'nama_produk'     => 'required|string|max:150',
-            'sku'             => 'nullable|string|max:50|unique:produk,sku',
-            'id_kategori'     => 'nullable|exists:kategori,id_kategori',
-            'id_satuan_kecil' => 'required|exists:satuan,id_satuan',
-            'id_satuan_besar' => 'nullable|exists:satuan,id_satuan',
-            'nilai_konversi'  => 'required|integer|min:1',
-            'harga_beli'      => 'required|numeric|min:0',
-            'harga_jual_umum' => 'required|numeric|min:0',
-            'stok_awal'       => 'nullable|integer|min:0',
-            'gambar_produk'   => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'nama_produk'       => 'required|string|max:150',
+            'sku'               => 'nullable|string|max:50|unique:produk,sku',
+            'id_kategori'       => 'nullable|exists:kategori,id_kategori',
+            'id_satuan_kecil'   => 'required|exists:satuan,id_satuan',
+            'id_satuan_besar'   => 'nullable|exists:satuan,id_satuan',
+            'nilai_konversi'    => 'required|integer|min:1',
+            'harga_beli'        => 'required|numeric|min:0',
+            'harga_jual_umum'   => 'required|numeric|min:0',
+            'harga_jual_grosir' => 'nullable|numeric|min:0',
+            'harga_r1'          => 'nullable|numeric|min:0',
+            'harga_r2'          => 'nullable|numeric|min:0',
+            'stok_awal'         => 'nullable|integer|min:0',
+            'gambar_produk'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         DB::beginTransaction();
@@ -123,12 +126,15 @@ class ProdukController extends Controller
         $produk = Produk::findOrFail($id_produk);
 
         $request->validate([
-            'nama_produk'     => 'required|string|max:150',
-            'sku'             => 'nullable|string|max:50|unique:produk,sku,' . $produk->id_produk . ',id_produk',
-            'id_satuan_kecil' => 'required|exists:satuan,id_satuan',
-            'nilai_konversi'  => 'required|integer|min:1',
-            'harga_jual_umum' => 'required|numeric|min:0',
-            'gambar_produk'   => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'nama_produk'       => 'required|string|max:150',
+            'sku'               => 'nullable|string|max:50|unique:produk,sku,' . $produk->id_produk . ',id_produk',
+            'id_satuan_kecil'   => 'required|exists:satuan,id_satuan',
+            'nilai_konversi'    => 'required|integer|min:1',
+            'harga_jual_umum'   => 'required|numeric|min:0',
+            'harga_jual_grosir' => 'nullable|numeric|min:0',
+            'harga_r1'          => 'nullable|numeric|min:0',
+            'harga_r2'          => 'nullable|numeric|min:0',
+            'gambar_produk'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         DB::beginTransaction();
