@@ -27,6 +27,10 @@ class PelangganSeeder extends Seeder
             $firstName = $firstNames[array_rand($firstNames)];
             $lastName = $lastNames[array_rand($lastNames)];
             
+            $kategoris = ['umum', 'grosir', 'r1', 'r2'];
+            $weights = [50, 30, 15, 5]; // 50% umum, 30% grosir, 15% r1, 5% r2
+            $kategoriHarga = $this->weightedRandom($kategoris, $weights);
+            
             $customers[] = [
                 'id_toko' => $tokoPusat->id_toko,
                 'kode_pelanggan' => 'PLG-' . str_pad($i, 5, '0', STR_PAD_LEFT),
@@ -35,6 +39,7 @@ class PelangganSeeder extends Seeder
                 'no_hp' => '08' . rand(1, 9) . rand(100000000, 999999999),
                 'alamat' => 'Jl. ' . $lastNames[array_rand($lastNames)] . ' No. ' . rand(1, 200) . ', RT ' . rand(1, 10) . ' RW ' . rand(1, 10),
                 'limit_piutang' => rand(1, 20) * 500000, // 500k - 10jt
+                'kategori_harga' => $kategoriHarga,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -51,6 +56,11 @@ class PelangganSeeder extends Seeder
             $business = $businesses[array_rand($businesses)];
             $location = $wilayahs[array_rand($wilayahs)];
             
+            // Businesses more likely to have better categories
+            $kategoris = ['grosir', 'r1', 'r2'];
+            $weights = [60, 30, 10]; // 60% grosir, 30% r1, 10% r2
+            $kategoriHarga = $this->weightedRandom($kategoris, $weights);
+            
             $customers[] = [
                 'id_toko' => $tokoPusat->id_toko,
                 'kode_pelanggan' => 'PLG-' . str_pad($i, 5, '0', STR_PAD_LEFT),
@@ -59,6 +69,7 @@ class PelangganSeeder extends Seeder
                 'no_hp' => '08' . rand(1, 9) . rand(100000000, 999999999),
                 'alamat' => 'Jl. Raya ' . $location . ' No. ' . rand(1, 500),
                 'limit_piutang' => rand(10, 50) * 1000000, // 10jt - 50jt for businesses
+                'kategori_harga' => $kategoriHarga,
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -75,5 +86,22 @@ class PelangganSeeder extends Seeder
         }
         
         echo "Created 2000 customers\n";
+    }
+    
+    // Helper function for weighted random selection
+    private function weightedRandom($values, $weights)
+    {
+        $total = array_sum($weights);
+        $random = rand(1, $total);
+        $sum = 0;
+        
+        foreach ($values as $i => $value) {
+            $sum += $weights[$i];
+            if ($random <= $sum) {
+                return $value;
+            }
+        }
+        
+        return $values[0];
     }
 }

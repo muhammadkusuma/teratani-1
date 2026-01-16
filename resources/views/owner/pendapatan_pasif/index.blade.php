@@ -28,14 +28,26 @@
         </div>
     </form>
 </div>
-<div class="grid grid-cols-2 gap-3 mb-3">
+<div class="grid grid-cols-5 gap-3 mb-3">
     <div class="bg-green-50 border border-green-300 p-3">
-        <div class="text-xs text-green-700 font-bold">Total Pendapatan</div>
-        <div class="text-2xl font-bold text-green-900">Rp {{ number_format($summary['total_pendapatan'], 0, ',', '.') }}</div>
+        <div class="text-xs text-green-700 font-bold">Total (Filter)</div>
+        <div class="text-xl font-bold text-green-900">Rp {{ number_format($summary['total_pendapatan'], 0, ',', '.') }}</div>
     </div>
     <div class="bg-blue-50 border border-blue-300 p-3">
-        <div class="text-xs text-blue-700 font-bold">Jumlah Transaksi</div>
-        <div class="text-2xl font-bold text-blue-900">{{ $summary['jumlah_transaksi'] }}</div>
+        <div class="text-xs text-blue-700 font-bold">Transaksi (Filter)</div>
+        <div class="text-xl font-bold text-blue-900">{{ $summary['jumlah_transaksi'] }}</div>
+    </div>
+    <div class="bg-yellow-50 border border-yellow-300 p-3">
+        <div class="text-xs text-yellow-700 font-bold">Hari Ini</div>
+        <div class="text-xl font-bold text-yellow-900">Rp {{ number_format($summary['hari_ini'], 0, ',', '.') }}</div>
+    </div>
+    <div class="bg-purple-50 border border-purple-300 p-3">
+        <div class="text-xs text-purple-700 font-bold">Bulan Ini</div>
+        <div class="text-xl font-bold text-purple-900">Rp {{ number_format($summary['bulan_ini'], 0, ',', '.') }}</div>
+    </div>
+    <div class="bg-indigo-50 border border-indigo-300 p-3">
+        <div class="text-xs text-indigo-700 font-bold">Tahun Ini</div>
+        <div class="text-xl font-bold text-indigo-900">Rp {{ number_format($summary['tahun_ini'], 0, ',', '.') }}</div>
     </div>
 </div>
 <div class="overflow-x-auto border border-gray-400 bg-white">

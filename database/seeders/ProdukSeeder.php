@@ -59,6 +59,8 @@ class ProdukSeeder extends Seeder
                         'harga_beli' => $hargaBeli,
                         'harga_jual_umum' => $hargaJual,
                         'harga_jual_grosir' => $hargaJual * 0.95, // 5% discount for wholesale
+                        'harga_r1' => $hargaJual * 0.92, // 8% discount for R1 customers
+                        'harga_r2' => $hargaJual * 0.90, // 10% discount for R2 customers
                         'gambar_produk' => null,
                         'is_active' => rand(0, 10) > 1, // 90% active
                         'created_at' => now(),

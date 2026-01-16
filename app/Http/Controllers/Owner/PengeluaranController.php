@@ -35,9 +35,17 @@ class PengeluaranController extends Controller
 
         $pengeluarans = $query->orderBy('tanggal_pengeluaran', 'desc')->paginate(20);
 
+
+        $today = now()->format('Y-m-d');
+        $thisMonth = now()->month;
+        $thisYear = now()->year;
+
         $summary = [
-            'total_pengeluaran' => $query->sum('jumlah'),
-            'jumlah_transaksi' => $query->count(),
+            'total_pengeluaran' => $query->sum('jumlah'), // Respects filters
+            'jumlah_transaksi' => $query->count(),        // Respects filters
+            'hari_ini' => Pengeluaran::where('id_toko', $idToko)->whereDate('tanggal_pengeluaran', $today)->sum('jumlah'),
+            'bulan_ini' => Pengeluaran::where('id_toko', $idToko)->whereMonth('tanggal_pengeluaran', $thisMonth)->whereYear('tanggal_pengeluaran', $thisYear)->sum('jumlah'),
+            'tahun_ini' => Pengeluaran::where('id_toko', $idToko)->whereYear('tanggal_pengeluaran', $thisYear)->sum('jumlah'),
         ];
 
         return view('owner.pengeluaran.index', compact('pengeluarans', 'summary'));
