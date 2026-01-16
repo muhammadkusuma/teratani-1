@@ -22,4 +22,18 @@ class Pelanggan extends Model
     {
         return $this->belongsTo(Toko::class, 'id_toko', 'id_toko');
     }
+
+    public function piutang()
+    {
+        return $this->hasMany(UtangPiutangPelanggan::class, 'id_pelanggan', 'id_pelanggan');
+    }
+
+    // Helper method untuk menghitung total saldo piutang
+    public function getSaldoPiutangAttribute()
+    {
+        return $this->piutang()
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('id_piutang', 'desc')
+            ->first()?->saldo_piutang ?? 0;
+    }
 }

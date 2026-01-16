@@ -35,8 +35,22 @@ class Distributor extends Model
         return $this->belongsTo(Toko::class, 'id_toko', 'id_toko');
     }
 
+    public function utangPiutang()
+    {
+        return $this->hasMany(UtangPiutangDistributor::class, 'id_distributor', 'id_distributor');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    // Helper method untuk menghitung total saldo utang
+    public function getSaldoUtangAttribute()
+    {
+        return $this->utangPiutang()
+            ->orderBy('tanggal', 'desc')
+            ->orderBy('id_utang_piutang', 'desc')
+            ->first()?->saldo_utang ?? 0;
     }
 }

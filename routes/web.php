@@ -59,6 +59,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('pengeluaran', PengeluaranController::class);
 
         Route::resource('pendapatan_pasif', PendapatanPasifController::class);
+
+        Route::resource('utang-piutang-distributor', \App\Http\Controllers\Owner\UtangPiutangDistributorController::class);
+
+        Route::resource('utang-piutang-pelanggan', \App\Http\Controllers\Owner\UtangPiutangPelangganController::class);
+
         
         Route::resource('users', OwnerUserController::class);
 
