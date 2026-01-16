@@ -119,10 +119,17 @@ class KasirController extends Controller
             // Prioritize the category sent from frontend (which matches what user saw), otherwise fallback to customer default or umum
             $kategoriHarga = $request->kategori_harga ?? ($pelanggan ? $pelanggan->kategori_harga : 'umum');
 
-            foreach ($request->items as $item) {
-                $produk = Produk::with(['stokToko' => function ($q) use ($id_toko) {
+            // Batch fetch products with stock to avoid N+1 inside loop
+            $item_ids = collect($request->items)->pluck('id');
+            $produks = Produk::whereIn('id_produk', $item_ids)
+                ->with(['stokToko' => function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko);
-                }])->find($item['id']);
+                }, 'satuanKecil'])
+                ->get()
+                ->keyBy('id_produk');
+
+            foreach ($request->items as $item) {
+                $produk = $produks->get($item['id']);
 
                 if (! $produk) {
                     continue;
@@ -214,12 +221,9 @@ class KasirController extends Controller
                     'subtotal'              => $data['subtotal'],
                 ]);
 
-                $stokToko = StokToko::where('id_toko', $id_toko)
-                    ->where('id_produk', $data['produk']->id_produk)
-                    ->first();
-
-                if ($stokToko) {
-                    $stokToko->decrement('stok_fisik', $data['qty']);
+                // Use the eager-loaded relation
+                if ($data['produk']->stokToko) {
+                    $data['produk']->stokToko->decrement('stok_fisik', $data['qty']);
                 }
             }
 
