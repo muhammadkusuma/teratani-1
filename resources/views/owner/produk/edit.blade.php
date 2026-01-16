@@ -65,7 +65,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-xs mb-1">Harga Beli (HPP)</label>
-                        <input type="number" name="harga_beli" value="{{ $produk->harga_beli }}" class="w-full border border-gray-400 p-1 text-sm text-right">
+                        <input type="number" name="harga_beli" value="{{ $produk->harga_beli }}" step="1" class="w-full border border-gray-400 p-1 text-sm text-right">
                     </div>
                 </div>
 
@@ -75,19 +75,19 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-xs mb-1 font-bold text-blue-700">Eceran/Umum <span class="text-red-600">*</span></label>
-                            <input type="number" name="harga_jual_umum" value="{{ $produk->harga_jual_umum }}" class="w-full border border-gray-400 p-1 text-sm text-right font-bold bg-white" required>
+                            <input type="number" name="harga_jual_umum" value="{{ $produk->harga_jual_umum }}" step="1" class="w-full border border-gray-400 p-1 text-sm text-right font-bold bg-white" required>
                         </div>
                         <div>
                             <label class="block text-xs mb-1">Grosir</label>
-                            <input type="number" name="harga_jual_grosir" value="{{ $produk->harga_jual_grosir }}" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
+                            <input type="number" name="harga_jual_grosir" value="{{ $produk->harga_jual_grosir }}" step="1" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
                         </div>
                         <div>
                             <label class="block text-xs mb-1">Harga R1 (Langganan)</label>
-                            <input type="number" name="harga_r1" value="{{ $produk->harga_r1 }}" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
+                            <input type="number" name="harga_r1" value="{{ $produk->harga_r1 }}" step="1" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
                         </div>
                         <div>
                             <label class="block text-xs mb-1">Harga R2 (Langganan)</label>
-                            <input type="number" name="harga_r2" value="{{ $produk->harga_r2 }}" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
+                            <input type="number" name="harga_r2" value="{{ $produk->harga_r2 }}" step="1" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
                         </div>
                     </div>
                 </div>

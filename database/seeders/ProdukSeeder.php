@@ -46,7 +46,7 @@ class ProdukSeeder extends Seeder
                     $size = $sizes[array_rand($sizes)];
                     
                     $hargaBeli = rand(5000, 500000);
-                    $hargaJual = $hargaBeli * (1 + (rand(10, 40) / 100)); // 10-40% markup
+                    $hargaJual = intval($hargaBeli * (1 + (rand(10, 40) / 100))); // 10-40% markup
                     
                     $products[] = [
                         'sku' => $sku,
@@ -58,9 +58,9 @@ class ProdukSeeder extends Seeder
                         'nilai_konversi' => $category['kategori'] === 'Alat Pertanian' ? 1 : rand(1, 50),
                         'harga_beli' => $hargaBeli,
                         'harga_jual_umum' => $hargaJual,
-                        'harga_jual_grosir' => $hargaJual * 0.95, // 5% discount for wholesale
-                        'harga_r1' => $hargaJual * 0.92, // 8% discount for R1 customers
-                        'harga_r2' => $hargaJual * 0.90, // 10% discount for R2 customers
+                        'harga_jual_grosir' => intval($hargaJual * 0.95), // 5% discount for wholesale
+                        'harga_r1' => intval($hargaJual * 0.92), // 8% discount for R1 customers
+                        'harga_r2' => intval($hargaJual * 0.90), // 10% discount for R2 customers
                         'gambar_produk' => null,
                         'is_active' => rand(0, 10) > 1, // 90% active
                         'created_at' => now(),

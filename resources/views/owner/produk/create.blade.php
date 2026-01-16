@@ -60,7 +60,7 @@
                     </div>
                     <div>
                         <label class="block font-bold text-xs mb-1">Harga Beli (HPP)</label>
-                        <input type="number" name="harga_beli" value="0" class="w-full border border-gray-400 p-1 text-sm text-right">
+                        <input type="number" name="harga_beli" value="0" step="1" class="w-full border border-gray-400 p-1 text-sm text-right">
                     </div>
                 </div>
 
@@ -70,19 +70,19 @@
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-xs mb-1 font-bold text-blue-700">Eceran/Umum <span class="text-red-600">*</span></label>
-                            <input type="number" name="harga_jual_umum" value="0" class="w-full border border-gray-400 p-1 text-sm text-right font-bold bg-white" required>
+                            <input type="number" name="harga_jual_umum" value="0" step="1" class="w-full border border-gray-400 p-1 text-sm text-right font-bold bg-white" required>
                         </div>
                         <div>
                             <label class="block text-xs mb-1">Grosir</label>
-                            <input type="number" name="harga_jual_grosir" value="" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
+                            <input type="number" name="harga_jual_grosir" value="" step="1" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
                         </div>
                         <div>
                             <label class="block text-xs mb-1">Harga R1 (Langganan)</label>
-                            <input type="number" name="harga_r1" value="" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
+                            <input type="number" name="harga_r1" value="" step="1" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
                         </div>
                         <div>
                             <label class="block text-xs mb-1">Harga R2 (Langganan)</label>
-                            <input type="number" name="harga_r2" value="" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
+                            <input type="number" name="harga_r2" value="" step="1" placeholder="Optional" class="w-full border border-gray-400 p-1 text-sm text-right bg-white">
                         </div>
                     </div>
                 </div>
