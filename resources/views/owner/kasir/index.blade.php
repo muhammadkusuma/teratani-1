@@ -66,7 +66,7 @@
                                             {{ $p->nama_produk }}
                                         </div>
                                         <div
-                                            class="bg-black text-yellow-300 font-mono text-[11px] px-1 mb-1 border border-gray-500">
+                                            class="price-label bg-black text-yellow-300 font-mono text-[11px] px-1 mb-1 border border-gray-500" data-id="{{ $p->id_produk }}">
                                             Rp {{ number_format($harga, 0, ',', '.') }}
                                         </div>
                                         <div
@@ -291,12 +291,16 @@
 
             // Set values in main UI
             $('#pelanggan').val(pId);
-            // Trigger change on pelanggan first to satisfy any libraries, but then strictly override category
+            // Trigger change on pelanggan first to satisfy any libraries
              $('#pelanggan').trigger('change');
             
-            // Force the category selected in setup
+            // Force the category selected in setup to be the current one immediately
+            currentCategory = kId;
+            $('#kategoriHarga').val(kId); // Set value without triggering change yet if we want to avoid double updates, but we want to update prices.
+            
+            // Delay slightly to ensure Select2 and other listeners are ready, then trigger update
             setTimeout(() => {
-                $('#kategoriHarga').val(kId).trigger('change');
+                 $('#kategoriHarga').trigger('change');
                 
                 // Hide modal and ready to go
                 $('#modalSetupKasir').removeClass('flex').addClass('hidden');
@@ -304,56 +308,25 @@
             }, 50);
         }
 
-        // --- KEYBOARD SHORTCUTS ---
-        $(document).keydown(function(e) {
-            if (e.key === "F2") {
-                e.preventDefault();
-                $('#searchProduct').focus();
-            }
-            if (e.key === "F4") {
-                e.preventDefault();
-                $('#inputBayar').focus();
-            }
-            if (e.key === "F10") {
-                e.preventDefault();
-                prosesBayar();
-            }
-        });
-
-        // --- CUSTOMER & PRICE CATEGORY HANDLER ---
-        $('#pelanggan').on('change', function() {
-            let selectedOption = $(this).find(':selected');
-            let cat = selectedOption.data('kategori') || 'umum';
-            
-            // Auto-select the price category based on customer
-            // Must trigger 'change' for Select2 to update UI and for the listener below to fire
-            $('#kategoriHarga').val(cat).trigger('change'); 
-        });
-
-        $('#kategoriHarga').on('change', function() {
-            let cat = $(this).val();
-            updatePrices(cat);
-        });
-
-        function updatePrices(category) {
-            currentCategory = category;
-            console.log("Price category set to:", currentCategory);
-            
-            // Update prices in cart
-            cart.forEach(item => {
-                let product = productsData[item.id];
-                if(product) {
-                   item.harga = getPriceForCategory(product, currentCategory);
-                }
-            });
-            renderCart();
-        }
-
         function getPriceForCategory(product, category) {
-            let price = parseFloat(product.harga_jual_umum);
-            if (category === 'grosir' && product.harga_jual_grosir) price = parseFloat(product.harga_jual_grosir);
-            if (category === 'r1' && product.harga_r1) price = parseFloat(product.harga_r1);
-            if (category === 'r2' && product.harga_r2) price = parseFloat(product.harga_r2);
+            // Default to عمومی
+            let price = parseFloat(product.harga_jual_umum || 0);
+            
+            // Check specific categories. we check if property exists and is not null. 
+            // We use loose comparison != null to catch null and undefined.
+            // We also check if it > 0 if we want fallback? No, if it is 0, it might be free? 
+            // Usually if 0, it means not set -> fallback. Let's assume > 0 check is safer for now unless free items exist.
+            
+            if (category === 'grosir' && product.harga_jual_grosir > 0) {
+                 price = parseFloat(product.harga_jual_grosir);
+            }
+            if (category === 'r1' && product.harga_r1 > 0) {
+                 price = parseFloat(product.harga_r1);
+            }
+            if (category === 'r2' && product.harga_r2 > 0) {
+                 price = parseFloat(product.harga_r2);
+            }
+            
             return price;
         }
 
@@ -499,7 +472,11 @@
 
                             let stok = p.stok_toko ? p.stok_toko.stok_fisik : 0;
                             let safeName = p.nama_produk.replace(/'/g, "\\'");
-                            let hargaFmt = new Intl.NumberFormat('id-ID').format(p.harga_jual_umum);
+                            
+                            // Use currentCategory to determine displayed price in search results
+                            let currentPrice = getPriceForCategory(p, currentCategory);
+                            let hargaFmt = new Intl.NumberFormat('id-ID').format(currentPrice);
+                            
                             let stokClass = stok > 0 ? 'text-black' :
                                 'text-red-600 font-bold bg-yellow-200';
 
@@ -509,7 +486,7 @@
                                     <div class="bg-[#d4d0c8] border-2 border-white border-r-black border-b-black p-1 hover:bg-blue-100 active:border-t-black active:border-l-black h-full flex flex-col justify-between min-h-[80px]">
                                         <div class="text-center leading-tight">
                                             <div class="font-bold text-[10px] text-blue-900 mb-1 line-clamp-2 h-8 overflow-hidden">${p.nama_produk}</div>
-                                            <div class="bg-black text-yellow-300 font-mono text-[11px] px-1 mb-1 border border-gray-500">
+                                            <div class="price-label bg-black text-yellow-300 font-mono text-[11px] px-1 mb-1 border border-gray-500" data-id="${p.id_produk}">
                                                 Rp ${hargaFmt}
                                             </div>
                                             <div class="text-[9px] ${stokClass}">
