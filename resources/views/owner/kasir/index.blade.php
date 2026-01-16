@@ -121,12 +121,23 @@
 
                     
                     <div class="grid grid-cols-3 gap-1 items-center mb-1">
+                        <label class="font-bold text-right col-span-1">Harga:</label>
+                        <select id="kategoriHarga"
+                            class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black bg-white focus:outline-none font-bold text-blue-900">
+                            <option value="umum">UMUM (RETAIL)</option>
+                            <option value="grosir">GROSIR</option>
+                            <option value="r1">HARGA R1</option>
+                            <option value="r2">HARGA R2</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-1 items-center mb-1">
                         <label class="font-bold text-right col-span-1">Pelanggan:</label>
                         <select id="pelanggan"
                             class="col-span-2 px-1 py-0.5 border-2 border-gray-400 border-l-black border-t-black bg-white focus:outline-none">
-                            <option value="">- UMUM -</option>
+                            <option value="" data-kategori="umum">- UMUM -</option>
                             @foreach ($pelanggan as $plg)
-                                <option value="{{ $plg->id_pelanggan }}">{{ $plg->nama_pelanggan }}</option>
+                                <option value="{{ $plg->id_pelanggan }}" data-kategori="{{ $plg->kategori_harga }}">{{ $plg->nama_pelanggan }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -203,6 +214,13 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         let cart = [];
+        let productsData = {}; // Map to store full product info: id -> product object
+        let currentCategory = 'umum'; // Default category
+
+        // Initialize products from server-side loop
+        @foreach($produk as $p)
+            productsData[{{ $p->id_produk }}] = @json($p);
+        @endforeach
 
         // --- KEYBOARD SHORTCUTS ---
         $(document).keydown(function(e) {
@@ -220,12 +238,60 @@
             }
         });
 
+        // --- CUSTOMER & PRICE CATEGORY HANDLER ---
+        $('#pelanggan').on('change', function() {
+            let selectedOption = $(this).find(':selected');
+            let cat = selectedOption.data('kategori') || 'umum';
+            
+            // Auto-select the price category based on customer
+            $('#kategoriHarga').val(cat);
+            updatePrices(cat);
+        });
+
+        $('#kategoriHarga').on('change', function() {
+            let cat = $(this).val();
+            updatePrices(cat);
+        });
+
+        function updatePrices(category) {
+            currentCategory = category;
+            console.log("Price category set to:", currentCategory);
+            
+            // Update prices in cart
+            cart.forEach(item => {
+                let product = productsData[item.id];
+                if(product) {
+                   item.harga = getPriceForCategory(product, currentCategory);
+                }
+            });
+            renderCart();
+        }
+
+        function getPriceForCategory(product, category) {
+            let price = parseFloat(product.harga_jual_umum);
+            if (category === 'grosir' && product.harga_jual_grosir) price = parseFloat(product.harga_jual_grosir);
+            if (category === 'r1' && product.harga_r1) price = parseFloat(product.harga_r1);
+            if (category === 'r2' && product.harga_r2) price = parseFloat(product.harga_r2);
+            return price;
+        }
+
         // --- LOGIC KERANJANG ---
-        function addToCart(id, nama, harga, stok) {
+        function addToCart(id, nama, unused_price, stok) {
+            // We ignore the passed price and use the one from productsData based on category
+            let product = productsData[id];
+            if (!product) {
+                // Should not happen if data is synced, but fallback safely
+                console.error("Product data not found for ID", id);
+                return;
+            }
+
+            let price = getPriceForCategory(product, currentCategory);
+            
             let item = cart.find(i => i.id === id);
             if (item) {
                 if (item.qty < stok) {
                     item.qty++;
+                    item.harga = price; // Update price just in case category changed
                 } else {
                     alert('STOK TIDAK MENCUKUPI! Sisa: ' + stok);
                     return;
@@ -235,7 +301,7 @@
                     cart.push({
                         id,
                         nama,
-                        harga,
+                        harga: price,
                         stok,
                         qty: 1
                     });
@@ -261,7 +327,6 @@
                     <tr class="border-b border-gray-300 hover:bg-blue-50 group">
                         <td class="px-1 py-1 text-center"><button class="text-red-600 font-bold hover:bg-red-200 px-1" onclick="hapusItem(${idx})">x</button></td>
                         
-                        
                         <td class="px-1 py-1 truncate max-w-[120px]" title="${item.nama}">
                             ${item.nama}
                             <div class="text-[9px] text-gray-500">@ ${new Intl.NumberFormat('id-ID').format(item.harga)}</div>
@@ -280,7 +345,7 @@
             let formattedTotal = new Intl.NumberFormat('id-ID').format(total);
             $('#displayTotal').text(formattedTotal);
             $('#headerTotal').text('Rp ' + formattedTotal);
-            hitungKembalian();
+            hitungKembalian(); // Recalculate change as total might have changed
         }
 
         function updateQty(idx, val) {
@@ -347,10 +412,12 @@
                         );
                     } else {
                         data.forEach(p => {
+                            // Update our global data map with new results
+                            productsData[p.id_produk] = p;
+
                             let stok = p.stok_toko ? p.stok_toko.stok_fisik : 0;
                             let safeName = p.nama_produk.replace(/'/g, "\\'");
-                            let hargaFmt = new Intl.NumberFormat('id-ID').format(p
-                                .harga_jual_umum);
+                            let hargaFmt = new Intl.NumberFormat('id-ID').format(p.harga_jual_umum);
                             let stokClass = stok > 0 ? 'text-black' :
                                 'text-red-600 font-bold bg-yellow-200';
 
@@ -376,12 +443,11 @@
             }, 300);
         });
 
-        let lastTransactionId = null; // Variabel untuk menyimpan ID transaksi terakhir
+        let lastTransactionId = null; 
 
         function prosesBayar() {
             if (cart.length === 0) return alert('KERANJANG KOSONG!');
 
-            // ... (validasi pembayaran tetap sama) ...
             let total = cart.reduce((a, b) => a + (b.harga * b.qty), 0);
             let bayar = parseFloat($('#inputBayar').val()) || 0;
             let metode = $('#metodeBayar').val();
@@ -398,34 +464,34 @@
 
             $.post("{{ route('owner.kasir.store') }}", {
                     _token: "{{ csrf_token() }}",
-                    items: cart,
+                    // We must filter the cart to only send what the backend expects, but the backend likely only needs ID and QTY.
+                    // If backend recalculates price, we assume it trusts the client or (better) we should update the backend to respect the applied price or recalculate based on customer category.
+                    // For now, let's look at the controller. It fetches the product again.
+                    // WAIT: The controller currently uses `harga_jual_umum`. We need to fix the controller too or pass the resolved price?
+                    // Best practice: Pass the customer ID to backend, backend looks up category, backend determines price. JS is just for display.
+                    // But the controller 'store' method doesn't seem to account for customer category price calculation yet.
+                    // See KasirController line 128: $harga = $produk->harga_jual_umum;
+                    // I MUST UPDATE THE CONTROLLER STORE METHOD AS WELL.
+                    items: cart.map(i => ({ id: i.id, qty: i.qty })), 
                     bayar: bayar,
                     id_pelanggan: $('#pelanggan').val(),
                     metode_bayar: metode
                 })
                 .done(res => {
-                    // UPDATE DISINI: Jangan langsung reload/print
                     btn.prop('disabled', false).html(oriText);
-
-                    // 1. Simpan ID Transaksi
                     lastTransactionId = res.id_penjualan;
-
-                    // 2. Tampilkan Modal Pilihan
                     $('#modalCetak').removeClass('hidden').addClass('flex');
-
-                    // 3. Reset Cart di background (Opsional, agar siap transaksi baru)
                     cart = [];
                     renderCart();
                     $('#inputBayar').val('');
                     $('#pelanggan').val('');
+                    currentCategory = 'umum'; // Reset category
                 })
                 .fail(xhr => {
                     btn.prop('disabled', false).html(oriText);
                     alert('GAGAL: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Terjadi kesalahan sistem.'));
                 });
         }
-
-        // --- FUNGSI BARU UNTUK MODAL ---
 
         function printStruk() {
             if (!lastTransactionId) return;
@@ -435,14 +501,13 @@
 
         function printFaktur() {
             if (!lastTransactionId) return;
-            // Panggil route cetak faktur yang baru dibuat
             let url = "{{ url('owner/kasir/cetak-faktur') }}/" + lastTransactionId;
             window.open(url, 'Faktur', 'width=800,height=600');
         }
 
         function tutupModal() {
             $('#modalCetak').addClass('hidden').removeClass('flex');
-            location.reload(); // Refresh halaman untuk transaksi baru yang bersih
+            location.reload(); 
         }
     </script>
 

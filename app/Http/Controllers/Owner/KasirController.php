@@ -52,7 +52,7 @@ class KasirController extends Controller
 
         // Select only needed columns for pelanggan dropdown
         $pelanggan = Pelanggan::where('id_toko', $id_toko)
-            ->select('id_pelanggan', 'kode_pelanggan', 'nama_pelanggan')
+            ->select('id_pelanggan', 'kode_pelanggan', 'nama_pelanggan', 'kategori_harga')
             ->orderBy('nama_pelanggan')
             ->get();
 
@@ -110,6 +110,13 @@ class KasirController extends Controller
             $total_bruto = 0;
             $items_fix   = [];
 
+
+            $pelanggan = null;
+            if ($request->id_pelanggan) {
+                $pelanggan = Pelanggan::find($request->id_pelanggan);
+            }
+            $kategoriHarga = $pelanggan ? $pelanggan->kategori_harga : 'umum';
+
             foreach ($request->items as $item) {
                 $produk = Produk::with(['stokToko' => function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko);
@@ -125,7 +132,12 @@ class KasirController extends Controller
                     throw new \Exception("Stok {$produk->nama_produk} kurang (Sisa: $stok_sekarang).");
                 }
 
-                $harga       = $produk->harga_jual_umum;
+                // Determine price based on category
+                $harga = $produk->harga_jual_umum;
+                if ($kategoriHarga == 'grosir' && $produk->harga_jual_grosir) $harga = $produk->harga_jual_grosir;
+                if ($kategoriHarga == 'r1' && $produk->harga_r1) $harga = $produk->harga_r1;
+                if ($kategoriHarga == 'r2' && $produk->harga_r2) $harga = $produk->harga_r2;
+
                 $subtotal    = $harga * $item['qty'];
                 $total_bruto += $subtotal;
 
