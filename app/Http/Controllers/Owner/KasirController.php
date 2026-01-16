@@ -10,6 +10,7 @@ use App\Models\StokToko;
 use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class KasirController extends Controller
@@ -37,16 +38,19 @@ class KasirController extends Controller
         }
 
         // Limit to 50 most recent active products with stock
-        $produk = Produk::where('is_active', 1)
-            ->whereHas('stokToko', function ($q) use ($id_toko) {
-                $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
-            })
-            ->with(['stokToko' => function ($q) use ($id_toko) {
-                $q->where('id_toko', $id_toko);
-            }, 'satuanKecil'])
-            ->orderBy('nama_produk')
-            ->limit(50)
-            ->get();
+        $cacheKey = "kasir_index_products_{$id_toko}";
+        $produk = Cache::tags(["toko_{$id_toko}_products"])->remember($cacheKey, 3600, function () use ($id_toko) {
+            return Produk::where('is_active', 1)
+                ->whereHas('stokToko', function ($q) use ($id_toko) {
+                    $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
+                })
+                ->with(['stokToko' => function ($q) use ($id_toko) {
+                    $q->where('id_toko', $id_toko);
+                }, 'satuanKecil'])
+                ->orderBy('nama_produk')
+                ->limit(50)
+                ->get();
+        });
 
         $metodeBayar = ['Tunai', 'Transfer', 'Hutang'];
 
@@ -81,9 +85,13 @@ class KasirController extends Controller
             });
         }
 
-        $produk = $query->with(['stokToko' => function ($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko);
-        }, 'satuanKecil'])->limit(20)->get();
+        $cacheKey = "kasir_search_{$id_toko}_" . md5($keyword);
+
+        $produk = Cache::tags(["toko_{$id_toko}_products"])->remember($cacheKey, 3600, function () use ($query, $id_toko) {
+            return $query->with(['stokToko' => function ($q) use ($id_toko) {
+                    $q->where('id_toko', $id_toko);
+                }, 'satuanKecil'])->limit(20)->get();
+        });
 
         return response()->json($produk);
     }

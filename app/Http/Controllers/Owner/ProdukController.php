@@ -8,6 +8,7 @@ use App\Models\Satuan;
 use App\Models\StokToko;
 use App\Models\Toko;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -98,6 +99,7 @@ class ProdukController extends Controller
             }
 
             DB::commit();
+            Cache::tags(['toko_' . $toko->id_toko . '_products', 'toko_' . $toko->id_toko . '_dashboard'])->flush();
             return redirect()->route('owner.toko.produk.index', $toko->id_toko)
                 ->with('success', 'Produk berhasil ditambahkan');
         } catch (\Exception $e) {
@@ -152,6 +154,7 @@ class ProdukController extends Controller
             $produk->update($data);
 
             DB::commit();
+            Cache::tags(['toko_' . $toko->id_toko . '_products', 'toko_' . $toko->id_toko . '_dashboard'])->flush();
             return redirect()->route('owner.toko.produk.index', $toko->id_toko)
                 ->with('success', 'Produk berhasil diperbarui');
         } catch (\Exception $e) {
@@ -170,6 +173,7 @@ class ProdukController extends Controller
         }
 
         $produk->delete();
+        Cache::tags(['toko_' . $toko->id_toko . '_products', 'toko_' . $toko->id_toko . '_dashboard'])->flush();
         return redirect()->route('owner.toko.produk.index', $toko->id_toko)
             ->with('success', 'Produk dihapus');
     }

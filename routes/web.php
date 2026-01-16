@@ -21,6 +21,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\Owner\UserController as OwnerUserController;
 use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Cache;
+
+Route::get('/redis-test', function () {
+    Cache::put('test', 'Laravel + Redis OK', 60);
+    return Cache::get('test');
+});
 
 Route::get('/', [AuthController::class, 'showLoginForm']);
 
@@ -70,10 +76,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('kategori', KategoriController::class);
         Route::resource('satuan', SatuanController::class);
 
-        Route::get('/satuan', [SatuanController::class, 'index'])->name('satuan.index');
-        Route::post('/satuan', [SatuanController::class, 'store'])->name('satuan.store');
-        Route::put('/satuan/{id}', [SatuanController::class, 'update'])->name('satuan.update');
-        Route::delete('/satuan/{id}', [SatuanController::class, 'destroy'])->name('satuan.destroy');
+        // Route::resource generates index, store, update, destroy
+        // Explicit routes removed to avoid name collision
 
         Route::get('/stok', [StokController::class, 'index'])->name('stok.index');
         Route::get('/stok/tambah', [StokController::class, 'tambah'])->name('stok.tambah');
