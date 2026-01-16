@@ -210,6 +210,51 @@
         </div>
     </div>
 
+    <!-- MODAL SETUP AWAL KASIR -->
+    <div id="modalSetupKasir" class="fixed inset-0 bg-black bg-opacity-90 hidden items-center justify-center z-[60]" style="z-index: 9999;">
+        <div class="bg-[#d4d0c8] p-1 border-2 border-white border-r-black border-b-black shadow-none w-[450px]">
+            <!-- Header -->
+            <div class="bg-blue-900 text-white px-2 py-1 flex justify-between items-center mb-3 bg-gradient-to-r from-blue-800 to-blue-600">
+                <span class="font-bold text-xs">PENGATURAN TRANSAKSI</span>
+            </div>
+
+            <div class="p-4 flex flex-col gap-4">
+                <div class="text-center mb-2 bg-yellow-100 border border-yellow-500 p-2 text-yellow-900 text-xs">
+                    <i class="fas fa-info-circle"></i> Silahkan pilih Pelanggan & Kategori Harga terlebih dahulu agar tidak terjadi kesalahan harga.
+                </div>
+
+                <!-- Form Setup -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block font-bold text-xs mb-1">1. PILIH PELANGGAN:</label>
+                        <select id="setupPelanggan" class="manual-select2 w-full px-2 py-2 border-2 border-gray-400 border-l-black border-t-black focus:outline-none text-sm">
+                            <option value="" data-kategori="umum">- UMUM / RETAIL -</option>
+                            @foreach ($pelanggan as $plg)
+                                <option value="{{ $plg->id_pelanggan }}" data-kategori="{{ $plg->kategori_harga }}">{{ $plg->nama_pelanggan }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-xs mb-1">2. PASTIKAN KATEGORI HARGA:</label>
+                        <select id="setupKategoriHarga" class="manual-select2 w-full px-2 py-2 border-2 border-gray-400 border-l-black border-t-black focus:outline-none font-bold text-blue-900 bg-white text-sm">
+                            <option value="umum">UMUM (RETAIL)</option>
+                            <option value="grosir">GROSIR</option>
+                            <option value="r1">HARGA R1</option>
+                            <option value="r2">HARGA R2</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="mulaiKasir()" class="w-full py-3 bg-[#d4d0c8] border-2 border-white border-r-black border-b-black active:border-t-black active:border-l-black font-bold text-lg hover:bg-green-100 flex items-center justify-center gap-2 text-green-900">
+                        <i class="fas fa-check-circle"></i> MULAI TRANSAKSI
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -221,6 +266,43 @@
         @foreach($produk as $p)
             productsData[{{ $p->id_produk }}] = @json($p);
         @endforeach
+
+        $(document).ready(function() {
+            // Manual Init for Modal Selects to attach to modal parent
+            $('.manual-select2').select2({
+                dropdownParent: $('#modalSetupKasir'),
+                width: '100%'
+            });
+
+            // Show setup modal immediately
+            $('#modalSetupKasir').removeClass('hidden').addClass('flex');
+
+            // Sync setup modal inputs
+             $('#setupPelanggan').on('change', function() {
+                let selectedOption = $(this).find(':selected');
+                let cat = selectedOption.data('kategori') || 'umum';
+                $('#setupKategoriHarga').val(cat).trigger('change');
+            });
+        });
+
+        function mulaiKasir() {
+            let pId = $('#setupPelanggan').val();
+            let kId = $('#setupKategoriHarga').val();
+
+            // Set values in main UI
+            $('#pelanggan').val(pId);
+            // Trigger change on pelanggan first to satisfy any libraries, but then strictly override category
+             $('#pelanggan').trigger('change');
+            
+            // Force the category selected in setup
+            setTimeout(() => {
+                $('#kategoriHarga').val(kId).trigger('change');
+                
+                // Hide modal and ready to go
+                $('#modalSetupKasir').removeClass('flex').addClass('hidden');
+                $('#searchProduct').focus();
+            }, 50);
+        }
 
         // --- KEYBOARD SHORTCUTS ---
         $(document).keydown(function(e) {
@@ -475,6 +557,7 @@
                     items: cart.map(i => ({ id: i.id, qty: i.qty })), 
                     bayar: bayar,
                     id_pelanggan: $('#pelanggan').val(),
+                    kategori_harga: currentCategory, // Send the active price category
                     metode_bayar: metode
                 })
                 .done(res => {

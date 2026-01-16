@@ -115,7 +115,9 @@ class KasirController extends Controller
             if ($request->id_pelanggan) {
                 $pelanggan = Pelanggan::find($request->id_pelanggan);
             }
-            $kategoriHarga = $pelanggan ? $pelanggan->kategori_harga : 'umum';
+            
+            // Prioritize the category sent from frontend (which matches what user saw), otherwise fallback to customer default or umum
+            $kategoriHarga = $request->kategori_harga ?? ($pelanggan ? $pelanggan->kategori_harga : 'umum');
 
             foreach ($request->items as $item) {
                 $produk = Produk::with(['stokToko' => function ($q) use ($id_toko) {
