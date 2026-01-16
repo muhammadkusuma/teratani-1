@@ -91,8 +91,8 @@
         }
 
         .menu-item {
-            padding: 4px 12px;
-            font-size: 13px;
+            padding: 2px 8px;
+            font-size: 11px;
             font-weight: bold;
             border: 2px solid transparent;
         }

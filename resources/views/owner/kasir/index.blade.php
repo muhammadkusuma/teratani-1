@@ -5,7 +5,7 @@
 @section('content')
     
     <div class="w-full flex flex-col font-sans text-[11px] bg-[#c0c0c0]"
-        style="font-family: 'MS Sans Serif', Arial, sans-serif; height: calc(100vh - 160px); overflow: hidden;">
+        style="font-family: 'MS Sans Serif', Arial, sans-serif; height: calc(100vh - 85px); overflow: hidden;">
 
         
         <div class="shrink-0 p-2 border-b border-gray-500 flex justify-between items-end bg-[#c0c0c0]">
@@ -244,8 +244,8 @@
             let cat = selectedOption.data('kategori') || 'umum';
             
             // Auto-select the price category based on customer
-            $('#kategoriHarga').val(cat);
-            updatePrices(cat);
+            // Must trigger 'change' for Select2 to update UI and for the listener below to fire
+            $('#kategoriHarga').val(cat).trigger('change'); 
         });
 
         $('#kategoriHarga').on('change', function() {
