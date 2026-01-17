@@ -27,7 +27,7 @@
         @csrf
 
         <div class="grid grid-cols-2 gap-4">
-            {{-- Toko --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">Toko <span class="text-red-600">*</span></label>
                 <select name="id_toko" required class="w-full border border-gray-400 p-1 text-xs shadow-inner">
@@ -40,7 +40,7 @@
                 </select>
             </div>
 
-            {{-- Kode Distributor --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">Kode Distributor <span class="text-red-600">*</span></label>
                 <input type="text" name="kode_distributor" value="{{ old('kode_distributor', $kodeDistributor) }}" required
@@ -49,14 +49,14 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4 mt-3">
-            {{-- Nama Distributor --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">Nama Distributor <span class="text-red-600">*</span></label>
                 <input type="text" name="nama_distributor" value="{{ old('nama_distributor') }}" required
                        class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="CV Maju Jaya">
             </div>
 
-            {{-- Nama Perusahaan --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">Nama Perusahaan</label>
                 <input type="text" name="nama_perusahaan" value="{{ old('nama_perusahaan') }}"
@@ -64,28 +64,28 @@
             </div>
         </div>
 
-        {{-- Alamat --}}
+        
         <div class="mt-3">
             <label class="block text-xs font-bold mb-1">Alamat</label>
             <textarea name="alamat" rows="2" class="w-full border border-gray-400 p-1 text-xs shadow-inner">{{ old('alamat') }}</textarea>
         </div>
 
         <div class="grid grid-cols-3 gap-4 mt-3">
-            {{-- Kota --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">Kota</label>
                 <input type="text" name="kota" value="{{ old('kota') }}"
                        class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="Malang">
             </div>
 
-            {{-- Provinsi --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">Provinsi</label>
                 <input type="text" name="provinsi" value="{{ old('provinsi') }}"
                        class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="Jawa Timur">
             </div>
 
-            {{-- Kode Pos --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">Kode Pos</label>
                 <input type="text" name="kode_pos" value="{{ old('kode_pos') }}"
@@ -94,14 +94,14 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4 mt-3">
-            {{-- No Telp --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">No. Telepon</label>
                 <input type="text" name="no_telp" value="{{ old('no_telp') }}"
                        class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="0341-123456">
             </div>
 
-            {{-- Email --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">Email</label>
                 <input type="email" name="email" value="{{ old('email') }}"
@@ -110,14 +110,14 @@
         </div>
 
         <div class="grid grid-cols-2 gap-4 mt-3">
-            {{-- Nama Kontak --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">Nama Kontak Person</label>
                 <input type="text" name="nama_kontak" value="{{ old('nama_kontak') }}"
                        class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="Budi Santoso">
             </div>
 
-            {{-- No HP Kontak --}}
+            
             <div>
                 <label class="block text-xs font-bold mb-1">No. HP Kontak Person</label>
                 <input type="text" name="no_hp_kontak" value="{{ old('no_hp_kontak') }}"
@@ -125,14 +125,14 @@
             </div>
         </div>
 
-        {{-- NPWP --}}
+        
         <div class="mt-3">
             <label class="block text-xs font-bold mb-1">NPWP</label>
             <input type="text" name="npwp" value="{{ old('npwp') }}"
                    class="w-full border border-gray-400 p-1 text-xs shadow-inner font-mono" placeholder="00.000.000.0-000.000">
         </div>
 
-        {{-- Hutang Awal --}}
+        
         <div class="mt-3 border-t border-gray-300 pt-3">
             <label class="block text-xs font-bold mb-1">
                 <i class="fa fa-money-bill-wave text-orange-600"></i> Hutang Awal (Opsional)
@@ -144,13 +144,13 @@
             </small>
         </div>
 
-        {{-- Keterangan --}}
+        
         <div class="mt-3">
             <label class="block text-xs font-bold mb-1">Keterangan</label>
             <textarea name="keterangan" rows="3" class="w-full border border-gray-400 p-1 text-xs shadow-inner">{{ old('keterangan') }}</textarea>
         </div>
 
-        {{-- Status Aktif --}}
+        
         <div class="mt-4 border-t border-gray-300 pt-3">
             <label class="flex items-center gap-2 text-xs">
                 <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}

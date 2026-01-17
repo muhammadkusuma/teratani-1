@@ -45,7 +45,8 @@ class Distributor extends Model
         return $query->where('is_active', true);
     }
 
-    // Helper method untuk menghitung total saldo utang
+    
+
     public function getSaldoUtangAttribute()
     {
         return $this->utangPiutang()

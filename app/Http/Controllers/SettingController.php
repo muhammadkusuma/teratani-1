@@ -7,9 +7,9 @@ use Illuminate\Validation\Rule;
 
 class SettingController extends Controller
 {
-    /**
-     * Menampilkan daftar pengaturan.
-     */
+    
+
+
     public function index(Request $request)
     {
         $query = Setting::query();
@@ -24,17 +24,17 @@ class SettingController extends Controller
         return view('settings.index', compact('settings'));
     }
 
-    /**
-     * Form tambah pengaturan baru.
-     */
+    
+
+
     public function create()
     {
         return view('settings.create');
     }
 
-    /**
-     * Simpan pengaturan baru.
-     */
+    
+
+
     public function store(Request $request)
     {
         $request->validate([
@@ -49,17 +49,17 @@ class SettingController extends Controller
         return redirect()->route('settings.index')->with('success', 'Pengaturan berhasil ditambahkan.');
     }
 
-    /**
-     * Form edit pengaturan.
-     */
+    
+
+
     public function edit(Setting $setting)
     {
         return view('settings.edit', compact('setting'));
     }
 
-    /**
-     * Update pengaturan.
-     */
+    
+
+
     public function update(Request $request, Setting $setting)
     {
         $request->validate([
@@ -74,9 +74,9 @@ class SettingController extends Controller
         return redirect()->route('settings.index')->with('success', 'Pengaturan berhasil diperbarui.');
     }
 
-    /**
-     * Hapus pengaturan.
-     */
+    
+
+
     public function destroy(Setting $setting)
     {
         $setting->delete();

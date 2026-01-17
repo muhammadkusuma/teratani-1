@@ -33,7 +33,8 @@ class Pelanggan extends Model
         return $this->hasMany(UtangPiutangPelanggan::class, 'id_pelanggan', 'id_pelanggan');
     }
 
-    // Helper method untuk menghitung total saldo piutang
+    
+
     public function getSaldoPiutangAttribute()
     {
         return $this->piutang()
@@ -42,7 +43,8 @@ class Pelanggan extends Model
             ->first()?->saldo_piutang ?? 0;
     }
 
-    // Helper method untuk mendapatkan harga sesuai kategori pelanggan
+    
+
     public function getHargaForProduk($produk)
     {
         return match($this->kategori_harga) {

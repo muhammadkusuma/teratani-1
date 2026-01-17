@@ -15,9 +15,9 @@ use Illuminate\Support\Facades\DB;
 
 class KasirController extends Controller
 {
-    /**
-     * Helper: ambil ID toko yang sedang aktif di session
-     */
+    
+
+
     private function getTokoAktif()
     {
         return session('toko_active_id');
@@ -37,7 +37,8 @@ class KasirController extends Controller
             return redirect()->route('owner.toko.index')->with('error', 'Toko tidak ditemukan');
         }
 
-        // Limit to 50 most recent active products with stock
+        
+
         $cacheKey = "kasir_index_products_{$id_toko}";
         $produk = Cache::remember($cacheKey, 3600, function () use ($id_toko) {
             return Produk::where('is_active', 1)
@@ -54,7 +55,8 @@ class KasirController extends Controller
 
         $metodeBayar = ['Tunai', 'Transfer', 'Hutang'];
 
-        // Select only needed columns for pelanggan dropdown
+        
+
         $pelanggan = Pelanggan::where('id_toko', $id_toko)
             ->select('id_pelanggan', 'kode_pelanggan', 'nama_pelanggan', 'kategori_harga')
             ->orderBy('nama_pelanggan')
@@ -124,10 +126,12 @@ class KasirController extends Controller
                 $pelanggan = Pelanggan::find($request->id_pelanggan);
             }
             
-            // Prioritize the category sent from frontend (which matches what user saw), otherwise fallback to customer default or umum
+            
+
             $kategoriHarga = $request->kategori_harga ?? ($pelanggan ? $pelanggan->kategori_harga : 'umum');
 
-            // Batch fetch products with stock to avoid N+1 inside loop
+            
+
             $item_ids = collect($request->items)->pluck('id');
             $produks = Produk::whereIn('id_produk', $item_ids)
                 ->with(['stokToko' => function ($q) use ($id_toko) {
@@ -149,7 +153,8 @@ class KasirController extends Controller
                     throw new \Exception("Stok {$produk->nama_produk} kurang (Sisa: $stok_sekarang).");
                 }
 
-                // Determine price based on category
+                
+
                 $harga = $produk->harga_jual_umum;
                 if ($kategoriHarga == 'grosir' && $produk->harga_jual_grosir) $harga = $produk->harga_jual_grosir;
                 if ($kategoriHarga == 'r1' && $produk->harga_r1) $harga = $produk->harga_r1;
@@ -229,7 +234,8 @@ class KasirController extends Controller
                     'subtotal'              => $data['subtotal'],
                 ]);
 
-                // Use the eager-loaded relation
+                
+
                 if ($data['produk']->stokToko) {
                     $data['produk']->stokToko->decrement('stok_fisik', $data['qty']);
                 }
@@ -305,9 +311,9 @@ class KasirController extends Controller
     }
 
 
-    /**
-     * Menampilkan halaman riwayat transaksi hari ini / terbaru
-     */
+    
+
+
     public function riwayat(Request $request)
     {
         $id_toko = $this->getTokoAktif();

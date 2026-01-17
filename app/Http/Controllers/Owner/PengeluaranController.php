@@ -41,8 +41,10 @@ class PengeluaranController extends Controller
         $thisYear = now()->year;
 
         $summary = [
-            'total_pengeluaran' => $query->sum('jumlah'), // Respects filters
-            'jumlah_transaksi' => $query->count(),        // Respects filters
+            'total_pengeluaran' => $query->sum('jumlah'), 
+
+            'jumlah_transaksi' => $query->count(),        
+
             'hari_ini' => Pengeluaran::where('id_toko', $idToko)->whereDate('tanggal_pengeluaran', $today)->sum('jumlah'),
             'bulan_ini' => Pengeluaran::where('id_toko', $idToko)->whereMonth('tanggal_pengeluaran', $thisMonth)->whereYear('tanggal_pengeluaran', $thisYear)->sum('jumlah'),
             'tahun_ini' => Pengeluaran::where('id_toko', $idToko)->whereYear('tanggal_pengeluaran', $thisYear)->sum('jumlah'),

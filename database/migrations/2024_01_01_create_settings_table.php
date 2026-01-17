@@ -10,10 +10,14 @@ return new class extends Migration
     {
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->string('key')->unique();         // Contoh: app_name, maintenance_mode
-            $table->string('label');                 // Contoh: Nama Aplikasi
-            $table->text('value')->nullable();       // Contoh: Teratani v1.0
-            $table->string('type')->default('text'); // text, number, boolean, textarea
+            $table->string('key')->unique();         
+
+            $table->string('label');                 
+
+            $table->text('value')->nullable();       
+
+            $table->string('type')->default('text'); 
+
             $table->timestamps();
         });
     }

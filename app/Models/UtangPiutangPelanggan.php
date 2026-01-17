@@ -24,13 +24,15 @@ class UtangPiutangPelanggan extends Model
         'saldo_piutang' => 'decimal:2',
     ];
 
-    // Relasi ke Pelanggan
+    
+
     public function pelanggan()
     {
         return $this->belongsTo(Pelanggan::class, 'id_pelanggan', 'id_pelanggan');
     }
 
-    // Scope untuk filter jenis transaksi
+    
+
     public function scopePiutang($query)
     {
         return $query->where('jenis_transaksi', 'piutang');
@@ -41,7 +43,8 @@ class UtangPiutangPelanggan extends Model
         return $query->where('jenis_transaksi', 'pembayaran');
     }
 
-    // Scope untuk filter by pelanggan
+    
+
     public function scopeByPelanggan($query, $id_pelanggan)
     {
         return $query->where('id_pelanggan', $id_pelanggan);

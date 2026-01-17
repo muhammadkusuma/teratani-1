@@ -7,7 +7,7 @@
             <span class="mr-2">👤</span> Profil Saya
         </div>
 
-        <!-- Tabs Header -->
+        
         <div class="flex border-b border-gray-400 mb-4 gap-1">
             <button onclick="switchTab('biodata')" id="tab-btn-biodata" class="win98-btn px-4 py-2 font-bold active-tab bg-gray-300 border-b-0 relative top-[1px] z-10">
                 📝 Biodata
@@ -17,7 +17,7 @@
             </button>
         </div>
 
-        <!-- Tab Content: Biodata -->
+        
         <div id="tab-content-biodata" class="block">
             <form action="{{ route('owner.profile.update') }}" method="POST">
                 @csrf
@@ -56,7 +56,7 @@
             </form>
         </div>
 
-        <!-- Tab Content: Keamanan -->
+        
         <div id="tab-content-keamanan" class="hidden">
             <form action="{{ route('owner.profile.update-password') }}" method="POST">
                 @csrf

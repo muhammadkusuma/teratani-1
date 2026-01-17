@@ -47,7 +47,7 @@
                         class="w-full border border-gray-400 p-1 text-sm text-right">
                 </div>
 
-                {{-- Kategori Harga --}}
+                
                 <div>
                     <label class="block font-bold text-xs mb-1 bg-green-100 px-2 py-1 w-fit">💰 Kategori Harga</label>
                     <select name="kategori_harga" class="w-full border border-gray-400 p-1 text-sm bg-white">

@@ -12,14 +12,16 @@ class PerusahaanController extends Controller
 {
     public function index()
     {
-        // Get the logged-in user's company
+        
+
         $perusahaan = Auth::user()->perusahaan;
         
         if (!$perusahaan) {
             return redirect()->back()->with('error', 'Anda belum terdaftar di perusahaan manapun');
         }
         
-        // Load the stores relationship
+        
+
         $perusahaan->load('tokos');
         
         return view('owner.perusahaan.index', compact('perusahaan'));
@@ -73,9 +75,11 @@ class PerusahaanController extends Controller
             'npwp'            => $request->npwp,
         ];
 
-        // Handle logo upload
+        
+
         if ($request->hasFile('logo')) {
-            // Delete old logo if exists
+            
+
             if ($perusahaan->logo && Storage::disk('public')->exists($perusahaan->logo)) {
                 Storage::disk('public')->delete($perusahaan->logo);
             }

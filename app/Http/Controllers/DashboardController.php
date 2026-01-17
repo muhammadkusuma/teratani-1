@@ -18,13 +18,15 @@ class DashboardController extends Controller
         $id_toko = session('toko_active_id');
         $nama_toko_aktif = session('toko_active_nama', 'Semua Toko');
 
-        // Load user's stores for popup selection
+        
+
         $userStores = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)
             ->orderBy('is_pusat', 'desc')
             ->orderBy('nama_toko')
             ->get();
 
-        // Cache key unik berdasarkan toko dan tanggal hari ini
+        
+
         $cacheKey = "dashboard_owner_" . ($id_toko ?? 'all') . "_" . date('Y-m-d');
         
         $data = Cache::remember($cacheKey, 600, function () use ($id_toko, $userStores) {
@@ -48,7 +50,8 @@ class DashboardController extends Controller
                 $transaksi_hari_ini = Penjualan::whereDate('tgl_transaksi', today())->count();
             }
 
-            // Chart data untuk 7 hari terakhir
+            
+
             $chart_data = [];
             for ($i = 6; $i >= 0; $i--) {
                 $date = today()->subDays($i);
@@ -62,7 +65,8 @@ class DashboardController extends Controller
                 ];
             }
 
-            // Stok menipis
+            
+
             $stok_menipis = DB::table('stok_toko')
                 ->join('produk', 'stok_toko.id_produk', '=', 'produk.id_produk')
                 ->join('toko', 'stok_toko.id_toko', '=', 'toko.id_toko')
@@ -75,7 +79,8 @@ class DashboardController extends Controller
                 ->limit(5)
                 ->get();
 
-            // Produk terlaris bulan ini
+            
+
             $produk_terlaris = DB::table('penjualan_detail')
                 ->join('penjualan', 'penjualan_detail.id_penjualan', '=', 'penjualan.id_penjualan')
                 ->join('produk', 'penjualan_detail.id_produk', '=', 'produk.id_produk')

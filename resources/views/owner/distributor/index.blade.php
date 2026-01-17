@@ -29,7 +29,7 @@
     </div>
 @endif
 
-{{-- Filter --}}
+
 <div class="bg-white border border-gray-400 p-3 mb-3">
     <form method="GET" action="{{ route('owner.distributor.index') }}" class="flex items-end gap-3">
         <div class="flex-1">

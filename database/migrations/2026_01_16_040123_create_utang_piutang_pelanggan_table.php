@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
+
+
     public function up(): void
     {
         Schema::create('utang_piutang_pelanggan', function (Blueprint $table) {
@@ -22,14 +22,15 @@ return new class extends Migration
             $table->decimal('saldo_piutang', 15, 2)->default(0)->comment('Running balance piutang');
             $table->timestamps();
             
-            // Index untuk performa
+            
+
             $table->index(['id_pelanggan', 'tanggal']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    
+
+
     public function down(): void
     {
         Schema::dropIfExists('utang_piutang_pelanggan');

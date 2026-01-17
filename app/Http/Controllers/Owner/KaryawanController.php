@@ -13,23 +13,27 @@ class KaryawanController extends Controller
 {
     public function index(Request $request)
     {
-        // Get user's company stores
+        
+
         $userStores = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)
             ->orderBy('nama_toko')
             ->get();
 
-        // Build query for employees from user's company stores
+        
+
         $query = Karyawan::with('toko')
             ->whereHas('toko', function($q) {
                 $q->where('id_perusahaan', Auth::user()->id_perusahaan);
             });
 
-        // Filter by store if selected
+        
+
         if ($request->filled('id_toko')) {
             $query->where('id_toko', $request->id_toko);
         }
 
-        // Filter by status if selected
+        
+
         if ($request->filled('status_karyawan')) {
             $query->where('status_karyawan', $request->status_karyawan);
         }
@@ -41,13 +45,15 @@ class KaryawanController extends Controller
 
     public function create()
     {
-        // Get user's company stores
+        
+
         $userStores = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)
             ->where('is_active', true)
             ->orderBy('nama_toko')
             ->get();
 
-        // Generate next employee code
+        
+
         $lastKaryawan = Karyawan::orderBy('id_karyawan', 'desc')->first();
         $nextNumber = $lastKaryawan ? (intval(substr($lastKaryawan->kode_karyawan, 3)) + 1) : 1;
         $kodeKaryawan = 'KRY' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
@@ -96,7 +102,8 @@ class KaryawanController extends Controller
             'keterangan'       => $request->keterangan,
         ];
 
-        // Handle photo upload
+        
+
         if ($request->hasFile('foto')) {
             $fotoPath = $request->file('foto')->store('karyawan', 'public');
             $data['foto'] = $fotoPath;
@@ -112,7 +119,8 @@ class KaryawanController extends Controller
     {
         $karyawan = Karyawan::with('toko')->findOrFail($id);
         
-        // Check if employee belongs to user's company
+        
+
         if ($karyawan->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.karyawan.index')
                            ->with('error', 'Anda tidak memiliki akses ke karyawan ini');
@@ -125,7 +133,8 @@ class KaryawanController extends Controller
     {
         $karyawan = Karyawan::findOrFail($id);
         
-        // Check if employee belongs to user's company
+        
+
         if ($karyawan->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.karyawan.index')
                            ->with('error', 'Anda tidak memiliki akses ke karyawan ini');
@@ -143,7 +152,8 @@ class KaryawanController extends Controller
     {
         $karyawan = Karyawan::findOrFail($id);
         
-        // Check if employee belongs to user's company
+        
+
         if ($karyawan->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.karyawan.index')
                            ->with('error', 'Anda tidak memiliki akses ke karyawan ini');
@@ -188,9 +198,11 @@ class KaryawanController extends Controller
             'keterangan'       => $request->keterangan,
         ];
 
-        // Handle photo upload
+        
+
         if ($request->hasFile('foto')) {
-            // Delete old photo if exists
+            
+
             if ($karyawan->foto && Storage::disk('public')->exists($karyawan->foto)) {
                 Storage::disk('public')->delete($karyawan->foto);
             }
@@ -209,13 +221,15 @@ class KaryawanController extends Controller
     {
         $karyawan = Karyawan::findOrFail($id);
         
-        // Check if employee belongs to user's company
+        
+
         if ($karyawan->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.karyawan.index')
                            ->with('error', 'Anda tidak memiliki akses ke karyawan ini');
         }
 
-        // Delete photo if exists
+        
+
         if ($karyawan->foto && Storage::disk('public')->exists($karyawan->foto)) {
             Storage::disk('public')->delete($karyawan->foto);
         }

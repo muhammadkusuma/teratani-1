@@ -65,9 +65,9 @@ class KategoriController extends Controller
         return redirect()->back()->with('success', 'Kategori berhasil dihapus.');
     }
 
-    /**
-     * Method khusus untuk AJAX Request (Code Lama Anda)
-     */
+    
+
+
     public function storeAjax(Request $request)
     {
         $validator = Validator::make($request->all(), [

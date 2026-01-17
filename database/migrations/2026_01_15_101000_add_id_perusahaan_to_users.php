@@ -9,18 +9,21 @@ return new class extends Migration
 {
     public function up()
     {
-        // Add the column as nullable first
+        
+
         Schema::table('users', function (Blueprint $table) {
             $table->unsignedBigInteger('id_perusahaan')->nullable()->after('id_user');
         });
 
-        // Assign all existing users to the first company
+        
+
         $firstCompanyId = DB::table('perusahaan')->first()->id_perusahaan ?? null;
         if ($firstCompanyId) {
             DB::table('users')->update(['id_perusahaan' => $firstCompanyId]);
         }
 
-        // Now make the column non-nullable and add foreign key
+        
+
         Schema::table('users', function (Blueprint $table) {
             $table->unsignedBigInteger('id_perusahaan')->nullable(false)->change();
             $table->foreign('id_perusahaan')

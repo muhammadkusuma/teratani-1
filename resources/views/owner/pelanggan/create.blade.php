@@ -51,7 +51,7 @@
                     <small class="text-[10px] text-gray-500">Batas maksimal hutang yang diperbolehkan.</small>
                 </div>
 
-                {{-- Kategori Harga --}}
+                
                 <div>
                     <label class="block font-bold text-xs mb-1 bg-green-100 px-2 py-1 w-fit">💰 Kategori Harga</label>
                     <select name="kategori_harga" class="w-full border border-gray-400 p-1 text-sm bg-white">

@@ -13,7 +13,8 @@ return new class extends Migration
             $table->boolean('is_otomatis')->default(false)->after('keterangan');
         });
         
-        // Update kategori enum to include Penjualan
+        
+
         DB::statement("ALTER TABLE pendapatan_pasif MODIFY kategori ENUM('Penjualan', 'Bunga Bank', 'Sewa Aset', 'Komisi', 'Investasi', 'Lainnya')");
     }
 

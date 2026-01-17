@@ -6,9 +6,9 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
+    
+
+
     public function up(): void
     {
         Schema::table('produk', function (Blueprint $table) {
@@ -20,13 +20,14 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
+    
+
+
     public function down(): void
     {
         Schema::table('produk', function (Blueprint $table) {
-            // Revert to decimal/double if needed, usually decimal(12, 2) or double
+            
+
             $table->decimal('harga_beli', 12, 2)->change();
             $table->decimal('harga_jual_umum', 12, 2)->change();
             $table->decimal('harga_jual_grosir', 12, 2)->nullable()->change();

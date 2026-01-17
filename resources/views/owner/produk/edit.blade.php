@@ -69,7 +69,7 @@
                     </div>
                 </div>
 
-                {{-- Harga Bertingkat --}}
+                
                 <div class="bg-green-50 p-3 border border-green-200 rounded">
                     <div class="text-xs font-bold text-green-800 mb-2">💰 HARGA JUAL BERTINGKAT</div>
                     <div class="grid grid-cols-2 gap-2">

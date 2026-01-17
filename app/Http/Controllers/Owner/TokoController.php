@@ -35,7 +35,8 @@ class TokoController extends Controller
             'is_pusat'   => 'boolean',
         ]);
 
-        // Use the logged-in user's company
+        
+
         $idPerusahaan = Auth::user()->id_perusahaan;
 
         Toko::create([
@@ -68,7 +69,8 @@ class TokoController extends Controller
             'nama_toko'  => 'required',
         ]);
 
-        // Keep the existing company, don't allow changing
+        
+
         $toko->update([
             'kode_toko'      => $request->kode_toko,
             'nama_toko'      => $request->nama_toko,

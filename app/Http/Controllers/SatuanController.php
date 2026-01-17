@@ -63,9 +63,9 @@ class SatuanController extends Controller
         return redirect()->back()->with('success', 'Satuan berhasil dihapus.');
     }
 
-    /**
-     * Method khusus untuk AJAX Request (Code Lama Anda)
-     */
+    
+
+
     public function storeAjax(Request $request)
     {
         $validator = Validator::make($request->all(), [

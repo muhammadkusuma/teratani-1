@@ -40,25 +40,33 @@ class PendapatanPasifController extends Controller
             }
         }
 
-        // Calculate time-based summaries (ignoring filters for broader context, or respecting them? Usually "Today" means absolute today for the store)
-        // User request implies "Pendapatan harian sama bulanan tahunan juga". Usually this means general stats.
-        // Let's make them absolute stats for the store, regardless of filters, as filters usually narrow down the list.
-        // However, if the user "filters" by a specific range, showing "Today" might still be useful as context.
-        // Let's stick to absolute "Today", "This Month", "This Year" for the store.
+        
+
+        
+
+        
+
+        
+
+        
+
         
         $today = now()->format('Y-m-d');
         $thisMonth = now()->month;
         $thisYear = now()->year;
 
         $summary = [
-            'total_pendapatan' => $query->sum('jumlah'), // This respects filters
-            'jumlah_transaksi' => $query->count(),       // This respects filters
+            'total_pendapatan' => $query->sum('jumlah'), 
+
+            'jumlah_transaksi' => $query->count(),       
+
             'hari_ini' => PendapatanPasif::where('id_toko', $idToko)->whereDate('tanggal_pendapatan', $today)->sum('jumlah'),
             'bulan_ini' => PendapatanPasif::where('id_toko', $idToko)->whereMonth('tanggal_pendapatan', $thisMonth)->whereYear('tanggal_pendapatan', $thisYear)->sum('jumlah'),
             'tahun_ini' => PendapatanPasif::where('id_toko', $idToko)->whereYear('tanggal_pendapatan', $thisYear)->sum('jumlah'),
         ];
 
-        // Then paginate
+        
+
         $pendapatanPasifs = $query->orderBy('tanggal_pendapatan', 'desc')->paginate(20);
 
         return view('owner.pendapatan_pasif.index', compact('pendapatanPasifs', 'summary'));

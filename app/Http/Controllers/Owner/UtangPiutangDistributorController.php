@@ -14,12 +14,14 @@ class UtangPiutangDistributorController extends Controller
 {
     public function index(Request $request)
     {
-        // Get user's company stores
+        
+
         $userStores = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)
             ->orderBy('nama_toko')
             ->get();
 
-        // Get distributors from user's company stores
+        
+
         $distributors = Distributor::with('toko')
             ->whereHas('toko', function($q) {
                 $q->where('id_perusahaan', Auth::user()->id_perusahaan);
@@ -28,23 +30,27 @@ class UtangPiutangDistributorController extends Controller
             ->orderBy('nama_distributor')
             ->get();
 
-        // Build query
+        
+
         $query = UtangPiutangDistributor::with(['distributor.toko'])
             ->whereHas('distributor.toko', function($q) {
                 $q->where('id_perusahaan', Auth::user()->id_perusahaan);
             });
 
-        // Filter by distributor
+        
+
         if ($request->filled('id_distributor')) {
             $query->where('id_distributor', $request->id_distributor);
         }
 
-        // Filter by jenis transaksi
+        
+
         if ($request->filled('jenis_transaksi')) {
             $query->where('jenis_transaksi', $request->jenis_transaksi);
         }
 
-        // Filter by date range
+        
+
         if ($request->filled('tanggal_dari')) {
             $query->where('tanggal', '>=', $request->tanggal_dari);
         }
@@ -61,7 +67,8 @@ class UtangPiutangDistributorController extends Controller
 
     public function create(Request $request)
     {
-        // Get distributors from user's company stores
+        
+
         $distributors = Distributor::with('toko')
             ->whereHas('toko', function($q) {
                 $q->where('id_perusahaan', Auth::user()->id_perusahaan);
@@ -70,7 +77,8 @@ class UtangPiutangDistributorController extends Controller
             ->orderBy('nama_distributor')
             ->get();
 
-        // Get pre-selected distributor ID from query parameter
+        
+
         $selectedDistributorId = $request->query('id_distributor');
 
         return view('owner.utang_piutang_distributor.create', compact('distributors', 'selectedDistributorId'));
@@ -89,7 +97,8 @@ class UtangPiutangDistributorController extends Controller
 
         DB::beginTransaction();
         try {
-            // Get saldo terakhir
+            
+
             $lastTransaction = UtangPiutangDistributor::where('id_distributor', $request->id_distributor)
                 ->orderBy('tanggal', 'desc')
                 ->orderBy('id_utang_piutang', 'desc')
@@ -97,14 +106,17 @@ class UtangPiutangDistributorController extends Controller
 
             $saldoSebelumnya = $lastTransaction ? $lastTransaction->saldo_utang : 0;
 
-            // Hitung saldo baru
+            
+
             if ($request->jenis_transaksi == 'utang') {
                 $saldoBaru = $saldoSebelumnya + $request->nominal;
-            } else { // pembayaran
+            } else { 
+
                 $saldoBaru = $saldoSebelumnya - $request->nominal;
             }
 
-            // Create transaction
+            
+
             UtangPiutangDistributor::create([
                 'id_distributor'  => $request->id_distributor,
                 'tanggal'         => $request->tanggal,
@@ -131,7 +143,8 @@ class UtangPiutangDistributorController extends Controller
     {
         $transaksi = UtangPiutangDistributor::with('distributor.toko')->findOrFail($id);
         
-        // Check access
+        
+
         if ($transaksi->distributor->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.utang-piutang-distributor.index')
                            ->with('error', 'Anda tidak memiliki akses ke transaksi ini');
@@ -152,7 +165,8 @@ class UtangPiutangDistributorController extends Controller
     {
         $transaksi = UtangPiutangDistributor::with('distributor.toko')->findOrFail($id);
         
-        // Check access
+        
+
         if ($transaksi->distributor->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.utang-piutang-distributor.index')
                            ->with('error', 'Anda tidak memiliki akses ke transaksi ini');
@@ -169,7 +183,8 @@ class UtangPiutangDistributorController extends Controller
 
         DB::beginTransaction();
         try {
-            // Update transaksi
+            
+
             $transaksi->update([
                 'id_distributor'  => $request->id_distributor,
                 'tanggal'         => $request->tanggal,
@@ -179,7 +194,8 @@ class UtangPiutangDistributorController extends Controller
                 'no_referensi'    => $request->no_referensi,
             ]);
 
-            // Recalculate all balances for this distributor
+            
+
             $this->recalculateSaldo($request->id_distributor);
 
             DB::commit();
@@ -198,7 +214,8 @@ class UtangPiutangDistributorController extends Controller
     {
         $transaksi = UtangPiutangDistributor::with('distributor.toko')->findOrFail($id);
         
-        // Check access
+        
+
         if ($transaksi->distributor->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.utang-piutang-distributor.index')
                            ->with('error', 'Anda tidak memiliki akses ke transaksi ini');
@@ -209,7 +226,8 @@ class UtangPiutangDistributorController extends Controller
             $id_distributor = $transaksi->id_distributor;
             $transaksi->delete();
 
-            // Recalculate all balances for this distributor
+            
+
             $this->recalculateSaldo($id_distributor);
 
             DB::commit();
@@ -223,7 +241,8 @@ class UtangPiutangDistributorController extends Controller
         }
     }
 
-    // Helper method untuk recalculate saldo
+    
+
     private function recalculateSaldo($id_distributor)
     {
         $transaksis = UtangPiutangDistributor::where('id_distributor', $id_distributor)
@@ -235,7 +254,8 @@ class UtangPiutangDistributorController extends Controller
         foreach ($transaksis as $t) {
             if ($t->jenis_transaksi == 'utang') {
                 $saldo += $t->nominal;
-            } else { // pembayaran
+            } else { 
+
                 $saldo -= $t->nominal;
             }
             $t->saldo_utang = $saldo;

@@ -210,10 +210,10 @@
         </div>
     </div>
 
-    <!-- MODAL SETUP AWAL KASIR -->
+    
     <div id="modalSetupKasir" class="fixed inset-0 bg-black bg-opacity-90 hidden items-center justify-center z-[60]" style="z-index: 9999;">
         <div class="bg-[#d4d0c8] p-1 border-2 border-white border-r-black border-b-black shadow-none w-[450px]">
-            <!-- Header -->
+            
             <div class="bg-blue-900 text-white px-2 py-1 flex justify-between items-center mb-3 bg-gradient-to-r from-blue-800 to-blue-600">
                 <span class="font-bold text-xs">PENGATURAN TRANSAKSI</span>
             </div>
@@ -223,7 +223,7 @@
                     <i class="fas fa-info-circle"></i> Silahkan pilih Pelanggan & Kategori Harga terlebih dahulu agar tidak terjadi kesalahan harga.
                 </div>
 
-                <!-- Form Setup -->
+                
                 <div class="space-y-4">
                     <div>
                         <label class="block font-bold text-xs mb-1">1. PILIH PELANGGAN:</label>

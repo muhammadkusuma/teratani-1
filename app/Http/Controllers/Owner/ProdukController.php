@@ -100,7 +100,8 @@ class ProdukController extends Controller
 
             DB::commit();
             
-            // Invalidate related caches
+            
+
             Cache::forget("kasir_index_products_{$toko->id_toko}");
             Cache::forget("dashboard_owner_{$toko->id_toko}_" . date('Y-m-d'));
             
@@ -159,7 +160,8 @@ class ProdukController extends Controller
 
             DB::commit();
             
-            // Invalidate related caches
+            
+
             Cache::forget("kasir_index_products_{$toko->id_toko}");
             Cache::forget("dashboard_owner_{$toko->id_toko}_" . date('Y-m-d'));
             
@@ -182,7 +184,8 @@ class ProdukController extends Controller
 
         $produk->delete();
         
-        // Invalidate related caches
+        
+
         Cache::forget("kasir_index_products_{$toko->id_toko}");
         Cache::forget("dashboard_owner_{$toko->id_toko}_" . date('Y-m-d'));
         

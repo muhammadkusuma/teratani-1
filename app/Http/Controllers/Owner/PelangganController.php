@@ -119,19 +119,22 @@ class PelangganController extends Controller
     {
         $pelanggan = Pelanggan::with('toko')->findOrFail($id);
         
-        // Check if pelanggan belongs to user's company
+        
+
         if ($pelanggan->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.pelanggan.index')
                            ->with('error', 'Anda tidak memiliki akses ke pelanggan ini');
         }
 
-        // Get all piutang transactions for this pelanggan
+        
+
         $piutang = $pelanggan->piutang()
             ->orderBy('tanggal', 'desc')
             ->orderBy('id_piutang', 'desc')
             ->get();
 
-        // Get current saldo
+        
+
         $saldoPiutang = $pelanggan->saldo_piutang;
 
         return view('owner.pelanggan.show', compact('pelanggan', 'piutang', 'saldoPiutang'));
@@ -139,12 +142,14 @@ class PelangganController extends Controller
 
     public function piutangIndex(Request $request)
     {
-        // Get user's company stores
+        
+
         $userStores = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)
             ->orderBy('nama_toko')
             ->get();
 
-        // Get pelanggan from user's company stores
+        
+
         $pelanggans = Pelanggan::with('toko')
             ->whereHas('toko', function($q) {
                 $q->where('id_perusahaan', Auth::user()->id_perusahaan);
@@ -152,23 +157,27 @@ class PelangganController extends Controller
             ->orderBy('nama_pelanggan')
             ->get();
 
-        // Build query
+        
+
         $query = UtangPiutangPelanggan::with(['pelanggan.toko'])
             ->whereHas('pelanggan.toko', function($q) {
                 $q->where('id_perusahaan', Auth::user()->id_perusahaan);
             });
 
-        // Filter by pelanggan
+        
+
         if ($request->filled('id_pelanggan')) {
             $query->where('id_pelanggan', $request->id_pelanggan);
         }
 
-        // Filter by jenis transaksi
+        
+
         if ($request->filled('jenis_transaksi')) {
             $query->where('jenis_transaksi', $request->jenis_transaksi);
         }
 
-        // Filter by date range
+        
+
         if ($request->filled('tanggal_dari')) {
             $query->where('tanggal', '>=', $request->tanggal_dari);
         }
@@ -185,7 +194,8 @@ class PelangganController extends Controller
 
     public function piutangCreate(Request $request)
     {
-        // Get pelanggan from user's company stores
+        
+
         $pelanggans = Pelanggan::with('toko')
             ->whereHas('toko', function($q) {
                 $q->where('id_perusahaan', Auth::user()->id_perusahaan);
@@ -193,7 +203,8 @@ class PelangganController extends Controller
             ->orderBy('nama_pelanggan')
             ->get();
 
-        // Get pre-selected pelanggan ID from query parameter
+        
+
         $selectedPelangganId = $request->query('id_pelanggan');
 
         return view('owner.pelanggan.piutang.create', compact('pelanggans', 'selectedPelangganId'));
@@ -212,7 +223,8 @@ class PelangganController extends Controller
 
         DB::beginTransaction();
         try {
-            // Get saldo terakhir
+            
+
             $lastTransaction = UtangPiutangPelanggan::where('id_pelanggan', $request->id_pelanggan)
                 ->orderBy('tanggal', 'desc')
                 ->orderBy('id_piutang', 'desc')
@@ -220,14 +232,17 @@ class PelangganController extends Controller
 
             $saldoSebelumnya = $lastTransaction ? $lastTransaction->saldo_piutang : 0;
 
-            // Hitung saldo baru
+            
+
             if ($request->jenis_transaksi == 'piutang') {
                 $saldoBaru = $saldoSebelumnya + $request->nominal;
-            } else { // pembayaran
+            } else { 
+
                 $saldoBaru = $saldoSebelumnya - $request->nominal;
             }
 
-            // Create transaction
+            
+
             UtangPiutangPelanggan::create([
                 'id_pelanggan'    => $request->id_pelanggan,
                 'tanggal'         => $request->tanggal,
@@ -254,7 +269,8 @@ class PelangganController extends Controller
     {
         $transaksi = UtangPiutangPelanggan::with('pelanggan.toko')->findOrFail($id);
         
-        // Check access
+        
+
         if ($transaksi->pelanggan->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.pelanggan.piutang.index')
                            ->with('error', 'Anda tidak memiliki akses ke transaksi ini');
@@ -274,7 +290,8 @@ class PelangganController extends Controller
     {
         $transaksi = UtangPiutangPelanggan::with('pelanggan.toko')->findOrFail($id);
         
-        // Check access
+        
+
         if ($transaksi->pelanggan->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.pelanggan.piutang.index')
                            ->with('error', 'Anda tidak memiliki akses ke transaksi ini');
@@ -291,7 +308,8 @@ class PelangganController extends Controller
 
         DB::beginTransaction();
         try {
-            // Update transaksi
+            
+
             $transaksi->update([
                 'id_pelanggan'    => $request->id_pelanggan,
                 'tanggal'         => $request->tanggal,
@@ -301,7 +319,8 @@ class PelangganController extends Controller
                 'no_referensi'    => $request->no_referensi,
             ]);
 
-            // Recalculate all balances for this pelanggan
+            
+
             $this->recalculateSaldo($request->id_pelanggan);
 
             DB::commit();
@@ -320,7 +339,8 @@ class PelangganController extends Controller
     {
         $transaksi = UtangPiutangPelanggan::with('pelanggan.toko')->findOrFail($id);
         
-        // Check access
+        
+
         if ($transaksi->pelanggan->toko->id_perusahaan != Auth::user()->id_perusahaan) {
             return redirect()->route('owner.pelanggan.piutang.index')
                            ->with('error', 'Anda tidak memiliki akses ke transaksi ini');
@@ -331,7 +351,8 @@ class PelangganController extends Controller
             $id_pelanggan = $transaksi->id_pelanggan;
             $transaksi->delete();
 
-            // Recalculate all balances for this pelanggan
+            
+
             $this->recalculateSaldo($id_pelanggan);
 
             DB::commit();
@@ -345,7 +366,8 @@ class PelangganController extends Controller
         }
     }
 
-    // Helper method untuk recalculate saldo
+    
+
     private function recalculateSaldo($id_pelanggan)
     {
         $transaksis = UtangPiutangPelanggan::where('id_pelanggan', $id_pelanggan)
@@ -357,7 +379,8 @@ class PelangganController extends Controller
         foreach ($transaksis as $t) {
             if ($t->jenis_transaksi == 'piutang') {
                 $saldo += $t->nominal;
-            } else { // pembayaran
+            } else { 
+
                 $saldo -= $t->nominal;
             }
             $t->saldo_piutang = $saldo;

@@ -173,18 +173,18 @@
 
 </div>
 
-{{-- Store Selection Popup --}}
+
 @if(!session('toko_active_id'))
 <div id="storeSelectionModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-gray-300 border-4 border-gray-400 shadow-2xl max-w-2xl w-full mx-4" style="border-style: outset;">
-        {{-- Title Bar --}}
+        
         <div class="bg-gradient-to-r from-blue-900 to-blue-600 text-white px-3 py-2 flex justify-between items-center">
             <span class="font-bold text-base flex items-center gap-2">
                 <i class="fa fa-store"></i> PILIH TOKO AKTIF
             </span>
         </div>
 
-        {{-- Content --}}
+        
         <div class="p-4">
             <div class="bg-yellow-100 border-2 border-yellow-600 p-3 mb-4">
                 <p class="text-sm font-bold text-yellow-900">

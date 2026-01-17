@@ -7,26 +7,26 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Menampilkan daftar user.
-     */
+    
+
+
     public function index()
     {
         $users = User::orderBy('created_at', 'desc')->get();
         return view('users.index', compact('users'));
     }
 
-    /**
-     * Menampilkan form tambah user manual.
-     */
+    
+
+
     public function create()
     {
         return view('users.create');
     }
 
-    /**
-     * Menyimpan user baru dari admin.
-     */
+    
+
+
     public function store(Request $request)
     {
         $request->validate([
@@ -50,18 +50,18 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan');
     }
 
-    /**
-     * Menampilkan form edit.
-     */
+    
+
+
     public function edit($id)
     {
         $user = User::findOrFail($id);
         return view('users.edit', compact('user'));
     }
 
-    /**
-     * Update data user.
-     */
+    
+
+
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -90,9 +90,9 @@ class UserController extends Controller
         return redirect()->route('users.index')->with('success', 'Data user berhasil diperbarui');
     }
 
-    /**
-     * Hapus user.
-     */
+    
+
+
     public function destroy($id)
     {
         $user = User::findOrFail($id);

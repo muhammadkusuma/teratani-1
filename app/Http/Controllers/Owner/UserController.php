@@ -16,7 +16,8 @@ class UserController extends Controller
     {
         $users = User::with('karyawan')
             ->where('id_perusahaan', Auth::user()->id_perusahaan)
-            ->whereNotNull('id_karyawan') // Only show employee users
+            ->whereNotNull('id_karyawan') 
+
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
@@ -25,7 +26,8 @@ class UserController extends Controller
 
     public function create()
     {
-        // Get employees from the same company who don't have a user account yet
+        
+
         $karyawans = Karyawan::whereHas('toko', function ($query) {
                 $query->where('id_perusahaan', Auth::user()->id_perusahaan);
             })
@@ -43,16 +45,20 @@ class UserController extends Controller
                 'required',
                 'exists:karyawan,id_karyawan',
                 function ($attribute, $value, $fail) {
-                    // Start of custom validation closure
-                    $karyawan = Karyawan::find($value);
-                    if (!$karyawan) return; // handled by exists
                     
-                    // Verify karyawan belongs to owner's company
+
+                    $karyawan = Karyawan::find($value);
+                    if (!$karyawan) return; 
+
+                    
+                    
+
                     if ($karyawan->toko->id_perusahaan != Auth::user()->id_perusahaan) {
                         $fail('Karyawan tidak valid.');
                     }
                     
-                    // Verify karyawan doesn't have an account
+                    
+
                     if ($karyawan->user) {
                         $fail('Karyawan ini sudah memiliki akun pengguna.');
                     }

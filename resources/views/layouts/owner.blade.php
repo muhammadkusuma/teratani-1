@@ -171,7 +171,7 @@
 
 <body class="bg-teal-700 overflow-hidden h-screen">
     <div class="win98-border bg-gray-300 h-screen flex flex-col">
-        <!-- Title Bar -->
+        
         <div class="bg-gradient-to-r from-blue-900 to-blue-600 text-white px-2 py-1.5 flex justify-between items-center">
             <span class="font-bold text-base">📊 SISTEM TOKO TANI - {{ session('toko_active_nama', 'Pilih Toko') }}</span>
             <form action="{{ route('logout') }}" method="POST" class="inline">
@@ -180,15 +180,15 @@
             </form>
         </div>
 
-        <!-- Menu Bar -->
+        
         <div class="bg-gray-300 border-b-2 border-gray-400 p-1 flex flex-wrap gap-1 relative items-center">
             
-            <!-- Hamburger Button (Mobile Only) -->
+            
             <button id="mobile-menu-btn" class="md:hidden win98-button flex items-center gap-2">
                 <i class="fa-solid fa-bars"></i> Menu
             </button>
 
-            <!-- Menu Items Container -->
+            
             <div id="nav-menu" class="hidden md:flex flex-wrap gap-1 w-full md:w-auto absolute md:relative top-full left-0 md:top-auto md:left-auto z-50 bg-gray-300 md:bg-transparent p-2 md:p-0 win98-border md:border-none shadow-lg md:shadow-none flex-col md:flex-row">
                 
                 @php
@@ -289,7 +289,7 @@
             </div>
         </div>
 
-        <!-- Content Area -->
+        
         <div class="flex-1 overflow-y-auto p-3 bg-gray-300">
             @if (session('success'))
                 <div class="bg-green-400 border-4 border-green-600 p-4 mb-3 font-bold text-base text-black">
@@ -312,7 +312,7 @@
             @yield('content')
         </div>
 
-        <!-- Status Bar -->
+        
         <div class="bg-gray-300 border-t-2 border-gray-400 px-3 py-1.5 flex justify-between text-base">
             <span class="font-bold">👤 {{ Auth::user()->nama_lengkap ?? Auth::user()->username }}</span>
             <span class="font-bold">🕐 <span id="clock"></span></span>

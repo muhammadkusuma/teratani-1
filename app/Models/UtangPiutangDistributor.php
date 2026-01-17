@@ -24,13 +24,15 @@ class UtangPiutangDistributor extends Model
         'saldo_utang' => 'decimal:2',
     ];
 
-    // Relasi ke Distributor
+    
+
     public function distributor()
     {
         return $this->belongsTo(Distributor::class, 'id_distributor', 'id_distributor');
     }
 
-    // Scope untuk filter jenis transaksi
+    
+
     public function scopeUtang($query)
     {
         return $query->where('jenis_transaksi', 'utang');
@@ -41,7 +43,8 @@ class UtangPiutangDistributor extends Model
         return $query->where('jenis_transaksi', 'pembayaran');
     }
 
-    // Scope untuk filter by distributor
+    
+
     public function scopeByDistributor($query, $id_distributor)
     {
         return $query->where('id_distributor', $id_distributor);

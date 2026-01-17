@@ -29,7 +29,7 @@
     </div>
 @endif
 
-{{-- Informasi Distributor --}}
+
 <div class="bg-white border border-gray-400 p-4 mb-3">
     <h3 class="font-bold text-sm mb-3 border-b pb-1">INFORMASI DISTRIBUTOR</h3>
     
@@ -112,7 +112,7 @@
     </div>
 </div>
 
-{{-- Saldo Hutang --}}
+
 <div class="bg-white border border-gray-400 p-4 mb-3">
     <h3 class="font-bold text-sm mb-3 border-b pb-1">SALDO HUTANG SAAT INI</h3>
     <div class="text-center py-4">
@@ -128,7 +128,7 @@
     </div>
 </div>
 
-{{-- Riwayat Hutang Piutang --}}
+
 <div class="bg-white border border-gray-400 p-4">
     <div class="flex justify-between items-center mb-3 border-b pb-1">
         <h3 class="font-bold text-sm">RIWAYAT HUTANG / PIUTANG</h3>

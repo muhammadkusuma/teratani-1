@@ -46,7 +46,8 @@ class StokController extends Controller
 
         $toko = Toko::find($id_toko);
 
-        // Select only needed columns for dropdown
+        
+
         $produk = Produk::select('id_produk', 'nama_produk', 'sku')
             ->where('is_active', 1)
             ->orderBy('nama_produk')
