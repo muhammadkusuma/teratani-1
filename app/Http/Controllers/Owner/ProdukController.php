@@ -99,7 +99,11 @@ class ProdukController extends Controller
             }
 
             DB::commit();
-            Cache::tags(['toko_' . $toko->id_toko . '_products', 'toko_' . $toko->id_toko . '_dashboard'])->flush();
+            
+            // Invalidate related caches
+            Cache::forget("kasir_index_products_{$toko->id_toko}");
+            Cache::forget("dashboard_owner_{$toko->id_toko}_" . date('Y-m-d'));
+            
             return redirect()->route('owner.toko.produk.index', $toko->id_toko)
                 ->with('success', 'Produk berhasil ditambahkan');
         } catch (\Exception $e) {
@@ -154,7 +158,11 @@ class ProdukController extends Controller
             $produk->update($data);
 
             DB::commit();
-            Cache::tags(['toko_' . $toko->id_toko . '_products', 'toko_' . $toko->id_toko . '_dashboard'])->flush();
+            
+            // Invalidate related caches
+            Cache::forget("kasir_index_products_{$toko->id_toko}");
+            Cache::forget("dashboard_owner_{$toko->id_toko}_" . date('Y-m-d'));
+            
             return redirect()->route('owner.toko.produk.index', $toko->id_toko)
                 ->with('success', 'Produk berhasil diperbarui');
         } catch (\Exception $e) {
@@ -173,7 +181,11 @@ class ProdukController extends Controller
         }
 
         $produk->delete();
-        Cache::tags(['toko_' . $toko->id_toko . '_products', 'toko_' . $toko->id_toko . '_dashboard'])->flush();
+        
+        // Invalidate related caches
+        Cache::forget("kasir_index_products_{$toko->id_toko}");
+        Cache::forget("dashboard_owner_{$toko->id_toko}_" . date('Y-m-d'));
+        
         return redirect()->route('owner.toko.produk.index', $toko->id_toko)
             ->with('success', 'Produk dihapus');
     }

@@ -26,9 +26,8 @@ class DashboardController extends Controller
 
         // Cache key unik berdasarkan toko dan tanggal hari ini
         $cacheKey = "dashboard_owner_" . ($id_toko ?? 'all') . "_" . date('Y-m-d');
-        $cacheTag = "toko_" . ($id_toko ?? 'global') . "_dashboard";
         
-        $data = Cache::tags([$cacheTag])->remember($cacheKey, 600, function () use ($id_toko, $userStores) {
+        $data = Cache::remember($cacheKey, 600, function () use ($id_toko, $userStores) {
             
             $total_toko = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)->count();
             $total_produk = Produk::count();

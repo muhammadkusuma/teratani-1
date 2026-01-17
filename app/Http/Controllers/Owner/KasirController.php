@@ -39,7 +39,7 @@ class KasirController extends Controller
 
         // Limit to 50 most recent active products with stock
         $cacheKey = "kasir_index_products_{$id_toko}";
-        $produk = Cache::tags(["toko_{$id_toko}_products"])->remember($cacheKey, 3600, function () use ($id_toko) {
+        $produk = Cache::remember($cacheKey, 3600, function () use ($id_toko) {
             return Produk::where('is_active', 1)
                 ->whereHas('stokToko', function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
@@ -87,7 +87,7 @@ class KasirController extends Controller
 
         $cacheKey = "kasir_search_{$id_toko}_" . md5($keyword);
 
-        $produk = Cache::tags(["toko_{$id_toko}_products"])->remember($cacheKey, 3600, function () use ($query, $id_toko) {
+        $produk = Cache::remember($cacheKey, 3600, function () use ($query, $id_toko) {
             return $query->with(['stokToko' => function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko);
                 }, 'satuanKecil'])->limit(20)->get();
