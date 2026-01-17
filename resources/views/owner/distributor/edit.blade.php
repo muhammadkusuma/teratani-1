@@ -132,6 +132,18 @@
                    class="w-full border border-gray-400 p-1 text-xs shadow-inner font-mono">
         </div>
 
+        {{-- Hutang Awal --}}
+        <div class="mt-3 border-t border-gray-300 pt-3">
+            <label class="block text-xs font-bold mb-1">
+                <i class="fa fa-money-bill-wave text-orange-600"></i> Tambah Hutang Awal (Opsional)
+            </label>
+            <input type="number" step="0.01" name="hutang_awal" value="{{ old('hutang_awal') }}"
+                   class="w-full border border-gray-400 p-1 text-xs shadow-inner" placeholder="0">
+            <small class="text-gray-500 text-[10px]">
+                <i class="fa fa-info-circle"></i> Isi jika ingin menambahkan hutang baru. Saldo hutang saat ini: <strong class="text-red-600">Rp {{ number_format($distributor->saldo_utang, 0, ',', '.') }}</strong>
+            </small>
+        </div>
+
         {{-- Keterangan --}}
         <div class="mt-3">
             <label class="block text-xs font-bold mb-1">Keterangan</label>

@@ -58,6 +58,17 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('pelanggan', PelangganController::class);
 
+        // Distributor hutang routes (must come before resource routes to avoid conflicts)
+        Route::prefix('distributor')->name('distributor.')->group(function () {
+            Route::get('/hutang', [DistributorController::class, 'hutangIndex'])->name('hutang.index');
+            Route::get('/hutang/create', [DistributorController::class, 'hutangCreate'])->name('hutang.create');
+            Route::post('/hutang', [DistributorController::class, 'hutangStore'])->name('hutang.store');
+            Route::get('/hutang/{id}/edit', [DistributorController::class, 'hutangEdit'])->name('hutang.edit');
+            Route::put('/hutang/{id}', [DistributorController::class, 'hutangUpdate'])->name('hutang.update');
+            Route::delete('/hutang/{id}', [DistributorController::class, 'hutangDestroy'])->name('hutang.destroy');
+        });
+        
+        // Distributor resource routes
         Route::resource('distributor', DistributorController::class);
 
         Route::resource('karyawan', KaryawanController::class);
@@ -65,8 +76,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('pengeluaran', PengeluaranController::class);
 
         Route::resource('pendapatan_pasif', PendapatanPasifController::class);
-
-        Route::resource('utang-piutang-distributor', \App\Http\Controllers\Owner\UtangPiutangDistributorController::class);
 
         Route::resource('utang-piutang-pelanggan', \App\Http\Controllers\Owner\UtangPiutangPelangganController::class);
 

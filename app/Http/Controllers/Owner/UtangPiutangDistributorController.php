@@ -59,7 +59,7 @@ class UtangPiutangDistributorController extends Controller
         return view('owner.utang_piutang_distributor.index', compact('transaksi', 'distributors', 'userStores'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         // Get distributors from user's company stores
         $distributors = Distributor::with('toko')
@@ -70,7 +70,10 @@ class UtangPiutangDistributorController extends Controller
             ->orderBy('nama_distributor')
             ->get();
 
-        return view('owner.utang_piutang_distributor.create', compact('distributors'));
+        // Get pre-selected distributor ID from query parameter
+        $selectedDistributorId = $request->query('id_distributor');
+
+        return view('owner.utang_piutang_distributor.create', compact('distributors', 'selectedDistributorId'));
     }
 
     public function store(Request $request)

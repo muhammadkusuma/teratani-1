@@ -7,9 +7,14 @@
     <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
         <i class="fa fa-truck"></i> DAFTAR DISTRIBUTOR / SUPPLIER
     </h2>
-    <a href="{{ route('owner.distributor.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
-        <i class="fa fa-plus"></i> TAMBAH DISTRIBUTOR
-    </a>
+    <div class="flex gap-2">
+        <a href="{{ route('owner.distributor.hutang.index') }}" class="px-3 py-1 bg-green-700 text-white border border-green-900 shadow hover:bg-green-600 text-xs">
+            <i class="fa fa-money-bill-wave"></i> KELOLA HUTANG
+        </a>
+        <a href="{{ route('owner.distributor.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
+            <i class="fa fa-plus"></i> TAMBAH DISTRIBUTOR
+        </a>
+    </div>
 </div>
 
 @if(session('success'))
@@ -103,6 +108,7 @@
                 </td>
                 <td class="border border-gray-300 p-2 text-center">
                     <div class="flex justify-center gap-1">
+                        <a href="{{ route('owner.distributor.show', $row->id_distributor) }}" class="bg-blue-500 text-white border border-blue-700 px-2 py-0.5 text-[10px] hover:bg-blue-400">LIHAT</a>
                         <a href="{{ route('owner.distributor.edit', $row->id_distributor) }}" class="bg-yellow-400 border border-yellow-600 px-2 py-0.5 text-[10px] hover:bg-yellow-300">EDIT</a>
                         <form action="{{ route('owner.distributor.destroy', $row->id_distributor) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus distributor ini?')">
                             @csrf

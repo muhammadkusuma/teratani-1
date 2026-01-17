@@ -246,13 +246,6 @@
                         </a>
                     @endif
 
-                    @if(in_array($jabatan, $level_gudang))
-                        <a href="{{ route('owner.utang-piutang-distributor.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.utang-piutang-distributor.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            💸 Utang Distributor
-                        </a>
-                    @endif
-
                     @if(in_array($jabatan, $level_kasir))
                         <a href="{{ route('owner.utang-piutang-pelanggan.index') }}" 
                         class="menu-item {{ request()->routeIs('owner.utang-piutang-pelanggan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">

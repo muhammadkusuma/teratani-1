@@ -16,7 +16,7 @@
 @endif
 
 <div class="bg-white border border-gray-400 p-4">
-    <form action="{{ route('owner.utang-piutang-distributor.store') }}" method="POST">
+    <form action="{{ route('owner.distributor.hutang.store') }}" method="POST">
         @csrf
 
         <div class="grid grid-cols-2 gap-4">
@@ -84,7 +84,7 @@
             <button type="submit" class="px-4 py-2 bg-blue-600 text-white border border-blue-800 text-xs hover:bg-blue-500">
                 <i class="fa fa-save"></i> SIMPAN
             </button>
-            <a href="{{ route('owner.utang-piutang-distributor.index') }}" class="px-4 py-2 bg-gray-400 text-white border border-gray-600 text-xs hover:bg-gray-300">
+            <a href="{{ route('owner.distributor.hutang.index') }}" class="px-4 py-2 bg-gray-400 text-white border border-gray-600 text-xs hover:bg-gray-300">
                 <i class="fa fa-times"></i> BATAL
             </a>
         </div>
