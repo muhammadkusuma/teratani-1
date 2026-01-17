@@ -7,9 +7,14 @@
     <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
         <i class="fa fa-users"></i> DAFTAR PELANGGAN (CRM)
     </h2>
-    <a href="{{ route('owner.pelanggan.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
-        <i class="fa fa-plus"></i> TAMBAH PELANGGAN
-    </a>
+    <div class="flex gap-2">
+        <a href="{{ route('owner.pelanggan.piutang.index') }}" class="px-3 py-1 bg-green-700 text-white border border-green-900 shadow hover:bg-green-600 text-xs">
+            <i class="fa fa-hand-holding-usd"></i> KELOLA PIUTANG
+        </a>
+        <a href="{{ route('owner.pelanggan.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
+            <i class="fa fa-plus"></i> TAMBAH PELANGGAN
+        </a>
+    </div>
 </div>
 
 <form method="GET" action="{{ route('owner.pelanggan.index') }}" class="mb-3 flex gap-2">
@@ -49,6 +54,7 @@
                 </td>
                 <td class="border border-gray-300 p-2 text-center">
                     <div class="flex justify-center gap-1">
+                        <a href="{{ route('owner.pelanggan.show', $row->id_pelanggan) }}" class="bg-blue-500 text-white border border-blue-700 px-2 py-0.5 text-[10px] hover:bg-blue-400">LIHAT</a>
                         <a href="{{ route('owner.pelanggan.edit', $row->id_pelanggan) }}" class="bg-yellow-400 border border-yellow-600 px-2 py-0.5 text-[10px] hover:bg-yellow-300">EDIT</a>
                         <form action="{{ route('owner.pelanggan.destroy', $row->id_pelanggan) }}" method="POST" onsubmit="return confirm('Hapus pelanggan ini?')" class="inline">
                             @csrf

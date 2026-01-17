@@ -56,6 +56,17 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('toko.produk', ProdukController::class);
 
+        // Customer piutang routes (must come before resource routes to avoid conflicts)
+        Route::prefix('pelanggan')->name('pelanggan.')->group(function () {
+            Route::get('/piutang', [PelangganController::class, 'piutangIndex'])->name('piutang.index');
+            Route::get('/piutang/create', [PelangganController::class, 'piutangCreate'])->name('piutang.create');
+            Route::post('/piutang', [PelangganController::class, 'piutangStore'])->name('piutang.store');
+            Route::get('/piutang/{id}/edit', [PelangganController::class, 'piutangEdit'])->name('piutang.edit');
+            Route::put('/piutang/{id}', [PelangganController::class, 'piutangUpdate'])->name('piutang.update');
+            Route::delete('/piutang/{id}', [PelangganController::class, 'piutangDestroy'])->name('piutang.destroy');
+        });
+
+        // Customer resource routes
         Route::resource('pelanggan', PelangganController::class);
 
         // Distributor hutang routes (must come before resource routes to avoid conflicts)
@@ -76,8 +87,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('pengeluaran', PengeluaranController::class);
 
         Route::resource('pendapatan_pasif', PendapatanPasifController::class);
-
-        Route::resource('utang-piutang-pelanggan', \App\Http\Controllers\Owner\UtangPiutangPelangganController::class);
 
         
         Route::resource('users', OwnerUserController::class);

@@ -1,0 +1,93 @@
+@extends('layouts.owner')
+
+@section('title', 'Tambah Transaksi Piutang Pelanggan')
+
+@section('content')
+<div class="mb-3">
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 inline-block pr-4">
+        <i class="fa fa-plus-circle"></i> TAMBAH TRANSAKSI PIUTANG PELANGGAN
+    </h2>
+</div>
+
+@if(session('error'))
+    <div class="bg-red-100 border border-red-400 text-red-700 px-2 py-1 mb-2 text-xs">
+        {{ session('error') }}
+    </div>
+@endif
+
+<div class="bg-white border border-gray-400 p-4">
+    <form action="{{ route('owner.pelanggan.piutang.store') }}" method="POST">
+        @csrf
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-xs font-bold mb-1">Pelanggan <span class="text-red-600">*</span></label>
+                <select name="id_pelanggan" required class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('id_pelanggan') border-red-500 @enderror">
+                    <option value="">-- Pilih Pelanggan --</option>
+                    @foreach($pelanggans as $p)
+                        <option value="{{ $p->id_pelanggan }}" {{ (old('id_pelanggan', $selectedPelangganId ?? null) == $p->id_pelanggan) ? 'selected' : '' }}>
+                            {{ $p->nama_pelanggan }} ({{ $p->toko->nama_toko }})
+                        </option>
+                    @endforeach
+                </select>
+                @error('id_pelanggan')
+                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold mb-1">Tanggal <span class="text-red-600">*</span></label>
+                <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" required class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('tanggal') border-red-500 @enderror">
+                @error('tanggal')
+                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold mb-1">Jenis Transaksi <span class="text-red-600">*</span></label>
+                <select name="jenis_transaksi" required class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('jenis_transaksi') border-red-500 @enderror">
+                    <option value="">-- Pilih Jenis --</option>
+                    <option value="piutang" {{ old('jenis_transaksi') == 'piutang' ? 'selected' : '' }}>Piutang (Tambah Piutang)</option>
+                    <option value="pembayaran" {{ old('jenis_transaksi') == 'pembayaran' ? 'selected' : '' }}>Pembayaran (Terima Bayar)</option>
+                </select>
+                @error('jenis_transaksi')
+                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold mb-1">Nominal <span class="text-red-600">*</span></label>
+                <input type="number" step="0.01" name="nominal" value="{{ old('nominal') }}" required placeholder="0" class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('nominal') border-red-500 @enderror">
+                @error('nominal')
+                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold mb-1">No Referensi</label>
+                <input type="text" name="no_referensi" value="{{ old('no_referensi') }}" maxlength="50" placeholder="No Invoice, Nota, dll" class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('no_referensi') border-red-500 @enderror">
+                @error('no_referensi')
+                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="col-span-2">
+                <label class="block text-xs font-bold mb-1">Keterangan</label>
+                <textarea name="keterangan" rows="3" class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('keterangan') border-red-500 @enderror">{{ old('keterangan') }}</textarea>
+                @error('keterangan')
+                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                @enderror
+            </div>
+        </div>
+
+        <div class="flex gap-2 mt-4">
+            <button type="submit" class="px-4 py-2 bg-blue-600 text-white border border-blue-800 text-xs hover:bg-blue-500">
+                <i class="fa fa-save"></i> SIMPAN
+            </button>
+            <a href="{{ route('owner.pelanggan.piutang.index') }}" class="px-4 py-2 bg-gray-400 text-white border border-gray-600 text-xs hover:bg-gray-300">
+                <i class="fa fa-times"></i> BATAL
+            </a>
+        </div>
+    </form>
+</div>
+@endsection
