@@ -17,7 +17,7 @@ class StokController extends Controller
         return session('toko_active_id');
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $id_toko = $this->getTokoAktif();
 
@@ -26,14 +26,33 @@ class StokController extends Controller
         }
 
         $toko = Toko::find($id_toko);
+        $gudangs = \App\Models\Gudang::where('id_toko', $id_toko)->get();
 
-        $produk = Produk::with(['stokToko' => function ($q) use ($id_toko) {
-                $q->where('id_toko', $id_toko);
-            }, 'kategori', 'satuanKecil'])
-            ->orderBy('nama_produk')
-            ->paginate(20);
+        // Default to Toko, but allow filtering
+        $location_type = $request->get('location_type', 'toko');
+        $location_id = $request->get('location_id', $id_toko);
 
-        return view('owner.stok.index', compact('produk', 'toko'));
+        // If Gudang, ensure we use gudang ID
+        if ($location_type == 'gudang' && !$request->has('location_id')) {
+             $firstGudang = $gudangs->first();
+             $location_id = $firstGudang ? $firstGudang->id_gudang : null;
+        }
+
+        $query = Produk::with(['kategori', 'satuanKecil'])->orderBy('nama_produk');
+
+        if ($location_type == 'gudang') {
+            $query->with(['stokGudang' => function ($q) use ($location_id) {
+                $q->where('id_gudang', $location_id);
+            }]);
+        } else {
+             $query->with(['stokToko' => function ($q) use ($location_id) {
+                $q->where('id_toko', $location_id);
+            }]);
+        }
+
+        $produk = $query->paginate(20);
+
+        return view('owner.stok.index', compact('produk', 'toko', 'gudangs', 'location_type', 'location_id'));
     }
 
     public function tambah()
@@ -45,15 +64,14 @@ class StokController extends Controller
         }
 
         $toko = Toko::find($id_toko);
-
-        
+        $gudangs = \App\Models\Gudang::where('id_toko', $id_toko)->get();
 
         $produk = Produk::select('id_produk', 'nama_produk', 'sku')
             ->where('is_active', 1)
             ->orderBy('nama_produk')
             ->get();
 
-        return view('owner.stok.tambah', compact('produk', 'toko'));
+        return view('owner.stok.tambah', compact('produk', 'toko', 'gudangs'));
     }
 
     public function store(Request $request)
@@ -61,6 +79,9 @@ class StokController extends Controller
         $request->validate([
             'id_produk' => 'required|exists:produk,id_produk',
             'jumlah'    => 'required|numeric|min:1',
+            'location_type' => 'required|in:toko,gudang',
+            'location_id' => 'required',
+            'keterangan' => 'nullable|string'
         ]);
 
         $id_toko = $this->getTokoAktif();
@@ -71,24 +92,43 @@ class StokController extends Controller
 
         DB::beginTransaction();
         try {
-            $stok = StokToko::where('id_toko', $id_toko)
-                ->where('id_produk', $request->id_produk)
-                ->first();
-
-            if ($stok) {
-                $stok->stok_fisik += $request->jumlah;
-                $stok->save();
+            $stokAkhir = 0;
+            
+            if ($request->location_type == 'gudang') {
+                $stok = \App\Models\StokGudang::firstOrCreate(
+                    ['id_gudang' => $request->location_id, 'id_produk' => $request->id_produk],
+                    ['stok_fisik' => 0]
+                );
+                $stok->increment('stok_fisik', $request->jumlah);
+                $stokAkhir = $stok->stok_fisik;
             } else {
-                StokToko::create([
-                    'id_toko'      => $id_toko,
-                    'id_produk'    => $request->id_produk,
-                    'stok_fisik'   => $request->jumlah,
-                    'stok_minimal' => 5,
-                ]);
+                $stok = StokToko::firstOrCreate(
+                    ['id_toko' => $request->location_id, 'id_produk' => $request->id_produk],
+                    ['stok_fisik' => 0, 'stok_minimal' => 5]
+                );
+                $stok->increment('stok_fisik', $request->jumlah);
+                $stokAkhir = $stok->stok_fisik;
             }
 
+            // Log History
+            \App\Models\RiwayatStok::create([
+                'id_produk' => $request->id_produk,
+                'id_toko' => $request->location_type == 'toko' ? $request->location_id : null,
+                'id_gudang' => $request->location_type == 'gudang' ? $request->location_id : null,
+                'jenis' => 'masuk',
+                'jumlah' => $request->jumlah,
+                'stok_akhir' => $stokAkhir,
+                'keterangan' => $request->keterangan ?? 'Penambahan Stok Manual',
+                'referensi' => 'MANUAL-ADD',
+                'tanggal' => now(),
+            ]);
+
             DB::commit();
-            return redirect()->route('owner.stok.index')->with('success', 'Stok berhasil ditambahkan');
+            return redirect()->route('owner.stok.index', [
+                'location_type' => $request->location_type, 
+                'location_id' => $request->location_id
+            ])->with('success', 'Stok berhasil ditambahkan');
+            
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->with('error', 'Gagal menambah stok: ' . $e->getMessage());

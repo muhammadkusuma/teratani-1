@@ -104,9 +104,20 @@
                     </div>
                 </div>
 
-                <div>
-                    <label class="block font-bold text-xs mb-1 bg-yellow-200 px-1 w-fit">STOK AWAL</label>
-                    <input type="number" name="stok_awal" value="0" min="0" class="w-full border border-gray-400 p-1 text-sm text-right font-bold bg-yellow-50">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-xs mb-1 bg-yellow-200 px-1 w-fit">LOKASI STOK AWAL</label>
+                        <select name="lokasi_stok_awal" class="w-full border border-gray-400 p-1 text-sm bg-yellow-50">
+                            <option value="toko">TOKO (ETALASE DEPAN)</option>
+                            @foreach ($gudangs as $g)
+                                <option value="{{ $g->id_gudang }}">{{ $g->nama_gudang }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-xs mb-1 bg-yellow-200 px-1 w-fit">JUMLAH STOK AWAL</label>
+                        <input type="number" name="stok_awal" value="0" min="0" class="w-full border border-gray-400 p-1 text-sm text-right font-bold bg-yellow-50">
+                    </div>
                 </div>
             </div>
 

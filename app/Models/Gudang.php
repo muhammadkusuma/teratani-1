@@ -13,6 +13,11 @@ class Gudang extends Model
     protected $primaryKey = 'id_gudang';
     protected $guarded = ['id_gudang'];
 
+    public function toko()
+    {
+        return $this->belongsTo(Toko::class, 'id_toko', 'id_toko');
+    }
+
     public function perusahaan()
     {
         return $this->belongsTo(Perusahaan::class, 'id_perusahaan', 'id_perusahaan');

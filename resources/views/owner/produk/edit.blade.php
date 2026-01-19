@@ -112,9 +112,18 @@
                 </div>
 
                 
-                <div class="bg-yellow-50 p-2 border border-yellow-200 flex justify-between items-center">
-                    <span class="text-xs font-bold text-gray-600">Sisa Stok Fisik:</span>
-                    <span class="text-lg font-bold font-mono">{{ $stokToko->stok_fisik ?? 0 }}</span>
+                <div class="bg-yellow-50 p-2 border border-yellow-200">
+                    <div class="text-xs font-bold text-gray-600 mb-2 border-b border-yellow-300 pb-1">POSISI STOK FISIK SAAT INI</div>
+                    <div class="flex justify-between items-center mb-1 border-b border-gray-200 pb-1 text-xs">
+                        <span class="text-gray-700">TOKO (ETALASE DEPAN)</span>
+                        <span class="font-bold font-mono">{{ $stokToko->stok_fisik ?? 0 }}</span>
+                    </div>
+                    @foreach ($stokGudangs as $sg)
+                        <div class="flex justify-between items-center mb-1 border-b border-gray-200 pb-1 text-xs">
+                            <span class="text-gray-700">GUDANG: {{ $sg->gudang->nama_gudang ?? '-' }}</span>
+                            <span class="font-bold font-mono">{{ $sg->stok_fisik }}</span>
+                        </div>
+                    @endforeach
                 </div>
             </div>
 

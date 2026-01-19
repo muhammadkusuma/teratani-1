@@ -12,7 +12,19 @@ class RiwayatStokController extends Controller
 {
     public function index(Request $request)
     {
+        $id_toko = session('toko_active_id');
+        if (!$id_toko) {
+            return redirect()->back()->with('error', 'Pilih Toko Terlebih Dahulu');
+        }
+
         $query = RiwayatStok::with(['produk', 'gudang', 'toko'])
+            ->where(function($q) use ($id_toko) {
+                // Show logs for this Store OR Warehouses of this Store
+                $q->where('id_toko', $id_toko)
+                  ->orWhereHas('gudang', function($g) use ($id_toko) {
+                      $g->where('id_toko', $id_toko);
+                  });
+            })
             ->orderBy('created_at', 'desc');
 
         // Filter by Date
@@ -46,16 +58,21 @@ class RiwayatStokController extends Controller
         $riwayats = $query->paginate(20)->withQueryString();
         
         // Get lists for filter
-        $gudangs = Gudang::all();
-        $tokos = Toko::all();
+        $gudangs = Gudang::where('id_toko', $id_toko)->get();
+        $tokos = Toko::where('id_toko', $id_toko)->get();
 
         return view('owner.riwayat_stok.index', compact('riwayats', 'gudangs', 'tokos'));
     }
 
     public function create()
     {
-        $gudangs = Gudang::all();
-        $tokos = Toko::all();
+        $id_toko = session('toko_active_id');
+        if (!$id_toko) {
+            return redirect()->back()->with('error', 'Pilih Toko Terlebih Dahulu');
+        }
+
+        $gudangs = Gudang::where('id_toko', $id_toko)->get();
+        $tokos = Toko::where('id_toko', $id_toko)->get();
         $produks = \App\Models\Produk::select('id_produk', 'nama_produk', 'sku')->orderBy('nama_produk')->get();
         return view('owner.riwayat_stok.create', compact('gudangs', 'tokos', 'produks'));
     }

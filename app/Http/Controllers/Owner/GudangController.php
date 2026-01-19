@@ -11,7 +11,12 @@ class GudangController extends Controller
 {
     public function index()
     {
-        $gudangs = Gudang::withCount('stokGudangs')->get();
+        $id_toko = session('toko_active_id');
+        if (!$id_toko) {
+             return redirect()->route('owner.dashboard')->with('error', 'Pilih Toko Terlebih Dahulu');
+        }
+
+        $gudangs = Gudang::where('id_toko', $id_toko)->withCount('stokGudangs')->get();
         return view('owner.gudang.index', compact('gudangs'));
     }
 

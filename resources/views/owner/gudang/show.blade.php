@@ -3,43 +3,58 @@
 @section('title', 'Stok Gudang')
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="card-title">Stok: {{ $gudang->nama_gudang }}</h4>
-                <a href="{{ route('owner.gudang.index') }}" class="btn btn-secondary">Kembali</a>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead>
-                            <tr>
-                                <th>Nama Produk</th>
-                                <th class="text-center">Stok Fisik</th>
-                                <th>Satuan</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($stoks as $stok)
-                            <tr>
-                                <td>{{ $stok->produk->nama_produk }}</td>
-                                <td class="text-center fw-bold">{{ number_format($stok->stok_fisik, 0, ',', '.') }}</td>
-                                <td>{{ $stok->produk->satuanKecil->nama_satuan ?? 'Pcs' }}</td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="3" class="text-center">Tidak ada stok produk di gudang ini.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-                <div class="mt-3">
-                    {{ $stoks->links() }}
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="flex justify-between items-center mb-3">
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
+        <i class="fa fa-boxes"></i> STOK GUDANG: {{ strtoupper($gudang->nama_gudang) }}
+    </h2>
+    <a href="{{ route('owner.gudang.index') }}" class="px-3 py-1 bg-gray-200 text-gray-700 border border-gray-400 shadow hover:bg-gray-300 text-xs">
+        <i class="fa fa-arrow-left"></i> KEMBALI
+    </a>
+</div>
+
+<div class="overflow-x-auto border border-gray-400 bg-white">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="bg-gray-200 text-gray-700 text-xs uppercase">
+                <th class="border border-gray-400 p-2 text-center w-10">No</th>
+                <th class="border border-gray-400 p-2">Nama Produk</th>
+                <th class="border border-gray-400 p-2 text-right">Stok Fisik</th>
+                <th class="border border-gray-400 p-2 text-center">Satuan</th>
+                <th class="border border-gray-400 p-2 text-center">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse($stoks as $index => $stok)
+                @php
+                    $status = $stok->stok_fisik <= 0 ? 'habis' : 'aman';
+                    $rowClass = $stok->stok_fisik <= 0 ? 'bg-red-50' : 'hover:bg-yellow-50';
+                @endphp
+            <tr class="{{ $rowClass }} text-xs">
+                <td class="border border-gray-300 p-2 text-center">{{ $stoks->firstItem() + $index }}</td>
+                <td class="border border-gray-300 p-2">
+                    <div class="font-bold">{{ $stok->produk->nama_produk }}</div>
+                    <div class="text-[10px] text-gray-500 font-mono">{{ $stok->produk->sku }}</div>
+                </td>
+                <td class="border border-gray-300 p-2 text-right font-mono font-bold">{{ number_format($stok->stok_fisik, 0, ',', '.') }}</td>
+                <td class="border border-gray-300 p-2 text-center">{{ $stok->produk->satuanKecil->nama_satuan ?? 'Pcs' }}</td>
+                <td class="border border-gray-300 p-2 text-center">
+                    @if ($status == 'habis')
+                        <span class="px-2 py-0.5 rounded bg-red-200 text-red-800 text-[10px] font-bold">HABIS</span>
+                    @else
+                        <span class="px-2 py-0.5 rounded bg-green-200 text-green-800 text-[10px] font-bold">AMAN</span>
+                    @endif
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="5" class="p-4 text-center text-gray-500 italic border border-gray-300">Tidak ada stok produk di gudang ini.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-3 text-xs">
+    {{ $stoks->links() }}
 </div>
 @endsection

@@ -36,44 +36,43 @@ class ProdukSeeder extends Seeder
             $kategori = $kategoris->where('nama_kategori', $category['kategori'])->first();
             
             foreach ($category['names'] as $index => $name) {
-                // Create 100 variants per product (different sizes, brands, etc)
-                for ($variant = 1; $variant <= 100; $variant++) {
-                    $sku = sprintf('%s-%04d-%03d', $category['prefix'], $index + 1, $variant);
-                    $barcode = '899' . str_pad($counter, 10, '0', STR_PAD_LEFT);
-                    
-                    // Randomize sizes and prices
-                    $sizes = ['500gr', '1kg', '5kg', '10kg', '25kg', '50kg', '100ml', '250ml', '500ml', '1L'];
-                    $size = $sizes[array_rand($sizes)];
-                    
-                    $hargaBeli = rand(5000, 500000);
-                    $hargaJual = intval($hargaBeli * (1 + (rand(10, 40) / 100))); // 10-40% markup
-                    
-                    $products[] = [
-                        'sku' => $sku,
-                        'barcode' => $barcode,
-                        'nama_produk' => $name . ' ' . $size . ' Var-' . $variant,
-                        'id_kategori' => $kategori->id_kategori,
-                        'id_satuan_kecil' => $category['kategori'] === 'Pestisida' ? $botol->id_satuan : ($category['kategori'] === 'Alat Pertanian' ? $pcs->id_satuan : $kg->id_satuan),
-                        'id_satuan_besar' => $category['kategori'] === 'Alat Pertanian' ? $pcs->id_satuan : $karung->id_satuan,
-                        'nilai_konversi' => $category['kategori'] === 'Alat Pertanian' ? 1 : rand(1, 50),
-                        'harga_beli' => $hargaBeli,
-                        'harga_jual_umum' => $hargaJual,
-                        'harga_jual_grosir' => intval($hargaJual * 0.95), // 5% discount for wholesale
-                        'harga_r1' => intval($hargaJual * 0.92), // 8% discount for R1 customers
-                        'harga_r2' => intval($hargaJual * 0.90), // 10% discount for R2 customers
-                        'gambar_produk' => null,
+                // Create single unique product
+                $sku = sprintf('%s-%04d', $category['prefix'], $index + 1);
+                $barcode = '899' . str_pad($counter, 10, '0', STR_PAD_LEFT);
+                
+                // Deterministic size/price for consistency
+                $size = '1kg'; 
+                if ($category['kategori'] === 'Pestisida') $size = '500ml';
+                if ($category['kategori'] === 'Alat Pertanian') $size = '1 Pcs';
+
+                $hargaBeli = rand(100, 500) * 1000; // 100k - 500k
+                $hargaJual = intval($hargaBeli * 1.2); 
+                
+                $products[] = [
+                    'sku' => $sku,
+                    'barcode' => $barcode,
+                    'nama_produk' => $name . ' ' . $size, // Unique Name
+                    'id_kategori' => $kategori->id_kategori,
+                    'id_satuan_kecil' => $category['kategori'] === 'Pestisida' ? $botol->id_satuan : ($category['kategori'] === 'Alat Pertanian' ? $pcs->id_satuan : $kg->id_satuan),
+                    'id_satuan_besar' => $category['kategori'] === 'Alat Pertanian' ? $pcs->id_satuan : $karung->id_satuan,
+                    'nilai_konversi' => $category['kategori'] === 'Alat Pertanian' ? 1 : 20,
+                    'harga_beli' => $hargaBeli,
+                    'harga_jual_umum' => $hargaJual,
+                    'harga_jual_grosir' => intval($hargaJual * 0.95), // 5% discount for wholesale
+                    'harga_r1' => intval($hargaJual * 0.92), // 8% discount for R1 customers
+                    'harga_r2' => intval($hargaJual * 0.90), // 10% discount for R2 customers
+                    'gambar_produk' => null,
                         'is_active' => rand(0, 10) > 1, // 90% active
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
                     
-                    $counter++;
-                    
-                    // Insert in chunks of 500 to avoid memory issues
-                    if (count($products) >= 500) {
-                        DB::table('produk')->insert($products);
-                        $products = [];
-                    }
+                $counter++;
+                
+                // Insert in chunks of 100
+                if (count($products) >= 100) {
+                    DB::table('produk')->insert($products);
+                    $products = [];
                 }
             }
         }

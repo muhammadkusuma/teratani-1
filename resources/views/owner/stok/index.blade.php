@@ -7,13 +7,26 @@
     <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
         <i class="fa fa-warehouse"></i> KELOLA STOK PRODUK
     </h2>
-    <a href="{{ route('owner.stok.tambah') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
+    <a href="{{ route('owner.stok.tambah') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs text-decoration-none">
         <i class="fa fa-plus"></i> TAMBAH STOK
     </a>
 </div>
 
-<div class="text-xs mb-3 bg-gray-100 border border-gray-400 p-2">
-    <strong>Toko:</strong> {{ $toko->nama_toko }}
+<div class="bg-gray-100 border border-gray-400 p-3 mb-3">
+    <form action="" method="GET" class="flex flex-wrap gap-2 items-center" id="filterForm">
+        <label class="text-xs font-bold">LOKASI:</label>
+        <select name="location_selector" id="location_selector" class="win98-input text-xs w-48">
+            <option value="toko|{{ $toko->id_toko }}" {{ $location_type == 'toko' ? 'selected' : '' }}>Toko: {{ $toko->nama_toko }}</option>
+            @foreach($gudangs as $gudang)
+                <option value="gudang|{{ $gudang->id_gudang }}" {{ $location_type == 'gudang' && $location_id == $gudang->id_gudang ? 'selected' : '' }}>
+                    Gudang: {{ $gudang->nama_gudang }}
+                </option>
+            @endforeach
+        </select>
+        
+        <input type="hidden" name="location_type" id="location_type" value="{{ $location_type }}">
+        <input type="hidden" name="location_id" id="location_id" value="{{ $location_id }}">
+    </form>
 </div>
 
 @if (session('success'))
@@ -31,28 +44,39 @@
                 <th class="border border-gray-400 p-2">Nama Produk</th>
                 <th class="border border-gray-400 p-2">Kategori</th>
                 <th class="border border-gray-400 p-2 text-right">Stok</th>
-                <th class="border border-gray-400 p-2 text-right">Min</th>
+                @if($location_type == 'toko')
+                    <th class="border border-gray-400 p-2 text-right">Min</th>
+                @endif
                 <th class="border border-gray-400 p-2 text-center w-24">Status</th>
             </tr>
         </thead>
         <tbody>
             @forelse ($produk as $index => $item)
                 @php
-                    $stok = $item->stokToko;
-                    $stok_fisik = $stok ? $stok->stok_fisik : 0;
-                    $stok_minimal = $stok ? $stok->stok_minimal : 5;
-                    $status = $stok_fisik <= 0 ? 'habis' : ($stok_fisik <= $stok_minimal ? 'rendah' : 'aman');
+                    if ($location_type == 'gudang') {
+                        $stok = $item->stokGudang->first(); // Since we eager loaded with where id_gudang, this should be fine
+                        $stok_fisik = $stok ? $stok->stok_fisik : 0;
+                        $stok_minimal = 0; // Gudang usually serves multiple stores, min stock concept might differ
+                        $status = $stok_fisik <= 0 ? 'habis' : 'aman';
+                    } else {
+                        $stok = $item->stokToko->first();
+                        $stok_fisik = $stok ? $stok->stok_fisik : 0;
+                        $stok_minimal = $stok ? $stok->stok_minimal : 5;
+                        $status = $stok_fisik <= 0 ? 'habis' : ($stok_fisik <= $stok_minimal ? 'rendah' : 'aman');
+                    }
                 @endphp
                 <tr class="hover:bg-yellow-50 text-xs">
                     <td class="border border-gray-300 p-2 text-center">{{ $produk->firstItem() + $index }}</td>
                     <td class="border border-gray-300 p-2 font-mono">{{ $item->sku }}</td>
                     <td class="border border-gray-300 p-2">
                         <div class="font-bold">{{ $item->nama_produk }}</div>
-                        <div class="text-gray-500">{{ $item->satuanKecil->nama_satuan ?? '-' }}</div>
+                        <div class="text-[10px] text-gray-500">{{ $item->satuanKecil->nama_satuan ?? '-' }}</div>
                     </td>
                     <td class="border border-gray-300 p-2">{{ $item->kategori->nama_kategori ?? '-' }}</td>
                     <td class="border border-gray-300 p-2 text-right font-mono font-bold">{{ number_format($stok_fisik) }}</td>
-                    <td class="border border-gray-300 p-2 text-right font-mono text-gray-500">{{ number_format($stok_minimal) }}</td>
+                    @if($location_type == 'toko')
+                        <td class="border border-gray-300 p-2 text-right font-mono text-gray-500">{{ number_format($stok_minimal) }}</td>
+                    @endif
                     <td class="border border-gray-300 p-2 text-center">
                         @if ($status == 'habis')
                             <span class="px-2 py-0.5 rounded bg-red-200 text-red-800 text-[10px] font-bold">HABIS</span>
@@ -65,7 +89,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="7" class="p-4 text-center text-gray-500 italic border border-gray-300">
+                    <td colspan="{{ $location_type == 'toko' ? '7' : '6' }}" class="p-4 text-center text-gray-500 italic border border-gray-300">
                         Belum ada produk
                     </td>
                 </tr>
@@ -75,6 +99,17 @@
 </div>
 
 <div class="mt-3 text-xs">
-    {{ $produk->links() }}
+    {{ $produk->appends(['location_type' => $location_type, 'location_id' => $location_id])->links() }}
 </div>
+
+@push('scripts')
+<script>
+    document.getElementById('location_selector').addEventListener('change', function() {
+        const parts = this.value.split('|');
+        document.getElementById('location_type').value = parts[0];
+        document.getElementById('location_id').value = parts[1];
+        document.getElementById('filterForm').submit();
+    });
+</script>
+@endpush
 @endsection

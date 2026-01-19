@@ -12,23 +12,31 @@ class GudangSeeder extends Seeder
      */
     public function run(): void
     {
-        // Get the first company ID or default to 1 if not exists (though it should)
+        // Get the first company ID or default to 1 if not exists
         $id_perusahaan = DB::table('perusahaan')->value('id_perusahaan');
+        $tokos = DB::table('toko')->get();
 
-        $gudangs = [
-            ['nama_gudang' => 'Gudang 1', 'lokasi' => 'Utama'],
-            ['nama_gudang' => 'Gudang 2', 'lokasi' => 'Cadangan'],
-            ['nama_gudang' => 'Gudang 3', 'lokasi' => 'Tambahan'],
-        ];
+        if ($tokos->isEmpty()) {
+            return;
+        }
 
-        foreach ($gudangs as $gudang) {
-            DB::table('gudang')->insertOrIgnore([
-                'nama_gudang' => $gudang['nama_gudang'],
-                'lokasi' => $gudang['lokasi'],
-                'id_perusahaan' => $id_perusahaan,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+        foreach ($tokos as $toko) {
+            $gudangs = [
+                ['nama_gudang' => 'Gudang 1 - ' . $toko->nama_toko, 'lokasi' => 'Utama'],
+                ['nama_gudang' => 'Gudang 2 - ' . $toko->nama_toko, 'lokasi' => 'Cadangan'],
+                ['nama_gudang' => 'Gudang 3 - ' . $toko->nama_toko, 'lokasi' => 'Tambahan'],
+            ];
+
+            foreach ($gudangs as $gudang) {
+                DB::table('gudang')->insert([
+                    'nama_gudang' => $gudang['nama_gudang'],
+                    'lokasi' => $gudang['lokasi'],
+                    'id_toko' => $toko->id_toko,
+                    'id_perusahaan' => $id_perusahaan,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
         }
     }
 }

@@ -2,9 +2,11 @@
 namespace App\Http\Controllers\Owner;
 
 use App\Http\Controllers\Controller;
+use App\Models\Gudang;
 use App\Models\Kategori;
 use App\Models\Produk;
 use App\Models\Satuan;
+use App\Models\StokGudang;
 use App\Models\StokToko;
 use App\Models\Toko;
 use Illuminate\Http\Request;
@@ -48,7 +50,8 @@ class ProdukController extends Controller
         $toko = Toko::findOrFail($id_toko);
         $kategoris = Kategori::select('id_kategori', 'nama_kategori')->orderBy('nama_kategori')->get();
         $satuans = Satuan::select('id_satuan', 'nama_satuan')->orderBy('nama_satuan')->get();
-        return view('owner.produk.create', compact('toko', 'kategoris', 'satuans'));
+        $gudangs = Gudang::where('id_toko', $id_toko)->select('id_gudang', 'nama_gudang')->get();
+        return view('owner.produk.create', compact('toko', 'kategoris', 'satuans', 'gudangs'));
     }
 
     public function store(Request $request, $id_toko)
@@ -68,12 +71,13 @@ class ProdukController extends Controller
             'harga_r1'          => 'nullable|integer|min:0',
             'harga_r2'          => 'nullable|integer|min:0',
             'stok_awal'         => 'nullable|integer|min:0',
+            'lokasi_stok_awal'  => 'nullable|string', // 'toko' or id_gudang
             'gambar_produk'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         DB::beginTransaction();
         try {
-            $data = $request->except(['gambar_produk', 'stok_awal', '_token']);
+            $data = $request->except(['gambar_produk', 'stok_awal', 'lokasi_stok_awal', '_token']);
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
             if ($request->hasFile('gambar_produk')) {
@@ -82,20 +86,42 @@ class ProdukController extends Controller
 
             $produk = Produk::create($data);
 
+            // Default Stok Toko (Storefront) entry is mandatory for product visibility
+            $stokTokoEntry = [
+                'id_toko'      => $toko->id_toko,
+                'id_produk'    => $produk->id_produk,
+                'stok_fisik'   => 0,
+                'stok_minimal' => 5,
+            ];
+
             if ($request->filled('stok_awal') && $request->stok_awal > 0) {
-                StokToko::create([
-                    'id_toko'      => $toko->id_toko,
-                    'id_produk'    => $produk->id_produk,
-                    'stok_fisik'   => $request->stok_awal,
-                    'stok_minimal' => 5,
-                ]);
+                $lokasi = $request->lokasi_stok_awal ?? 'toko';
+
+                if ($lokasi === 'toko') {
+                    // Masuk ke Stok Toko
+                    $stokTokoEntry['stok_fisik'] = $request->stok_awal;
+                    StokToko::create($stokTokoEntry);
+                } else {
+                    // Masuk ke Gudang (Pastikan Gudang milik Toko ini)
+                    $gudangCheck = Gudang::where('id_toko', $toko->id_toko)->where('id_gudang', $lokasi)->exists();
+                    
+                    if ($gudangCheck) {
+                        StokGudang::create([
+                            'id_gudang'  => $lokasi,
+                            'id_produk'  => $produk->id_produk,
+                            'stok_fisik' => $request->stok_awal,
+                        ]);
+                        // Create empty tokostock
+                        StokToko::create($stokTokoEntry);
+                    } else {
+                        // Fallback to toko if valid gudang not found (shouldn't happen usually)
+                        $stokTokoEntry['stok_fisik'] = $request->stok_awal;
+                        StokToko::create($stokTokoEntry);
+                    }
+                }
             } else {
-                StokToko::create([
-                    'id_toko'      => $toko->id_toko,
-                    'id_produk'    => $produk->id_produk,
-                    'stok_fisik'   => 0,
-                    'stok_minimal' => 5,
-                ]);
+                // No stock, just create empty record
+                StokToko::create($stokTokoEntry);
             }
 
             DB::commit();
@@ -124,7 +150,14 @@ class ProdukController extends Controller
             ->where('id_produk', $produk->id_produk)
             ->first();
 
-        return view('owner.produk.edit', compact('toko', 'produk', 'kategoris', 'satuans', 'stokToko'));
+        $stokGudangs = StokGudang::with('gudang')
+            ->where('id_produk', $produk->id_produk)
+            ->whereHas('gudang', function($q) use ($toko) {
+                $q->where('id_toko', $toko->id_toko);
+            })
+            ->get();
+
+        return view('owner.produk.edit', compact('toko', 'produk', 'kategoris', 'satuans', 'stokToko', 'stokGudangs'));
     }
 
     public function update(Request $request, $id_toko, $id_produk)

@@ -39,9 +39,8 @@ class PembelianController extends Controller
     {
         $toko = Toko::findOrFail($id_toko);
         $distributors = Distributor::where('id_toko', $id_toko)->active()->get();
-        // Assuming Gudang belongs to Perusahaan, and Toko belongs to Perusahaan.
-        // We'll fetch warehouses for the company.
-        $gudangs = Gudang::where('id_perusahaan', $toko->id_perusahaan)->get();
+        // Gudang now belongs to Toko directly
+        $gudangs = Gudang::where('id_toko', $id_toko)->get();
         $produks = Produk::whereHas('stokTokos', function($q) use ($id_toko) {
             $q->where('id_toko', $id_toko);
         })->get();

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id('id_gudang');
             $table->string('nama_gudang');
             $table->string('lokasi')->nullable();
+            $table->foreignId('id_toko')->nullable()->constrained('toko', 'id_toko')->onDelete('cascade');
             $table->foreignId('id_perusahaan')->nullable()->constrained('perusahaan', 'id_perusahaan')->onDelete('cascade');
             $table->timestamps();
         });

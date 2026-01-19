@@ -1,72 +1,53 @@
 @extends('layouts.owner')
 
-@section('title', 'Daftar Pembelian')
+@section('title', 'Riwayat Pembelian')
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h4 class="card-title">Riwayat Pembelian Distributor</h4>
-                <a href="{{ route('owner.toko.pembelian.create', $toko->id_toko) }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Input Pembelian
-                </a>
-            </div>
-            <div class="card-body">
-                <form action="" method="GET" class="row mb-3">
-                    <div class="col-md-3">
-                        <label>Start Date</label>
-                        <input type="date" name="start_date" class="form-control" value="{{ request('start_date') }}">
-                    </div>
-                    <div class="col-md-3">
-                        <label>End Date</label>
-                        <input type="date" name="end_date" class="form-control" value="{{ request('end_date') }}">
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-secondary w-100">Filter</button>
-                    </div>
-                </form>
+<div class="flex justify-between items-center mb-3">
+    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
+        <i class="fa fa-shopping-basket"></i> RIWAYAT PEMBELIAN DISTRIBUTOR
+    </h2>
+    <a href="{{ route('owner.toko.pembelian.create', $toko->id_toko) }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
+        <i class="fa fa-plus"></i> INPUT PEMBELIAN
+    </a>
+</div>
 
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Distributor</th>
-                                <th>No Faktur</th>
-                                <th>Total</th>
-                                <th>Keterangan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($pembelians as $pembelian)
-                            <tr>
-                                <td>{{ $pembelian->tanggal->format('d M Y') }}</td>
-                                <td>{{ $pembelian->distributor->nama_distributor }}</td>
-                                <td>{{ $pembelian->no_faktur ?? '-' }}</td>
-                                <td>Rp {{ number_format($pembelian->total, 0, ',', '.') }}</td>
-                                <td>{{ $pembelian->keterangan }}</td>
-                                <td>
-                                    <a href="{{ route('owner.toko.pembelian.show', [$toko->id_toko, $pembelian->id_pembelian]) }}" class="btn btn-sm btn-info">
-                                        <i class="fas fa-eye"></i> Detail
-                                    </a>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="6" class="text-center">Belum ada data pembelian.</td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+<div class="overflow-x-auto border border-gray-400 bg-white">
+    <table class="w-full text-left border-collapse">
+        <thead>
+            <tr class="bg-gray-200 text-gray-700 text-xs uppercase">
+                <th class="border border-gray-400 p-2 text-center w-10">No</th>
+                <th class="border border-gray-400 p-2">Tanggal</th>
+                <th class="border border-gray-400 p-2">No. Faktur</th>
+                <th class="border border-gray-400 p-2">Distributor</th>
+                <th class="border border-gray-400 p-2 text-right">Total</th>
+                <th class="border border-gray-400 p-2 text-center w-24">Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            @forelse ($pembelians as $index => $pembelian)
+            <tr class="hover:bg-yellow-50 text-xs">
+                <td class="border border-gray-300 p-2 text-center">{{ $pembelians->firstItem() + $index }}</td>
+                <td class="border border-gray-300 p-2">{{ \Carbon\Carbon::parse($pembelian->tanggal)->format('d M Y') }}</td>
+                <td class="border border-gray-300 p-2 font-mono">{{ $pembelian->no_faktur }}</td>
+                <td class="border border-gray-300 p-2">{{ $pembelian->distributor->nama_distributor }}</td>
+                <td class="border border-gray-300 p-2 text-right font-bold">Rp {{ number_format($pembelian->total, 0, ',', '.') }}</td>
+                <td class="border border-gray-300 p-2 text-center">
+                    <a href="{{ route('owner.toko.pembelian.show', [$toko->id_toko, $pembelian->id_pembelian]) }}" class="px-2 py-0.5 bg-blue-600 text-white border border-blue-800 rounded hover:bg-blue-500 text-[10px]">
+                        DETAIL
+                    </a>
+                </td>
+            </tr>
+            @empty
+            <tr>
+                <td colspan="6" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada data pembelian.</td>
+            </tr>
+            @endforelse
+        </tbody>
+    </table>
+</div>
 
-                <div class="mt-3">
-                    {{ $pembelians->links() }}
-                </div>
-            </div>
-        </div>
-    </div>
+<div class="mt-3 text-xs">
+    {{ $pembelians->links() }}
 </div>
 @endsection
