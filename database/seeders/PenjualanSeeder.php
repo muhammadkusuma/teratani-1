@@ -6,6 +6,8 @@ use App\Models\Pelanggan;
 use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
 use App\Models\Produk;
+use App\Models\RiwayatStok;
+use App\Models\StokToko;
 use App\Models\Toko;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -19,6 +21,8 @@ class PenjualanSeeder extends Seeder
         $user = User::first();
         $pelanggans = Pelanggan::all();
         
+        if ($tokos->isEmpty()) return;
+
         DB::beginTransaction();
         try {
             foreach ($tokos as $toko) {
@@ -39,7 +43,7 @@ class PenjualanSeeder extends Seeder
                     // Create Parent Penjualan
                     $penjualan = Penjualan::create([
                         'id_toko' => $toko->id_toko,
-                        'id_user' => $user->id_user,
+                        'id_user' => $user->id_user ?? 1,
                         'id_pelanggan' => $pelanggans->count() > 0 ? $pelanggans->random()->id_pelanggan : null,
                         'no_faktur' => $noFaktur,
                         'tgl_transaksi' => $date,
@@ -48,7 +52,6 @@ class PenjualanSeeder extends Seeder
                         'status_transaksi' => 'Selesai',
                         'status_bayar' => 'Lunas',
                         'catatan' => 'Transaksi dummy seeding',
-                        // Initialize totals, will update after details
                         'total_bruto' => 0,
                         'diskon_nota' => 0,
                         'pajak_ppn' => 0,
@@ -65,7 +68,7 @@ class PenjualanSeeder extends Seeder
                     for ($j = 0; $j < $itemsCount; $j++) {
                         $produk = $produks->random();
                         $qty = rand(1, 5);
-                        $harga = $produk->harga_jual;
+                        $harga = $produk->harga_jual_umum ?? $produk->harga_beli * 1.2;
                         $subtotal = $qty * $harga;
                         
                         PenjualanDetail::create([
@@ -80,29 +83,41 @@ class PenjualanSeeder extends Seeder
                         ]);
                         
                         $totalBruto += $subtotal;
+
+                        // Deduct Stock & Log
+                        $stokToko = StokToko::firstOrCreate(
+                            ['id_toko' => $toko->id_toko, 'id_produk' => $produk->id_produk],
+                            ['stok_fisik' => 0, 'stok_minimal' => 5]
+                        );
+                        $stokToko->decrement('stok_fisik', $qty); // Allow negative for seeding if stock wasn't enough
+                        
+                        RiwayatStok::create([
+                            'id_produk' => $produk->id_produk,
+                            'id_toko' => $toko->id_toko,
+                            'jenis' => 'keluar',
+                            'jumlah' => $qty,
+                            'stok_akhir' => $stokToko->stok_fisik,
+                            'keterangan' => 'Penjualan Seeder',
+                            'referensi' => $noFaktur,
+                            'tanggal' => $date,
+                        ]);
                     }
 
                     // Update totals
-                    $diskon = 0;
-                    $ppn = 0; // Simplify for seed
-                    $biayaLain = 0;
-                    $netto = $totalBruto - $diskon + $ppn + $biayaLain;
+                    $netto = $totalBruto;
                     
                     $penjualan->update([
                         'total_bruto' => $totalBruto,
-                        'diskon_nota' => $diskon,
-                        'pajak_ppn' => $ppn,
-                        'biaya_lain' => $biayaLain,
                         'total_netto' => $netto,
                         'jumlah_bayar' => $netto,
-                        'kembalian' => 0,
                     ]);
                 }
             }
             DB::commit();
         } catch (\Exception $e) {
             DB::rollBack();
-            throw $e;
+            // throw $e; 
+            echo "Error seeding penjualan: " . $e->getMessage() . "\n";
         }
     }
 }

@@ -22,7 +22,9 @@ class DatabaseSeeder extends Seeder
             UtangPiutangPelangganSeeder::class,    // After Pelanggan
             PengeluaranSeeder::class,
             PendapatanPasifSeeder::class,
+            GudangSeeder::class,
             StokTokoSeeder::class,
+            PembelianSeeder::class,
             PenjualanSeeder::class,
             SyncPendapatanFromPenjualanSeeder::class,
             SettingSeeder::class,

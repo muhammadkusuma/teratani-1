@@ -240,6 +240,21 @@
                     @endif
 
                     @if(in_array($jabatan, $level_gudang))
+                        <a href="{{ route('owner.toko.pembelian.index', session('toko_active_id')) }}" 
+                        class="menu-item {{ request()->routeIs('owner.toko.pembelian.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            🧺 Pembelian
+                        </a>
+                        <a href="{{ route('owner.gudang.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.gudang.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            🏭 Gudang
+                        </a>
+                        <a href="{{ route('owner.riwayat-stok.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.riwayat-stok.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            📋 Log Stok
+                        </a>
+                    @endif
+
+                    @if(in_array($jabatan, $level_gudang))
                         <a href="{{ route('owner.distributor.index') }}" 
                         class="menu-item {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
                             🚚 Distributor
