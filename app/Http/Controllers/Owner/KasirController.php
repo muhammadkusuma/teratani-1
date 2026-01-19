@@ -7,6 +7,7 @@ use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
 use App\Models\Produk;
 use App\Models\StokToko;
+use App\Models\RiwayatStok;
 use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -237,7 +238,19 @@ class KasirController extends Controller
                 
 
                 if ($data['produk']->stokToko) {
+                    $stokAwal = $data['produk']->stokToko->stok_fisik;
                     $data['produk']->stokToko->decrement('stok_fisik', $data['qty']);
+                    
+                    RiwayatStok::create([
+                        'id_produk' => $data['produk']->id_produk,
+                        'id_toko' => $id_toko,
+                        'jenis' => 'keluar',
+                        'jumlah' => $data['qty'],
+                        'stok_akhir' => $stokAwal - $data['qty'],
+                        'keterangan' => 'Penjualan Kasir',
+                        'referensi' => $penjualan->no_faktur,
+                        'tanggal' => now(),
+                    ]);
                 }
             }
 

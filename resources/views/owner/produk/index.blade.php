@@ -74,7 +74,26 @@
                                 $jumlahStok <= ($stokData->stok_minimal ?? 0)
                                     ? 'text-red-600 font-bold'
                                     : 'text-green-700';
+                            $rowClass = $jumlahStok <= 0 ? 'bg-red-100' : 'hover:bg-yellow-50';
                         @endphp
+                    <tr class="{{ $rowClass }} text-xs">
+                        <td class="border border-gray-300 p-2 text-center">{{ $produks->firstItem() + $index }}</td>
+                        <td class="border border-gray-300 p-2 text-center">
+                            @if ($item->gambar_produk)
+                                <img src="{{ asset('storage/' . $item->gambar_produk) }}" alt="img"
+                                    class="h-8 w-8 object-cover border border-gray-300 mx-auto">
+                            @else
+                                <span class="text-[10px] text-gray-400 italic">No Img</span>
+                            @endif
+                        </td>
+                        <td class="border border-gray-300 p-2">
+                            <div class="font-bold">{{ $item->nama_produk }}</div>
+                            <div class="text-[10px] text-gray-500 font-mono">
+                                SKU: {{ $item->sku ?? '-' }} | BC: {{ $item->barcode ?? '-' }}
+                            </div>
+                        </td>
+                        <td class="border border-gray-300 p-2">{{ $item->kategori->nama_kategori ?? '-' }}</td>
+
                         <td class="border border-gray-300 p-2 text-center {{ $bgStok }}">
                             {{ number_format($jumlahStok, 0, ',', '.') }}
                         </td>

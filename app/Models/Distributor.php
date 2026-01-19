@@ -45,6 +45,11 @@ class Distributor extends Model
         return $query->where('is_active', true);
     }
 
+    public function pembelians()
+    {
+        return $this->hasMany(Pembelian::class, 'id_distributor', 'id_distributor');
+    }
+
     
 
     public function getSaldoUtangAttribute()

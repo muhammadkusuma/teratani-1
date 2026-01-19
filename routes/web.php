@@ -6,6 +6,8 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\Owner\BisnisController;
 use App\Http\Controllers\Owner\DistributorController;
 use App\Http\Controllers\Owner\KaryawanController;
+use App\Http\Controllers\Owner\GudangController;
+use App\Http\Controllers\Owner\RiwayatStokController;
 use App\Http\Controllers\Owner\PengeluaranController;
 use App\Http\Controllers\Owner\PendapatanPasifController;
 use App\Http\Controllers\Owner\KasirController;
@@ -19,6 +21,7 @@ use App\Http\Controllers\SatuanController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Owner\UserController as OwnerUserController;
+use App\Http\Controllers\Owner\PembelianController;
 use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
@@ -55,6 +58,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');
 
         Route::resource('toko.produk', ProdukController::class);
+        Route::resource('toko.pembelian', PembelianController::class);
 
         // Customer piutang routes (must come before resource routes to avoid conflicts)
         Route::prefix('pelanggan')->name('pelanggan.')->group(function () {
@@ -96,6 +100,11 @@ Route::middleware('auth')->group(function () {
 
         // Route::resource generates index, store, update, destroy
         // Explicit routes removed to avoid name collision
+
+        Route::resource('gudang', GudangController::class)->only(['index', 'show']);
+        Route::get('/riwayat-stok', [RiwayatStokController::class, 'index'])->name('riwayat-stok.index');
+        Route::get('/riwayat-stok/create', [RiwayatStokController::class, 'create'])->name('riwayat-stok.create');
+        Route::post('/riwayat-stok', [RiwayatStokController::class, 'store'])->name('riwayat-stok.store');
 
         Route::get('/stok', [StokController::class, 'index'])->name('stok.index');
         Route::get('/stok/tambah', [StokController::class, 'tambah'])->name('stok.tambah');
