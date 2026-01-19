@@ -289,23 +289,25 @@
             let pId = $('#setupPelanggan').val();
             let kId = $('#setupKategoriHarga').val();
 
-            // Set values in main UI
-            $('#pelanggan').val(pId);
-            // Trigger change on pelanggan first to satisfy any libraries
-             $('#pelanggan').trigger('change');
+            // 1. Set Customer and Trigger Change (Critical for UI update if Select2)
+            // This might trigger a listener that resets the price, so we handle price AFTER this.
+            $('#pelanggan').val(pId).trigger('change');
             
-            // Force the category selected in setup to be the current one immediately
-            currentCategory = kId;
-            $('#kategoriHarga').val(kId); // Set value without triggering change yet if we want to avoid double updates, but we want to update prices.
-            
-            // Delay slightly to ensure Select2 and other listeners are ready, then trigger update
+            // 2. Disable Customer immediately to prevent interaction
+            $('#pelanggan').prop('disabled', true);
+
+            // 3. Set Price Category with a slight delay to ensure it overrides any side-effects
             setTimeout(() => {
-                 $('#kategoriHarga').trigger('change');
+                currentCategory = kId;
+                $('#kategoriHarga').val(kId).trigger('change');
                 
-                // Hide modal and ready to go
+                // Disable Price input
+                $('#kategoriHarga').prop('disabled', true);
+
+                // 4. Hide modal and ready to go
                 $('#modalSetupKasir').removeClass('flex').addClass('hidden');
                 $('#searchProduct').focus();
-            }, 50);
+            }, 100);
         }
 
         function getPriceForCategory(product, category) {
@@ -567,6 +569,7 @@
 
         function tutupModal() {
             $('#modalCetak').addClass('hidden').removeClass('flex');
+            // Reload page to start new transaction and reset disabled inputs
             location.reload(); 
         }
     </script>
