@@ -36,9 +36,19 @@ class ProdukController extends Controller
             });
         }
 
-        $produks = $query->with(['stokTokos' => function ($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko);
-        }, 'kategori', 'satuanKecil', 'satuanBesar'])
+        $produks = $query->with([
+            'stokTokos' => function ($q) use ($id_toko) {
+                $q->where('id_toko', $id_toko);
+            },
+            'stokGudangs' => function ($q) use ($id_toko) {
+                $q->whereHas('gudang', function ($gq) use ($id_toko) {
+                    $gq->where('id_toko', $id_toko);
+                });
+            },
+            'kategori', 
+            'satuanKecil', 
+            'satuanBesar'
+        ])
             ->paginate(10)
             ->withQueryString();
 

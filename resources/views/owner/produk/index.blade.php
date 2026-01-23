@@ -52,7 +52,14 @@
 
                         @php
                             $stokData = $item->stokTokos->first();
-                            $jumlahStok = $stokData ? $stokData->stok_fisik : 0;
+                            $stokToko = $stokData ? $stokData->stok_fisik : 0;
+                            
+                            // Tambahkan stok dari semua gudang milik toko ini
+                            $stokGudangTotal = $item->stokGudangs->sum('stok_fisik');
+                            
+                            // Total stok = stok toko + stok gudang
+                            $jumlahStok = $stokToko + $stokGudangTotal;
+                            
                             $bgStok =
                                 $jumlahStok <= ($stokData->stok_minimal ?? 0)
                                     ? 'text-red-600 font-bold'
@@ -78,7 +85,10 @@
                         <td class="border border-gray-300 p-2">{{ $item->kategori->nama_kategori ?? '-' }}</td>
 
                         <td class="border border-gray-300 p-2 text-center {{ $bgStok }}">
-                            {{ number_format($jumlahStok, 0, ',', '.') }}
+                            <div class="font-mono font-bold">{{ number_format($jumlahStok, 0, ',', '.') }}</div>
+                            @if($stokGudangTotal > 0)
+                                <div class="text-[9px] text-gray-500">Toko: {{ $stokToko }} | Gudang: {{ $stokGudangTotal }}</div>
+                            @endif
                         </td>
 
                         <td class="border border-gray-300 p-2">
