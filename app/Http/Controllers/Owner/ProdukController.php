@@ -80,6 +80,11 @@ class ProdukController extends Controller
             $data = $request->except(['gambar_produk', 'stok_awal', 'lokasi_stok_awal', '_token']);
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
+            // Auto-generate SKU if empty
+            if (empty($data['sku'])) {
+                $data['sku'] = 'PROD-' . now()->format('ymd') . '-' . strtoupper(substr(uniqid(), -6));
+            }
+
             if ($request->hasFile('gambar_produk')) {
                 $data['gambar_produk'] = $request->file('gambar_produk')->store('produk', 'public');
             }
@@ -181,6 +186,11 @@ class ProdukController extends Controller
         try {
             $data = $request->except(['gambar_produk', '_token', '_method']);
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
+
+            // Auto-generate SKU if empty
+            if (empty($data['sku'])) {
+                $data['sku'] = 'PROD-' . now()->format('ymd') . '-' . strtoupper(substr(uniqid(), -6));
+            }
 
             if ($request->hasFile('gambar_produk')) {
                 if ($produk->gambar_produk && Storage::disk('public')->exists($produk->gambar_produk)) {
