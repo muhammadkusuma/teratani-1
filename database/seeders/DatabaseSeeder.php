@@ -15,19 +15,19 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,        // Now runs after Karyawan
             KategoriSeeder::class,
             SatuanSeeder::class,
-            ProdukSeeder::class,
-            PelangganSeeder::class,
-            DistributorSeeder::class,
-            UtangPiutangDistributorSeeder::class,  // After Distributor
-            UtangPiutangPelangganSeeder::class,    // After Pelanggan
-            PengeluaranSeeder::class,
-            PendapatanPasifSeeder::class,
-            GudangSeeder::class,
-            StokTokoSeeder::class,
-            PembelianSeeder::class,
-            PenjualanSeeder::class,
-            SyncPendapatanFromPenjualanSeeder::class,
-            SettingSeeder::class,
+            // ProdukSeeder::class,
+            // PelangganSeeder::class,
+            // DistributorSeeder::class,
+            // UtangPiutangDistributorSeeder::class,  // After Distributor
+            // UtangPiutangPelangganSeeder::class,    // After Pelanggan
+            // PengeluaranSeeder::class,
+            // PendapatanPasifSeeder::class,
+            // GudangSeeder::class,
+            // StokTokoSeeder::class,
+            // PembelianSeeder::class,
+            // PenjualanSeeder::class,
+            // SyncPendapatanFromPenjualanSeeder::class,
+            // SettingSeeder::class,
         ]);
     }
 }

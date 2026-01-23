@@ -59,7 +59,7 @@
     <style>
         body {
             font-family: 'Tahoma', 'MS Sans Serif', Arial, sans-serif;
-            font-size: 16px;
+            font-size: 18px;
         }
 
         .win98-border {
@@ -77,9 +77,10 @@
             border: 3px solid;
             border-color: #ffffff #000000 #000000 #ffffff;
             background: #c0c0c0;
-            padding: 8px 16px;
+            padding: 10px 18px;
             font-weight: bold;
             cursor: pointer;
+            font-size: 16px;
         }
 
         .win98-button:hover {
@@ -91,8 +92,8 @@
         }
 
         .menu-item {
-            padding: 2px 8px;
-            font-size: 11px;
+            padding: 4px 10px;
+            font-size: 13px;
             font-weight: bold;
             border: 2px solid transparent;
         }
@@ -119,24 +120,24 @@
         .win98-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 15px;
+            font-size: 17px;
         }
 
         .win98-table th {
             background: #000080;
             color: white;
-            padding: 10px;
+            padding: 12px;
             text-align: left;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
             border: 1px solid #000;
         }
 
         .win98-table td {
             background: white;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #808080;
-            font-size: 15px;
+            font-size: 17px;
         }
 
         .win98-table tr:nth-child(even) td {
@@ -145,8 +146,8 @@
 
         .win98-input {
             font-family: 'Tahoma', Arial, sans-serif;
-            font-size: 16px;
-            padding: 6px;
+            font-size: 18px;
+            padding: 8px;
             border: 2px solid;
             border-color: #000000 #ffffff #ffffff #000000;
             background: white;
@@ -157,14 +158,14 @@
         }
 
         .win98-heading {
-            font-size: 20px;
+            font-size: 24px;
             color: #000080;
             font-weight: bold;
             margin-bottom: 12px;
         }
 
         .win98-text-large {
-            font-size: 16px;
+            font-size: 18px;
         }
     </style>
 </head>
@@ -219,6 +220,10 @@
                         class="menu-item {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
                             💰 Kasir
                         </a>
+                        <a href="{{ route('owner.retur-penjualan.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.retur-penjualan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            🔄 Retur Penjualan
+                        </a>
                     @endif
 
                     @if(in_array($jabatan, $level_gudang))
@@ -258,6 +263,10 @@
                         <a href="{{ route('owner.distributor.index') }}" 
                         class="menu-item {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
                             🚚 Distributor
+                        </a>
+                        <a href="{{ route('owner.retur-pembelian.index') }}" 
+                        class="menu-item {{ request()->routeIs('owner.retur-pembelian.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                            🔙 Retur Pembelian
                         </a>
                     @endif
 
