@@ -93,15 +93,14 @@ Route::middleware('auth')->group(function () {
         Route::resource('pendapatan_pasif', PendapatanPasifController::class);
 
         
+        
         Route::resource('users', OwnerUserController::class);
 
         Route::resource('kategori', KategoriController::class);
         Route::resource('satuan', SatuanController::class);
 
-        // Route::resource generates index, store, update, destroy
-        // Explicit routes removed to avoid name collision
-
-        Route::resource('gudang', GudangController::class); // Removed ->only() to allow full CRUD
+        // Gudang as nested resource under toko (separated per store)
+        Route::resource('toko.gudang', GudangController::class);
         
         Route::resource('retur-penjualan', \App\Http\Controllers\Owner\ReturPenjualanController::class);
         Route::resource('retur-pembelian', \App\Http\Controllers\Owner\ReturPembelianController::class);

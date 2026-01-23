@@ -249,8 +249,8 @@
                         class="menu-item {{ request()->routeIs('owner.toko.pembelian.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
                             🧺 Pembelian
                         </a>
-                        <a href="{{ route('owner.gudang.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.gudang.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
+                        <a href="{{ route('owner.toko.gudang.index', session('toko_active_id')) }}" 
+                        class="menu-item {{ request()->routeIs('owner.toko.gudang.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
                             🏭 Gudang
                         </a>
                         <a href="{{ route('owner.riwayat-stok.index') }}" 
