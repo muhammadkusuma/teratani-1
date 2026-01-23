@@ -26,8 +26,20 @@
         <tbody>
             @forelse($stoks as $index => $stok)
                 @php
-                    $status = $stok->stok_fisik <= 0 ? 'habis' : 'aman';
-                    $rowClass = $stok->stok_fisik <= 0 ? 'bg-red-50' : 'hover:bg-yellow-50';
+                    $minStok = $stok->produk->stok_minimum ?? 10; // Default 10 if null
+                    $isHabis = $stok->stok_fisik <= 0;
+                    $isMauHabis = $stok->stok_fisik <= $minStok;
+                    
+                    if ($isHabis) {
+                        $rowClass = 'bg-red-50 hover:bg-red-100';
+                        $statusParams = ['bg-red-200', 'text-red-800', 'HABIS'];
+                    } elseif ($isMauHabis) {
+                        $rowClass = 'bg-yellow-50 hover:bg-yellow-100';
+                        $statusParams = ['bg-yellow-200', 'text-yellow-800', 'SEGERA HABIS'];
+                    } else {
+                        $rowClass = 'hover:bg-gray-50';
+                        $statusParams = ['bg-green-200', 'text-green-800', 'AMAN'];
+                    }
                 @endphp
             <tr class="{{ $rowClass }} text-xs">
                 <td class="border border-gray-300 p-2 text-center">{{ $stoks->firstItem() + $index }}</td>
@@ -38,11 +50,9 @@
                 <td class="border border-gray-300 p-2 text-right font-mono font-bold">{{ number_format($stok->stok_fisik, 0, ',', '.') }}</td>
                 <td class="border border-gray-300 p-2 text-center">{{ $stok->produk->satuanKecil->nama_satuan ?? 'Pcs' }}</td>
                 <td class="border border-gray-300 p-2 text-center">
-                    @if ($status == 'habis')
-                        <span class="px-2 py-0.5 rounded bg-red-200 text-red-800 text-[10px] font-bold">HABIS</span>
-                    @else
-                        <span class="px-2 py-0.5 rounded bg-green-200 text-green-800 text-[10px] font-bold">AMAN</span>
-                    @endif
+                    <span class="px-2 py-0.5 rounded {{ $statusParams[0] }} {{ $statusParams[1] }} text-[10px] font-bold">
+                        {{ $statusParams[2] }}
+                    </span>
                 </td>
             </tr>
             @empty

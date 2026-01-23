@@ -345,4 +345,55 @@ class KasirController extends Controller
         return view('owner.kasir.riwayat', compact('transaksi', 'tanggal'));
     }
 
+    public function salin($id)
+    {
+        $id_toko = $this->getTokoAktif();
+        $transaksi = Penjualan::with(['details.produk.stokToko', 'details.produk.satuanKecil', 'pelanggan'])
+            ->where('id_toko', $id_toko)
+            ->findOrFail($id);
+
+        // Prepare data for the cashier view
+        $cartItems = [];
+        foreach ($transaksi->details as $detail) {
+            $cartItems[] = [
+                'id' => $detail->id_produk,
+                'name' => $detail->produk->nama_produk,
+                'qty' => $detail->qty,
+                'price' => (int) $detail->harga_jual_satuan, // Cast to int
+                'sku' => $detail->produk->sku
+            ];
+        }
+
+        // Reuse index logic but pass cart data
+        $toko = Toko::find($id_toko);
+        
+        $cacheKey = "kasir_index_products_{$id_toko}";
+        $produk = Cache::remember($cacheKey, 3600, function () use ($id_toko) {
+            return Produk::where('is_active', 1)
+                ->whereHas('stokToko', function ($q) use ($id_toko) {
+                    $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
+                })
+                ->with(['stokToko' => function ($q) use ($id_toko) {
+                    $q->where('id_toko', $id_toko);
+                }, 'satuanKecil'])
+                ->orderBy('nama_produk')
+                ->limit(50)
+                ->get();
+        });
+
+        $metodeBayar = ['Tunai', 'Transfer', 'Hutang'];
+
+        $pelanggan = Pelanggan::where('id_toko', $id_toko)
+            ->select('id_pelanggan', 'kode_pelanggan', 'nama_pelanggan', 'kategori_harga')
+            ->orderBy('nama_pelanggan')
+            ->get();
+            
+        $salinTransaksi = [
+            'pelanggan' => $transaksi->pelanggan,
+            'items' => $cartItems
+        ];
+
+        return view('owner.kasir.index', compact('toko', 'produk', 'metodeBayar', 'pelanggan', 'salinTransaksi'));
+    }
+
 }

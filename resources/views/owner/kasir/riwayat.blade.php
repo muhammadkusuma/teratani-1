@@ -76,6 +76,13 @@
                                             title="Cetak Faktur">
                                             <i class="fas fa-file-invoice"></i> FAKTUR
                                         </button>
+
+                                        <button
+                                            onclick="window.location.href='{{ route('owner.kasir.salin', $trx->id_penjualan) }}'"
+                                            class="px-2 py-1 bg-yellow-100 border border-yellow-400 hover:bg-white text-[10px] font-bold text-yellow-800"
+                                            title="Salin / Re-order">
+                                            <i class="fas fa-copy"></i> SALIN
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

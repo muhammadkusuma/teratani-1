@@ -101,7 +101,11 @@ Route::middleware('auth')->group(function () {
         // Route::resource generates index, store, update, destroy
         // Explicit routes removed to avoid name collision
 
-        Route::resource('gudang', GudangController::class)->only(['index', 'show']);
+        Route::resource('gudang', GudangController::class); // Removed ->only() to allow full CRUD
+        
+        Route::resource('retur-penjualan', \App\Http\Controllers\Owner\ReturPenjualanController::class);
+        Route::resource('retur-pembelian', \App\Http\Controllers\Owner\ReturPembelianController::class);
+
         Route::get('/riwayat-stok', [RiwayatStokController::class, 'index'])->name('riwayat-stok.index');
         Route::get('/riwayat-stok/create', [RiwayatStokController::class, 'create'])->name('riwayat-stok.create');
         Route::post('/riwayat-stok', [RiwayatStokController::class, 'store'])->name('riwayat-stok.store');
@@ -113,6 +117,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/kasir', [KasirController::class, 'index'])->name('kasir.index');
         Route::post('/kasir', [KasirController::class, 'store'])->name('kasir.store');
         Route::get('/kasir/riwayat', [KasirController::class, 'riwayat'])->name('kasir.riwayat');
+        Route::get('/kasir/salin/{id}', [KasirController::class, 'salin'])->name('kasir.salin'); // New Route for Copy Transaction
         Route::get('/kasir/ajax-search', [KasirController::class, 'searchProduk'])->name('kasir.search');
         Route::get('/kasir/cetak/{id}', [KasirController::class, 'print'])->name('kasir.print');
         Route::get('/kasir/cetak-faktur/{id}', [KasirController::class, 'cetakFaktur'])->name('kasir.cetak-faktur');

@@ -274,6 +274,51 @@
                 width: '100%'
             });
 
+            // Check if we are in "Salin Mode"
+            @if(isset($salinTransaksi))
+                // Populate Cart
+                let copiedItems = @json($salinTransaksi['items']);
+                let copiedPelanggan = @json($salinTransaksi['pelanggan']);
+                
+                // Set Customer if exists
+                if(copiedPelanggan) {
+                    $('#setupPelanggan').val(copiedPelanggan.id_pelanggan).trigger('change');
+                    $('#setupKategoriHarga').val(copiedPelanggan.kategori_harga).trigger('change');
+                }
+
+                // Add Items
+                copiedItems.forEach(item => {
+                   // We need to check stock availability from productsData
+                   let pData = productsData[item.id];
+                   if(pData) {
+                       let stok = pData.stokToko ? pData.stokToko.stok_fisik : 0;
+                       if(stok > 0) {
+                           // Use the copied Qty or Max Stock
+                           let qtyToAdd = Math.min(item.qty, stok);
+                           // Use current price from system, not old price (prices might have changed)
+                           // But wait, getPriceForCategory depends on currentCategory which is set in setup modal.
+                           // We will let addToCart handle pricing logic after setup modal is closed?
+                           // No, efficient way: Just push to cart with current price.
+                           
+                           // NOTE: Pricing will be calculated when rendering or when setup modal closes?
+                           // Actually current logic: addToCart uses currentCategory.
+                           // But currentCategory is 'umum' by default until setup modal closes.
+                           
+                           // So we should prepopulate, and let the user confirm in setup modal.
+                           cart.push({
+                               id: item.id,
+                               nama: item.name,
+                               harga: item.price, // Temporary, will be updated if category changes? No, logic doesn't auto-update cart price on category change yet!
+                               stok: stok,
+                               qty: qtyToAdd
+                           });
+                       }
+                   }
+                });
+                
+                renderCart();
+            @endif
+
             // Show setup modal immediately
             $('#modalSetupKasir').removeClass('hidden').addClass('flex');
 

@@ -23,6 +23,7 @@ class Produk extends Model
         'harga_r2',
         'gambar_produk',
         'is_active',
+        'stok_minimum',
     ];
 
     protected $casts = [
@@ -32,6 +33,7 @@ class Produk extends Model
         'harga_r1'          => 'decimal:2',
         'harga_r2'          => 'decimal:2',
         'is_active'         => 'boolean',
+        'stok_minimum'      => 'integer',
     ];
 
     public function kategori()
