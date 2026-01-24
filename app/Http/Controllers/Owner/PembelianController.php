@@ -59,10 +59,10 @@ class PembelianController extends Controller
             'keterangan' => 'nullable|string',
             'items' => 'required|array|min:1',
             'items.*.id_produk' => 'required|exists:produk,id_produk',
-            'items.*.jumlah' => 'required|integer|min:1',
-            'items.*.harga_satuan' => 'required|integer|min:0',
+            'items.*.jumlah' => 'required|numeric|min:1',
+            'items.*.harga_satuan' => 'required|numeric|min:0',
             'destination_type' => 'required|in:toko,gudang',
-            'destination_id' => 'required', // Will validate manually based on type
+            'destination_id' => 'required',
         ]);
 
         // Validate destination
@@ -147,7 +147,7 @@ class PembelianController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('owner.pembelian.index', $id_toko)->with('success', 'Pembelian berhasil disimpan.');
+            return redirect()->route('owner.toko.pembelian.index', $id_toko)->with('success', 'Pembelian berhasil disimpan.');
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal menyimpan pembelian: ' . $e->getMessage())->withInput();

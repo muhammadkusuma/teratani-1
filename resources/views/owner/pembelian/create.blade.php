@@ -12,6 +12,23 @@
     </a>
 </div>
 
+@if ($errors->any())
+    <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 mb-3 text-xs">
+        <strong>Error:</strong>
+        <ul class="list-disc ml-4 mt-1">
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="bg-red-100 border border-red-400 text-red-700 px-3 py-2 mb-3 text-xs">
+        {{ session('error') }}
+    </div>
+@endif
+
 <div class="bg-gray-100 border border-gray-400 p-4">
     <form action="{{ route('owner.toko.pembelian.store', $toko->id_toko) }}" method="POST">
         @csrf
@@ -32,7 +49,7 @@
             </div>
             <div>
                 <label class="block text-xs font-bold mb-1">NO. FAKTUR</label>
-                <input type="text" name="no_faktur" class="win98-input w-full text-sm" placeholder="Nomor Invoice..." required>
+                <input type="text" name="no_faktur" class="win98-input w-full text-sm" placeholder="Nomor Invoice...">
             </div>
             <div>
                 <label class="block text-xs font-bold mb-1">TUJUAN STOK</label>
@@ -42,6 +59,8 @@
                         <option value="gudang_{{ $gudang->id_gudang }}">Gudang: {{ $gudang->nama_gudang }}</option>
                     @endforeach
                 </select>
+                <input type="hidden" name="destination_type" id="destination_type" value="toko">
+                <input type="hidden" name="destination_id" id="destination_id" value="{{ $toko->id_toko }}">
             </div>
         </div>
 
@@ -175,6 +194,18 @@
     }
 
     document.getElementById('addItemBtn').addEventListener('click', addRow);
+    
+    // Handle destination change
+    document.getElementById('destination').addEventListener('change', function() {
+        const value = this.value;
+        if (value === 'toko') {
+            document.getElementById('destination_type').value = 'toko';
+            document.getElementById('destination_id').value = '{{ $toko->id_toko }}';
+        } else if (value.startsWith('gudang_')) {
+            document.getElementById('destination_type').value = 'gudang';
+            document.getElementById('destination_id').value = value.replace('gudang_', '');
+        }
+    });
     
     // Add first row on load
     addRow();
