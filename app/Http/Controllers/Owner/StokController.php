@@ -28,31 +28,23 @@ class StokController extends Controller
         $toko = Toko::find($id_toko);
         $gudangs = \App\Models\Gudang::where('id_toko', $id_toko)->get();
 
-        // Default to Toko, but allow filtering
-        $location_type = $request->get('location_type', 'toko');
-        $location_id = $request->get('location_id', $id_toko);
-
-        // If Gudang, ensure we use gudang ID
-        if ($location_type == 'gudang' && !$request->has('location_id')) {
-             $firstGudang = $gudangs->first();
-             $location_id = $firstGudang ? $firstGudang->id_gudang : null;
-        }
-
-        $query = Produk::with(['kategori', 'satuanKecil'])->orderBy('nama_produk');
-
-        if ($location_type == 'gudang') {
-            $query->with(['stokGudang' => function ($q) use ($location_id) {
-                $q->where('id_gudang', $location_id);
-            }]);
-        } else {
-             $query->with(['stokToko' => function ($q) use ($location_id) {
-                $q->where('id_toko', $location_id);
-            }]);
-        }
+        // Load all products with stock from all locations
+        $query = Produk::with([
+            'kategori', 
+            'satuanKecil',
+            'stokTokos' => function($q) use ($id_toko) {
+                $q->where('id_toko', $id_toko);
+            },
+            'stokGudangs' => function($q) use ($id_toko) {
+                $q->whereHas('gudang', function($gq) use ($id_toko) {
+                    $gq->where('id_toko', $id_toko);
+                })->with('gudang');
+            }
+        ])->orderBy('nama_produk');
 
         $produk = $query->paginate(20);
 
-        return view('owner.stok.index', compact('produk', 'toko', 'gudangs', 'location_type', 'location_id'));
+        return view('owner.stok.index', compact('produk', 'toko', 'gudangs'));
     }
 
     public function tambah()
