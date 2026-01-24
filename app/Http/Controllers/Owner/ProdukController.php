@@ -36,9 +36,19 @@ class ProdukController extends Controller
             });
         }
 
-        $produks = $query->with(['stokTokos' => function ($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko);
-        }, 'kategori', 'satuanKecil', 'satuanBesar'])
+        $produks = $query->with([
+            'stokTokos' => function ($q) use ($id_toko) {
+                $q->where('id_toko', $id_toko);
+            },
+            'stokGudangs' => function ($q) use ($id_toko) {
+                $q->whereHas('gudang', function ($gq) use ($id_toko) {
+                    $gq->where('id_toko', $id_toko);
+                });
+            },
+            'kategori', 
+            'satuanKecil', 
+            'satuanBesar'
+        ])
             ->paginate(10)
             ->withQueryString();
 
@@ -79,6 +89,11 @@ class ProdukController extends Controller
         try {
             $data = $request->except(['gambar_produk', 'stok_awal', 'lokasi_stok_awal', '_token']);
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
+
+            // Auto-generate SKU if empty
+            if (empty($data['sku'])) {
+                $data['sku'] = 'PROD-' . now()->format('ymd') . '-' . strtoupper(substr(uniqid(), -6));
+            }
 
             if ($request->hasFile('gambar_produk')) {
                 $data['gambar_produk'] = $request->file('gambar_produk')->store('produk', 'public');
@@ -181,6 +196,11 @@ class ProdukController extends Controller
         try {
             $data = $request->except(['gambar_produk', '_token', '_method']);
             $data['is_active'] = $request->has('is_active') ? 1 : 0;
+
+            // Auto-generate SKU if empty
+            if (empty($data['sku'])) {
+                $data['sku'] = 'PROD-' . now()->format('ymd') . '-' . strtoupper(substr(uniqid(), -6));
+            }
 
             if ($request->hasFile('gambar_produk')) {
                 if ($produk->gambar_produk && Storage::disk('public')->exists($produk->gambar_produk)) {

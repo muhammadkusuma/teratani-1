@@ -1,13 +1,14 @@
 @extends('layouts.owner')
 
-@section('title', 'Stok Gudang')
+@section('title', 'Detail Gudang')
 
 @section('content')
 <div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
-        <i class="fa fa-boxes"></i> STOK GUDANG: {{ strtoupper($gudang->nama_gudang) }}
-    </h2>
-    <a href="{{ route('owner.gudang.index') }}" class="px-3 py-1 bg-gray-200 text-gray-700 border border-gray-400 shadow hover:bg-gray-300 text-xs">
+    <div>
+        <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4 inline-block">STOK GUDANG: {{ strtoupper($gudang->nama_gudang) }}</h2>
+        <span class="text-xs text-gray-500 ml-2">Toko: {{ $toko->nama_toko }}</span>
+    </div>
+    <a href="{{ route('owner.toko.gudang.index', $toko->id_toko) }}" class="px-3 py-1 bg-gray-200 text-gray-700 border border-gray-400 shadow hover:bg-gray-300 text-xs">
         <i class="fa fa-arrow-left"></i> KEMBALI
     </a>
 </div>
@@ -26,7 +27,7 @@
         <tbody>
             @forelse($stoks as $index => $stok)
                 @php
-                    $minStok = $stok->produk->stok_minimum ?? 10; // Default 10 if null
+                    $minStok = $stok->produk->stok_minimum ?? 10;
                     $isHabis = $stok->stok_fisik <= 0;
                     $isMauHabis = $stok->stok_fisik <= $minStok;
                     
