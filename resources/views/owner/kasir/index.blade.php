@@ -330,6 +330,27 @@
             });
         });
 
+        function updateCartPrices() {
+            // Update all cart item prices based on current category
+            cart.forEach(item => {
+                let product = productsData[item.id];
+                if (product) {
+                    item.harga = getPriceForCategory(product, currentCategory);
+                }
+            });
+            renderCart();
+            
+            // Also update price labels in product list
+            $('.price-label').each(function() {
+                let prodId = parseInt($(this).data('id'));
+                let product = productsData[prodId];
+                if (product) {
+                    let price = getPriceForCategory(product, currentCategory);
+                    $(this).text('Rp ' + new Intl.NumberFormat('id-ID').format(price));
+                }
+            });
+        }
+
         function mulaiKasir() {
             let pId = $('#setupPelanggan').val();
             let kId = $('#setupKategoriHarga').val();
@@ -345,6 +366,9 @@
             setTimeout(() => {
                 currentCategory = kId;
                 $('#kategoriHarga').val(kId).trigger('change');
+                
+                // UPDATE: Recalculate all cart prices based on selected category
+                updateCartPrices();
                 
                 // Disable Price input
                 $('#kategoriHarga').prop('disabled', true);
