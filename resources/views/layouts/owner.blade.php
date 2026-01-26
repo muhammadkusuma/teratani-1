@@ -240,11 +240,21 @@
                     🏠 Beranda
                 </a>
 
+                {{-- Organisasi Dropdown (Global Admin Items) --}}
                 @if(in_array($jabatan, $level_full))
-                    <a href="{{ route('owner.users.index') }}" 
-                       class="menu-item {{ request()->routeIs('owner.users.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        👥 Akun Pengguna
-                    </a>
+                    <div class="dropdown inline-block">
+                        <div class="menu-item {{ request()->routeIs('owner.users.*') || request()->routeIs('owner.karyawan.*') || request()->routeIs('owner.perusahaan.*') || request()->routeIs('owner.toko.index') ? 'active' : '' }} text-black">
+                            🏢 Organisasi ▼
+                        </div>
+                        <div class="dropdown-content">
+                            <a href="{{ route('owner.users.index') }}">👥 Akun Pengguna</a>
+                            @if (session('toko_active_id'))
+                                <a href="{{ route('owner.karyawan.index') }}">👨‍💼 Karyawan</a>
+                            @endif
+                            <a href="{{ route('owner.perusahaan.index') }}">🏢 Detail Perusahaan</a>
+                            <a href="{{ route('owner.toko.index') }}">🏪 Toko</a>
+                        </div>
+                    </div>
                 @endif
 
                 @if (session('toko_active_id'))
@@ -256,14 +266,19 @@
                     @endif
 
                     @if(in_array($jabatan, $level_gudang))
-                        <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}" 
-                        class="menu-item {{ request()->routeIs('owner.toko.produk.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            📦 Produk
-                        </a>
-                        <a href="{{ route('owner.stok.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.stok.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            📊 Stok
-                        </a>
+                        {{-- Inventaris Dropdown --}}
+                        <div class="dropdown inline-block">
+                            <div class="menu-item {{ request()->routeIs('owner.toko.produk.*') || request()->routeIs('owner.stok.*') || request()->routeIs('owner.toko.pembelian.*') || request()->routeIs('owner.toko.gudang.*') || request()->routeIs('owner.riwayat-stok.*') ? 'active' : '' }} text-black">
+                                📦 Inventaris ▼
+                            </div>
+                            <div class="dropdown-content">
+                                <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}">📦 Produk</a>
+                                <a href="{{ route('owner.stok.index') }}">📊 Stok</a>
+                                <a href="{{ route('owner.toko.pembelian.index', session('toko_active_id')) }}">🧺 Pembelian</a>
+                                <a href="{{ route('owner.toko.gudang.index', session('toko_active_id')) }}">🏭 Gudang</a>
+                                <a href="{{ route('owner.riwayat-stok.index') }}">📋 Log Stok</a>
+                            </div>
+                        </div>
                     @endif
 
                     @if(in_array($jabatan, $level_kasir))
@@ -279,21 +294,6 @@
                     @endif
 
                     @if(in_array($jabatan, $level_gudang))
-                        <a href="{{ route('owner.toko.pembelian.index', session('toko_active_id')) }}" 
-                        class="menu-item {{ request()->routeIs('owner.toko.pembelian.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            🧺 Pembelian
-                        </a>
-                        <a href="{{ route('owner.toko.gudang.index', session('toko_active_id')) }}" 
-                        class="menu-item {{ request()->routeIs('owner.toko.gudang.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            🏭 Gudang
-                        </a>
-                        <a href="{{ route('owner.riwayat-stok.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.riwayat-stok.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            📋 Log Stok
-                        </a>
-                    @endif
-
-                    @if(in_array($jabatan, $level_gudang))
                         <div class="dropdown inline-block">
                             <div class="menu-item {{ request()->routeIs('owner.distributor.*') || request()->routeIs('owner.retur-pembelian.*') ? 'active' : '' }} text-black">
                                 🚚 Distributor ▼
@@ -305,40 +305,20 @@
                         </div>
                     @endif
 
-                    @if(in_array($jabatan, $level_full))
-                        <a href="{{ route('owner.karyawan.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.karyawan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            👨‍💼 Karyawan
-                        </a>
-                    @endif
-
                     @if(in_array($jabatan, $level_gudang))
-                        <a href="{{ route('owner.pengeluaran.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.pengeluaran.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            💸 Pengeluaran
-                        </a>
+                         {{-- Keuangan Dropdown --}}
+                         <div class="dropdown inline-block">
+                            <div class="menu-item {{ request()->routeIs('owner.pengeluaran.*') || request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black">
+                                💵 Keuangan ▼
+                            </div>
+                            <div class="dropdown-content">
+                                <a href="{{ route('owner.pengeluaran.index') }}">💸 Pengeluaran</a>
+                                @if(in_array($jabatan, $level_full))
+                                    <a href="{{ route('owner.pendapatan_pasif.index') }}">💰 Pendapatan</a>
+                                @endif
+                            </div>
+                        </div>
                     @endif
-
-                    @if(in_array($jabatan, $level_full))
-                        <a href="{{ route('owner.pendapatan_pasif.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            💰 Pendapatan
-                        </a>
-                    @endif
-                @endif
-
-                @if(in_array($jabatan, $level_full))
-                    <a href="{{ route('owner.perusahaan.index') }}" 
-                    class="menu-item {{ request()->routeIs('owner.perusahaan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        🏢 Detail Perusahaan
-                    </a>
-                @endif
-                
-                @if(in_array($jabatan, $level_full))
-                    <a href="{{ route('owner.toko.index') }}" 
-                    class="menu-item {{ request()->routeIs('owner.toko.index') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                        🏪 Toko
-                    </a>
                 @endif
 
                 <a href="{{ route('owner.profile.index') }}" 
