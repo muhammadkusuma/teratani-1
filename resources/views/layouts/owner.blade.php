@@ -287,8 +287,8 @@
                                 👥 Pelanggan ▼
                             </div>
                             <div class="dropdown-content">
-                                <a href="{{ route('owner.retur-penjualan.index') }}">Retur Penjualan</a>
-                                <a href="{{ route('owner.pelanggan.index') }}">Data Pelanggan</a>
+                                <a href="{{ route('owner.retur-penjualan.index') }}">🔄 Retur Penjualan</a>
+                                <a href="{{ route('owner.pelanggan.index') }}">👥 Data Pelanggan</a>
                             </div>
                         </div>
                     @endif
@@ -299,8 +299,8 @@
                                 🚚 Distributor ▼
                             </div>
                             <div class="dropdown-content">
-                                <a href="{{ route('owner.retur-pembelian.index') }}">Retur Distributor</a>
-                                <a href="{{ route('owner.distributor.index') }}">Data Distributor</a>
+                                <a href="{{ route('owner.retur-pembelian.index') }}">🔙 Retur Distributor</a>
+                                <a href="{{ route('owner.distributor.index') }}">🚚 Data Distributor</a>
                             </div>
                         </div>
                     @endif
