@@ -41,11 +41,30 @@ class PembelianController extends Controller
         $distributors = Distributor::where('id_toko', $id_toko)->active()->get();
         // Gudang now belongs to Toko directly
         $gudangs = Gudang::where('id_toko', $id_toko)->get();
-        $produks = Produk::whereHas('stokTokos', function($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko);
-        })->get();
+        // OPTIMIZATION: Do NOT load all products. We will use AJAX.
+        // $produks = Produk::whereHas('stokTokos', function($q) use ($id_toko) {
+        //    $q->where('id_toko', $id_toko);
+        // })->get();
+        // Return empty collection initially
+        $produks = collect([]);
 
         return view('owner.pembelian.create', compact('toko', 'distributors', 'gudangs', 'produks'));
+    }
+
+    public function searchProduk(Request $request, $id_toko)
+    {
+        $keyword = $request->get('q');
+        
+        $produks = Produk::select('id_produk', 'nama_produk', 'sku', 'harga_beli')
+            ->where('is_active', 1)
+            ->where(function($q) use ($keyword) {
+                $q->where('nama_produk', 'like', "%{$keyword}%")
+                  ->orWhere('sku', 'like', "%{$keyword}%");
+            })
+            ->limit(20)
+            ->get();
+
+        return response()->json($produks);
     }
 
     public function store(Request $request, $id_toko)

@@ -135,4 +135,36 @@
     {{ $transaksi->links() }}
 </div>
 @endif
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        $('select[name="id_distributor"]').select2({
+            placeholder: '-- Cari Distributor --',
+            allowClear: true,
+            ajax: {
+                url: "{{ route('owner.distributor.search') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.map(function (item) {
+                            return {
+                                id: item.id_distributor,
+                                text: item.nama_distributor + ' (' + (item.kode_distributor || '-') + ')'
+                            };
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+    });
+</script>
+@endpush
 @endsection

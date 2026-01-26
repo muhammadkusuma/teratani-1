@@ -111,99 +111,126 @@
 
 @push('scripts')
 <script>
-    const products = @json($produks);
+    // Constants
+    const SEARCH_URL = "{{ route('owner.toko.pembelian.search', $toko->id_toko) }}";
     let rowCount = 0;
 
     function formatRupiah(amount) {
         return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(amount);
     }
 
-    function addRow() {
-        rowCount++;
-        const tableBody = document.querySelector('#itemsTable tbody');
-        const row = document.createElement('tr');
-        row.className = "text-xs";
-        row.innerHTML = `
-            <td class="border border-gray-300 p-1">
-                <select name="items[${rowCount}][id_produk]" class="product-select win98-input w-full text-xs" required onchange="updatePrice(this)">
-                    <option value="">-- Pilih Produk --</option>
-                    ${products.map(p => `
-                        <option value="${p.id_produk}" data-price="${p.harga_beli}">
-                            ${p.nama_produk} (${p.sku})
-                        </option>
-                    `).join('')}
-                </select>
-            </td>
-            <td class="border border-gray-300 p-1">
-                <input type="number" name="items[${rowCount}][jumlah]" class="qty-input win98-input w-full text-xs text-right" min="1" value="1" required oninput="calculateSubtotal(this)">
-            </td>
-            <td class="border border-gray-300 p-1">
-                <input type="number" name="items[${rowCount}][harga_satuan]" class="price-input win98-input w-full text-xs text-right" min="0" required oninput="calculateSubtotal(this)">
-            </td>
-            <td class="border border-gray-300 p-1">
-                <input type="text" class="subtotal-display win98-input w-full text-xs text-right bg-gray-100" readonly value="0">
-                <input type="hidden" name="items[${rowCount}][subtotal]" class="subtotal-input">
-            </td>
-            <td class="border border-gray-300 p-1 text-center">
-                <button type="button" class="text-red-600 hover:text-red-800" onclick="removeRow(this)">
-                    <i class="fa fa-trash"></i>
-                </button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-
-        // Re-init Select2 if needed (for this implementation using native select for simplicity & speed matching win98 style)
-        // If specific style required, can init select2 here.
+    function initSelect2(element) {
+        $(element).select2({
+            placeholder: 'Ketik Nama / SKU...',
+            allowClear: true,
+            width: '100%',
+            ajax: {
+                url: SEARCH_URL,
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.map(function (item) {
+                            return {
+                                id: item.id_produk,
+                                text: item.nama_produk + ' (' + (item.sku || '-') + ')',
+                                price: item.harga_beli
+                            };
+                        })
+                    };
+                },
+                cache: true
+            }
+        }).on('select2:select', function (e) {
+            let data = e.params.data;
+            updatePrice(this, data.price);
+        });
     }
 
-    window.updatePrice = function(select) {
-        const row = select.closest('tr');
-        const price = select.options[select.selectedIndex].getAttribute('data-price');
-        const priceInput = row.querySelector('.price-input');
+    function addRow() {
+        rowCount++;
+        const tableBody = $('#itemsTable tbody');
+        const row = `
+            <tr class="text-xs">
+                <td class="border border-gray-300 p-1">
+                    <select name="items[${rowCount}][id_produk]" class="product-select w-full text-xs" required>
+                        <option value="">Cari Produk...</option>
+                    </select>
+                </td>
+                <td class="border border-gray-300 p-1">
+                    <input type="number" name="items[${rowCount}][jumlah]" class="qty-input win98-input w-full text-xs text-right" min="1" value="1" required oninput="calculateSubtotal(this)">
+                </td>
+                <td class="border border-gray-300 p-1">
+                    <input type="number" name="items[${rowCount}][harga_satuan]" class="price-input win98-input w-full text-xs text-right" min="0" required oninput="calculateSubtotal(this)">
+                </td>
+                <td class="border border-gray-300 p-1">
+                    <input type="text" class="subtotal-display win98-input w-full text-xs text-right bg-gray-100" readonly value="0">
+                    <input type="hidden" name="items[${rowCount}][subtotal]" class="subtotal-input">
+                </td>
+                <td class="border border-gray-300 p-1 text-center">
+                    <button type="button" class="text-red-600 hover:text-red-800" onclick="removeRow(this)">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+        const $row = $(row);
+        tableBody.append($row);
+        initSelect2($row.find('.product-select'));
+    }
+
+    window.updatePrice = function(selectElement, price) {
+        const row = $(selectElement).closest('tr');
+        const priceInput = row.find('.price-input');
         if (price) {
-            priceInput.value = price;
-            calculateSubtotal(priceInput);
+            priceInput.val(price);
+            calculateSubtotal(priceInput[0]);
         }
     }
 
     window.calculateSubtotal = function(input) {
-        const row = input.closest('tr');
-        const qty = parseFloat(row.querySelector('.qty-input').value) || 0;
-        const price = parseFloat(row.querySelector('.price-input').value) || 0;
+        const row = $(input).closest('tr');
+        const qty = parseFloat(row.find('.qty-input').val()) || 0;
+        const price = parseFloat(row.find('.price-input').val()) || 0;
         const subtotal = qty * price;
         
-        row.querySelector('.subtotal-display').value = formatRupiah(subtotal);
-        row.querySelector('.subtotal-input').value = subtotal;
+        row.find('.subtotal-display').val(formatRupiah(subtotal));
+        row.find('.subtotal-input').val(subtotal);
         
         calculateGrandTotal();
     }
 
     window.removeRow = function(btn) {
-        btn.closest('tr').remove();
+        $(btn).closest('tr').remove();
         calculateGrandTotal();
     }
 
     function calculateGrandTotal() {
         let total = 0;
-        document.querySelectorAll('.subtotal-input').forEach(input => {
-            total += parseFloat(input.value) || 0;
+        $('.subtotal-input').each(function() {
+            total += parseFloat($(this).val()) || 0;
         });
         
-        document.getElementById('grandTotalDisplay').innerText = formatRupiah(total);
-        document.getElementById('grandTotalInput').value = total;
+        $('#grandTotalDisplay').text(formatRupiah(total));
+        $('#grandTotalInput').val(total);
     }
 
-    document.getElementById('addItemBtn').addEventListener('click', addRow);
+    $('#addItemBtn').on('click', addRow);
     
     // Handle destination change
-    document.getElementById('destination').addEventListener('change', function() {
+    $('#destination').on('change', function() {
         const value = this.value;
         if (value === 'toko') {
-            document.getElementById('destination_type').value = 'toko';
-            document.getElementById('destination_id').value = '{{ $toko->id_toko }}';
+            $('#destination_type').val('toko');
+            $('#destination_id').val('{{ $toko->id_toko }}');
         } else if (value.startsWith('gudang_')) {
-            document.getElementById('destination_type').value = 'gudang';
-            document.getElementById('destination_id').value = value.replace('gudang_', '');
+            $('#destination_type').val('gudang');
+            $('#destination_id').val(value.replace('gudang_', ''));
         }
     });
     

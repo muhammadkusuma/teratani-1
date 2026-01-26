@@ -40,17 +40,19 @@ class KasirController extends Controller
 
         
 
+        // OPTIMIZATION: Select only needed columns
         $cacheKey = "kasir_index_products_{$id_toko}";
         $produk = Cache::remember($cacheKey, 3600, function () use ($id_toko) {
-            return Produk::where('is_active', 1)
+             return Produk::select('id_produk', 'nama_produk', 'harga_jual_umum', 'harga_jual_grosir', 'harga_r1', 'harga_r2', 'is_active', 'id_satuan_kecil')
+                ->where('is_active', 1)
                 ->whereHas('stokToko', function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
                 })
                 ->with(['stokToko' => function ($q) use ($id_toko) {
-                    $q->where('id_toko', $id_toko);
-                }, 'satuanKecil'])
+                    $q->select('id_produk', 'id_toko', 'stok_fisik', 'stok_minimal')->where('id_toko', $id_toko);
+                }, 'satuanKecil:id_satuan,nama_satuan'])
                 ->orderBy('nama_produk')
-                ->limit(50)
+                ->limit(50) 
                 ->get();
         });
 
@@ -61,6 +63,7 @@ class KasirController extends Controller
         $pelanggan = Pelanggan::where('id_toko', $id_toko)
             ->select('id_pelanggan', 'kode_pelanggan', 'nama_pelanggan', 'kategori_harga')
             ->orderBy('nama_pelanggan')
+            ->limit(100)
             ->get();
 
         return view('owner.kasir.index', compact('toko', 'produk', 'metodeBayar', 'pelanggan'));
@@ -75,8 +78,11 @@ class KasirController extends Controller
 
         $keyword = $request->get('keyword');
 
-        $query = Produk::where('is_active', 1)
+        // Initial Optimized Query
+        $query = Produk::select('id_produk', 'nama_produk', 'sku', 'barcode', 'harga_jual_umum', 'harga_jual_grosir', 'harga_r1', 'harga_r2', 'is_active')
+            ->where('is_active', 1)
             ->whereHas('stokToko', function ($q) use ($id_toko) {
+                // Ensure we only find products belonging to this store
                 $q->where('id_toko', $id_toko);
             });
 
@@ -90,13 +96,28 @@ class KasirController extends Controller
 
         $cacheKey = "kasir_search_{$id_toko}_" . md5($keyword);
 
-        $produk = Cache::remember($cacheKey, 3600, function () use ($query, $id_toko) {
+        $produk = Cache::remember($cacheKey, 300, function () use ($query, $id_toko) {
             return $query->with(['stokToko' => function ($q) use ($id_toko) {
-                    $q->where('id_toko', $id_toko);
-                }, 'satuanKecil'])->limit(20)->get();
+                    $q->select('id_produk', 'id_toko', 'stok_fisik')->where('id_toko', $id_toko);
+                }])
+                ->limit(20)
+                ->get();
         });
 
-        return response()->json($produk);
+        // Transform for lighter JSON
+        $result = $produk->map(function($p) {
+             return [
+                 'id_produk' => $p->id_produk,
+                 'nama_produk' => $p->nama_produk,
+                 'harga_jual_umum' => $p->harga_jual_umum,
+                 'harga_jual_grosir' => $p->harga_jual_grosir,
+                 'harga_r1' => $p->harga_r1,
+                 'harga_r2' => $p->harga_r2,
+                 'stok_toko' => $p->stokToko, // Keep object structure but it's smaller now
+             ];
+        });
+
+        return response()->json($result);
     }
 
     public function store(Request $request)

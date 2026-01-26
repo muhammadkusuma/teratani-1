@@ -58,6 +58,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/toko/select/{id}', [OwnerTokoController::class, 'select'])->name('toko.select');
 
         Route::resource('toko.produk', ProdukController::class);
+        Route::get('toko/{toko}/pembelian/search', [PembelianController::class, 'searchProduk'])->name('toko.pembelian.search');
         Route::resource('toko.pembelian', PembelianController::class);
 
         // Customer piutang routes (must come before resource routes to avoid conflicts)
@@ -71,6 +72,7 @@ Route::middleware('auth')->group(function () {
         });
 
         // Customer resource routes
+        Route::get('pelanggan/search', [PelangganController::class, 'searchPelanggan'])->name('pelanggan.search');
         Route::resource('pelanggan', PelangganController::class);
 
         // Distributor hutang routes (must come before resource routes to avoid conflicts)
@@ -84,6 +86,7 @@ Route::middleware('auth')->group(function () {
         });
         
         // Distributor resource routes
+        Route::get('distributor/search', [DistributorController::class, 'searchDistributor'])->name('distributor.search');
         Route::resource('distributor', DistributorController::class);
 
         Route::resource('karyawan', KaryawanController::class);

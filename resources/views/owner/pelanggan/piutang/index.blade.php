@@ -135,4 +135,39 @@
     {{ $transaksi->links() }}
 </div>
 @endif
+
+@push('scripts')
+<!-- Ensure Select2 JS/CSS is loaded in layout or here -->
+<!-- Assuming Layout has it, otherwise we'd add CDN -->
+
+<script>
+    $(document).ready(function() {
+        $('select[name="id_pelanggan"]').select2({
+            placeholder: '-- Cari Pelanggan --',
+            allowClear: true,
+            ajax: {
+                url: "{{ route('owner.pelanggan.search') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (params) {
+                    return {
+                        q: params.term // search term
+                    };
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.map(function (item) {
+                            return {
+                                id: item.id_pelanggan,
+                                text: item.nama_pelanggan + ' (' + (item.kode_pelanggan || '-') + ')'
+                            };
+                        })
+                    };
+                },
+                cache: true
+            }
+        });
+    });
+</script>
+@endpush
 @endsection

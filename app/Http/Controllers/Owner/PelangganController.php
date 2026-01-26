@@ -150,12 +150,17 @@ class PelangganController extends Controller
 
         
 
-        $pelanggans = Pelanggan::with('toko')
-            ->whereHas('toko', function($q) {
-                $q->where('id_perusahaan', Auth::user()->id_perusahaan);
-            })
-            ->orderBy('nama_pelanggan')
-            ->get();
+        // OPTIMIZATION: Do not load all customers. Pass empty collection.
+        // But if filtering, we need to pass the selected customer name.
+        $selectedPelanggan = null;
+        if ($request->filled('id_pelanggan')) {
+            $selectedPelanggan = Pelanggan::find($request->id_pelanggan);
+        }
+        
+        $pelanggans = collect([]);
+        if ($selectedPelanggan) {
+            $pelanggans->push($selectedPelanggan);
+        }
 
         
 
@@ -386,5 +391,27 @@ class PelangganController extends Controller
             $t->saldo_piutang = $saldo;
             $t->save();
         }
+    }
+
+
+    public function searchPelanggan(Request $request)
+    {
+        $id_toko = $this->getActiveTokoId();
+        $keyword = $request->get('q');
+
+        $query = Pelanggan::select('id_pelanggan', 'nama_pelanggan', 'kode_pelanggan', 'no_hp')
+            ->where('id_toko', $id_toko);
+
+        if ($keyword) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('nama_pelanggan', 'like', "%{$keyword}%")
+                  ->orWhere('kode_pelanggan', 'like', "%{$keyword}%")
+                  ->orWhere('no_hp', 'like', "%{$keyword}%");
+            });
+        }
+
+        $pelanggan = $query->limit(20)->get();
+
+        return response()->json($pelanggan);
     }
 }
