@@ -28,7 +28,7 @@
             <div><label class="block text-xs font-bold mb-1">Kategori <span class="text-green-600">*</span></label>
                 <select name="kategori" required class="w-full border border-gray-400 p-1 text-xs shadow-inner">
                     <option value="">-- Pilih Kategori --</option>
-                    @foreach(['Bunga Bank', 'Investasi Aset', 'Komisi', 'Investasi', 'Lainnya', 'Lainnya', 'Lainnya', 'Lainnya', 'Lainnya'] as $kat)
+                    @foreach(['Bunga Bank', 'Investasi Aset', 'Komisi', 'Investasi', 'Lainnya'] as $kat)
                     <option value="{{ $kat }}" {{ old('kategori') == $kat ? 'selected' : '' }}>{{ $kat }}</option>
                     @endforeach
                 </select></div>
@@ -39,7 +39,6 @@
             <div><label class="block text-xs font-bold mb-1">Metode Penerimaan <span class="text-green-600">*</span></label>
                 <select name="metode_terima" required class="w-full border border-gray-400 p-1 text-xs shadow-inner">
                     <option value="Tunai" {{ old('metode_terima', 'Tunai') == 'Tunai' ? 'selected' : '' }}>Tunai</option>
-                    <option value="Transfer" {{ old('metode_terima') == 'Transfer' ? 'selected' : '' }}>Transfer</option>
                     <option value="Transfer" {{ old('metode_terima') == 'Transfer' ? 'selected' : '' }}>Transfer</option>
                 </select></div>
             <div><label class="block text-xs font-bold mb-1">Bukti Penerimaan (PDF/Gambar)</label><input type="file" name="bukti_penerimaan" accept=".pdf,.jpg,.jpeg,.png" class="w-full border border-gray-400 p-1 text-xs"></div>
