@@ -58,7 +58,52 @@
         <div class="text-base md:text-xl font-bold text-indigo-900">Rp {{ number_format($summary['tahun_ini'], 0, ',', '.') }}</div>
     </div>
 </div>
-<div class="overflow-x-auto border border-gray-400 bg-white">
+{{-- Mobile Card View --}}
+<div class="block md:hidden space-y-3">
+    @forelse($pendapatanPasifs as $row)
+    <div class="bg-white border-2 border-gray-400 p-3 shadow-md relative">
+        <div class="flex justify-between items-start mb-2">
+            <div>
+                <div class="text-xs text-gray-500 font-bold">{{ $row->tanggal_pendapatan->format('d/m/Y') }}</div>
+                <div class="font-bold text-sm">{{ $row->toko->nama_toko ?? 'N/A' }}</div>
+                <div class="text-xs font-mono text-gray-600">{{ $row->kode_pendapatan }}</div>
+            </div>
+            <div class="text-right">
+                <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-[10px] font-bold block mb-1">{{ $row->kategori }}</span>
+                @if($row->is_otomatis)
+                <span class="px-2 py-0.5 rounded bg-blue-200 text-blue-800 text-[10px] font-bold block"><i class="fa fa-robot"></i> AUTO</span>
+                @else
+                <span class="px-2 py-0.5 rounded bg-gray-200 text-gray-800 text-[10px] font-bold block"><i class="fa fa-hand-paper"></i> MANUAL</span>
+                @endif
+            </div>
+        </div>
+        
+        <div class="mb-2 text-sm text-gray-800 italic border-l-2 border-gray-300 pl-2">
+            {{ Str::limit($row->sumber, 60) }}
+        </div>
+
+        <div class="flex justify-between items-end border-t border-gray-300 pt-2 mt-2">
+            <div class="font-bold text-green-700 text-lg">Rp {{ number_format($row->jumlah, 0, ',', '.') }}</div>
+            <div class="flex gap-1">
+                <a href="{{ route('owner.pendapatan_pasif.show', $row->id_pendapatan) }}" class="bg-blue-500 text-white border border-blue-700 px-2 py-1 text-xs hover:bg-blue-400">LIHAT</a>
+                @if(!$row->is_otomatis)
+                <a href="{{ route('owner.pendapatan_pasif.edit', $row->id_pendapatan) }}" class="bg-yellow-400 text-black border border-yellow-600 px-2 py-1 text-xs hover:bg-yellow-300">EDIT</a>
+                <form action="{{ route('owner.pendapatan_pasif.destroy', $row->id_pendapatan) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus pendapatan ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="bg-red-500 text-white border border-red-700 px-2 py-1 text-xs hover:bg-red-400">HAPUS</button>
+                </form>
+                @endif
+            </div>
+        </div>
+    </div>
+    @empty
+    <div class="bg-white border border-gray-400 p-4 text-center text-gray-500 italic">Belum ada pendapatan</div>
+    @endforelse
+</div>
+
+{{-- Desktop Table View --}}
+<div class="hidden md:block overflow-x-auto border border-gray-400 bg-white">
     <table class="w-full text-left border-collapse">
         <thead>
             <tr class="bg-gray-200 text-gray-700 text-xs uppercase">
@@ -105,7 +150,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="8" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada pendapatan</td></tr>
+            <tr><td colspan="9" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada pendapatan</td></tr>
             @endforelse
         </tbody>
     </table>

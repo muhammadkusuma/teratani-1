@@ -12,11 +12,11 @@
     <form action="{{ route('owner.pendapatan_pasif.update', $pendapatanPasif->id_pendapatan) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method("PUT")
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label class="block text-xs font-bold mb-1">Kode Pendapatan <span class="text-green-600">*</span></label><input type="text" name="kode_pendapatan" value="{{ old('kode_pendapatan', $pendapatanPasif->kode_pendapatan) }}" required class="w-full border border-gray-400 p-1 text-xs shadow-inner font-mono"></div>
             <div><label class="block text-xs font-bold mb-1">Tanggal <span class="text-green-600">*</span></label><input type="date" name="tanggal_pendapatan" value="{{ old('tanggal_pendapatan', $pendapatanPasif->tanggal_pendapatan->format('Y-m-d')) }}" required class="w-full border border-gray-400 p-1 text-xs shadow-inner"></div>
         </div>
-        <div class="grid grid-cols-2 gap-4 mt-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
             <div><label class="block text-xs font-bold mb-1">Kategori <span class="text-green-600">*</span></label>
                 <select name="kategori" required class="w-full border border-gray-400 p-1 text-xs shadow-inner">
                     <option value="">-- Pilih Kategori --</option>
@@ -27,7 +27,7 @@
             <div><label class="block text-xs font-bold mb-1">Jumlah (Rp) <span class="text-green-600">*</span></label><input type="number" name="jumlah" value="{{ old('jumlah', (int)$pendapatanPasif->jumlah) }}" required min="0" step="1000" class="w-full border border-gray-400 p-1 text-xs shadow-inner"></div>
         </div>
         <div class="mt-3"><label class="block text-xs font-bold mb-1">Sumber <span class="text-green-600">*</span></label><textarea name="sumber" rows="3" required class="w-full border border-gray-400 p-1 text-xs shadow-inner">{{ old('sumber', $pendapatanPasif->sumber) }}</textarea></div>
-        <div class="grid grid-cols-2 gap-4 mt-3">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
             <div><label class="block text-xs font-bold mb-1">Metode Penerimaan <span class="text-green-600">*</span></label>
                 <select name="metode_terima" required class="w-full border border-gray-400 p-1 text-xs shadow-inner">
                     <option value="Tunai" {{ old('metode_terima', $pendapatanPasif->metode_terima) == 'Tunai' ? 'selected' : '' }}>Tunai</option>
