@@ -96,17 +96,50 @@
             font-size: 13px;
             font-weight: bold;
             border: 2px solid transparent;
+            cursor: pointer;
+            position: relative;
         }
 
-        .menu-item:hover {
+        .menu-item:hover, .menu-item.active {
             background: #000080;
             color: white;
         }
 
-        .menu-item.active {
+        /* Dropdown Styles */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #c0c0c0;
+            min-width: 160px;
+            box-shadow: 2px 2px 0px black;
             border: 2px solid;
-            border-color: #000000 #ffffff #ffffff #000000;
-            background: #c0c0c0;
+            border-color: #ffffff #000000 #000000 #ffffff;
+            z-index: 100;
+            top: 100%;
+            left: 0;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 8px 12px;
+            text-decoration: none;
+            display: block;
+            font-size: 13px;
+            font-weight: normal;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #000080;
+            color: white;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
         }
 
         /* Global Helper Classes */
@@ -220,10 +253,6 @@
                         class="menu-item {{ request()->routeIs('owner.kasir.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
                             💰 Kasir
                         </a>
-                        <a href="{{ route('owner.retur-penjualan.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.retur-penjualan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            🔄 Retur Penjualan
-                        </a>
                     @endif
 
                     @if(in_array($jabatan, $level_gudang))
@@ -238,10 +267,15 @@
                     @endif
 
                     @if(in_array($jabatan, $level_kasir))
-                        <a href="{{ route('owner.pelanggan.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.pelanggan.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            👥 Pelanggan
-                        </a>
+                        <div class="dropdown inline-block">
+                            <div class="menu-item {{ request()->routeIs('owner.pelanggan.*') || request()->routeIs('owner.retur-penjualan.*') ? 'active' : '' }} text-black">
+                                👥 Pelanggan ▼
+                            </div>
+                            <div class="dropdown-content">
+                                <a href="{{ route('owner.retur-penjualan.index') }}">Retur Penjualan</a>
+                                <a href="{{ route('owner.pelanggan.index') }}">Data Pelanggan</a>
+                            </div>
+                        </div>
                     @endif
 
                     @if(in_array($jabatan, $level_gudang))
@@ -260,14 +294,15 @@
                     @endif
 
                     @if(in_array($jabatan, $level_gudang))
-                        <a href="{{ route('owner.distributor.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.distributor.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            🚚 Distributor
-                        </a>
-                        <a href="{{ route('owner.retur-pembelian.index') }}" 
-                        class="menu-item {{ request()->routeIs('owner.retur-pembelian.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
-                            🔙 Retur Pembelian
-                        </a>
+                        <div class="dropdown inline-block">
+                            <div class="menu-item {{ request()->routeIs('owner.distributor.*') || request()->routeIs('owner.retur-pembelian.*') ? 'active' : '' }} text-black">
+                                🚚 Distributor ▼
+                            </div>
+                            <div class="dropdown-content">
+                                <a href="{{ route('owner.retur-pembelian.index') }}">Retur Distributor</a>
+                                <a href="{{ route('owner.distributor.index') }}">Data Distributor</a>
+                            </div>
+                        </div>
                     @endif
 
                     @if(in_array($jabatan, $level_full))
