@@ -5,9 +5,6 @@
     <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4"><i class="fa fa-money-bill-wave"></i> DAFTAR PENGELUARAN</h2>
     <a href="{{ route('owner.pengeluaran.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs"><i class="fa fa-plus"></i> TAMBAH PENGELUARAN</a>
 </div>
-@if(session('success'))
-<div class="bg-green-100 border border-green-400 text-green-700 px-2 py-1 mb-2 text-xs">{{ session('success') }}</div>
-@endif
 <div class="bg-white border border-gray-400 p-3 mb-3">
     <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-3">
         <div><label class="block text-xs font-bold mb-1">Toko</label>
@@ -33,29 +30,68 @@
         </div>
     </form>
 </div>
-<div class="grid grid-cols-5 gap-3 mb-3">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
     <div class="bg-red-50 border border-red-300 p-3">
         <div class="text-xs text-red-700 font-bold">Total (Filter)</div>
-        <div class="text-xl font-bold text-red-900">Rp {{ number_format($summary['total_pengeluaran'], 0, ',', '.') }}</div>
+        <div class="text-base md:text-xl font-bold text-red-900">Rp {{ number_format($summary['total_pengeluaran'], 0, ',', '.') }}</div>
     </div>
     <div class="bg-blue-50 border border-blue-300 p-3">
         <div class="text-xs text-blue-700 font-bold">Transaksi (Filter)</div>
-        <div class="text-xl font-bold text-blue-900">{{ $summary['jumlah_transaksi'] }}</div>
+        <div class="text-base md:text-xl font-bold text-blue-900">{{ $summary['jumlah_transaksi'] }}</div>
     </div>
     <div class="bg-yellow-50 border border-yellow-300 p-3">
         <div class="text-xs text-yellow-700 font-bold">Hari Ini</div>
-        <div class="text-xl font-bold text-yellow-900">Rp {{ number_format($summary['hari_ini'], 0, ',', '.') }}</div>
+        <div class="text-base md:text-xl font-bold text-yellow-900">Rp {{ number_format($summary['hari_ini'], 0, ',', '.') }}</div>
     </div>
     <div class="bg-pink-50 border border-pink-300 p-3">
         <div class="text-xs text-pink-700 font-bold">Bulan Ini</div>
-        <div class="text-xl font-bold text-pink-900">Rp {{ number_format($summary['bulan_ini'], 0, ',', '.') }}</div>
+        <div class="text-base md:text-xl font-bold text-pink-900">Rp {{ number_format($summary['bulan_ini'], 0, ',', '.') }}</div>
     </div>
-    <div class="bg-orange-50 border border-orange-300 p-3">
+    <div class="bg-orange-50 border border-orange-300 p-3 col-span-2 md:col-span-1">
         <div class="text-xs text-orange-700 font-bold">Tahun Ini</div>
-        <div class="text-xl font-bold text-orange-900">Rp {{ number_format($summary['tahun_ini'], 0, ',', '.') }}</div>
+        <div class="text-base md:text-xl font-bold text-orange-900">Rp {{ number_format($summary['tahun_ini'], 0, ',', '.') }}</div>
     </div>
 </div>
-<div class="overflow-x-auto border border-gray-400 bg-white">
+{{-- Mobile Card View --}}
+<div class="block md:hidden space-y-3">
+    @forelse($pengeluarans as $row)
+    <div class="bg-white border-2 border-gray-400 p-3 shadow-md relative">
+        <div class="flex justify-between items-start mb-2">
+            <div>
+                <div class="text-xs text-gray-500 font-bold">{{ $row->tanggal_pengeluaran->format('d/m/Y') }}</div>
+                <div class="font-bold text-sm">{{ $row->toko->nama_toko ?? 'N/A' }}</div>
+                <div class="text-xs font-mono text-gray-600">{{ $row->kode_pengeluaran }}</div>
+            </div>
+            <div class="text-right">
+                <span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-[10px] font-bold block mb-1">{{ $row->kategori }}</span>
+                <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] font-bold block">{{ $row->metode_bayar }}</span>
+            </div>
+        </div>
+        
+        <div class="mb-2 text-sm text-gray-800 italic border-l-2 border-gray-300 pl-2">
+            {{ Str::limit($row->deskripsi, 60) }}
+        </div>
+
+        <div class="flex justify-between items-end border-t border-gray-300 pt-2 mt-2">
+            <div class="font-bold text-red-700 text-lg">Rp {{ number_format($row->jumlah, 0, ',', '.') }}</div>
+            <div class="flex gap-1">
+                <a href="{{ route('owner.pengeluaran.show', $row->id_pengeluaran) }}" class="bg-blue-500 text-white border border-blue-700 px-2 py-1 text-xs hover:bg-blue-400">LIHAT</a>
+                <a href="{{ route('owner.pengeluaran.edit', $row->id_pengeluaran) }}" class="bg-yellow-400 text-black border border-yellow-600 px-2 py-1 text-xs hover:bg-yellow-300">EDIT</a>
+                <form action="{{ route('owner.pengeluaran.destroy', $row->id_pengeluaran) }}" method="POST" class="inline" onsubmit="return confirm('Yakin ingin menghapus pengeluaran ini?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="bg-red-500 text-white border border-red-700 px-2 py-1 text-xs hover:bg-red-400">HAPUS</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    @empty
+    <div class="bg-white border border-gray-400 p-4 text-center text-gray-500 italic">Belum ada pengeluaran</div>
+    @endforelse
+</div>
+
+{{-- Desktop Table View --}}
+<div class="hidden md:block overflow-x-auto border border-gray-400 bg-white">
     <table class="w-full text-left border-collapse">
         <thead>
             <tr class="bg-gray-200 text-gray-700 text-xs uppercase">
