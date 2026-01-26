@@ -321,6 +321,26 @@
                     @endif
                 @endif
 
+                {{-- Ganti Toko Dropdown --}}
+                @php
+                    $tokos = Auth::user()->perusahaan->tokos ?? [];
+                @endphp
+                @if(count($tokos) > 0)
+                    <div class="dropdown inline-block">
+                        <div class="menu-item text-black">
+                            🏪 Ganti Toko ▼
+                        </div>
+                        <div class="dropdown-content">
+                            @foreach($tokos as $toko)
+                                <a href="{{ route('owner.toko.select', $toko->id_toko) }}" 
+                                   class="{{ session('toko_active_id') == $toko->id_toko ? 'font-bold bg-blue-100' : '' }}">
+                                   {{ $toko->nama_toko }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 <a href="{{ route('owner.profile.index') }}" 
                 class="menu-item {{ request()->routeIs('owner.profile.*') ? 'active' : '' }} text-black no-underline block md:inline-block">
                     👤 Profil Saya
