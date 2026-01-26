@@ -54,8 +54,8 @@
                             $stokData = $item->stokTokos->first();
                             $stokToko = $stokData ? $stokData->stok_fisik : 0;
                             
-                            // Tambahkan stok dari semua gudang milik toko ini
-                            $stokGudangTotal = $item->stokGudangs->sum('stok_fisik');
+                            // Ambil stok dari total_stok_gudang (hasil withSum di controller)
+                            $stokGudangTotal = $item->total_stok_gudang ?? 0;
                             
                             // Total stok = stok toko + stok gudang
                             $jumlahStok = $stokToko + $stokGudangTotal;

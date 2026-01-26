@@ -21,7 +21,20 @@ class ProdukController extends Controller
     {
         $toko = Toko::findOrFail($id_toko);
 
-        $query = Produk::query();
+        $query = Produk::query()
+            ->select([
+                'id_produk',
+                'nama_produk',
+                'sku',
+                'barcode',
+                'gambar_produk',
+                'is_active',
+                'harga_jual_umum',
+                'id_kategori',
+                'id_satuan_kecil',
+                'id_satuan_besar',
+                'nilai_konversi'
+            ]);
 
         $query->whereHas('stokTokos', function ($q) use ($id_toko) {
             $q->where('id_toko', $id_toko);
@@ -38,17 +51,18 @@ class ProdukController extends Controller
 
         $produks = $query->with([
             'stokTokos' => function ($q) use ($id_toko) {
-                $q->where('id_toko', $id_toko);
+                $q->select('id_produk', 'id_toko', 'stok_fisik', 'stok_minimal')
+                  ->where('id_toko', $id_toko);
             },
-            'stokGudangs' => function ($q) use ($id_toko) {
+            'kategori:id_kategori,nama_kategori',
+            'satuanKecil:id_satuan,nama_satuan',
+            'satuanBesar:id_satuan,nama_satuan'
+        ])
+            ->withSum(['stokGudangs as total_stok_gudang' => function ($q) use ($id_toko) {
                 $q->whereHas('gudang', function ($gq) use ($id_toko) {
                     $gq->where('id_toko', $id_toko);
                 });
-            },
-            'kategori', 
-            'satuanKecil', 
-            'satuanBesar'
-        ])
+            }], 'stok_fisik')
             ->paginate(10)
             ->withQueryString();
 

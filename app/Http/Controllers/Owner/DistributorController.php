@@ -278,13 +278,17 @@ class DistributorController extends Controller
 
         
 
-        $distributors = Distributor::with('toko')
-            ->whereHas('toko', function($q) {
-                $q->where('id_perusahaan', Auth::user()->id_perusahaan);
-            })
-            ->active()
-            ->orderBy('nama_distributor')
-            ->get();
+        // OPTIMIZATION: Do not load all distributors. Pass empty collection.
+        // If filtering, we load the selected one.
+        $selectedDistributor = null;
+        if ($request->filled('id_distributor')) {
+            $selectedDistributor = Distributor::find($request->id_distributor);
+        }
+
+        $distributors = collect([]);
+        if ($selectedDistributor) {
+            $distributors->push($selectedDistributor);
+        }
 
         
 
@@ -517,5 +521,27 @@ class DistributorController extends Controller
             $t->saldo_utang = $saldo;
             $t->save();
         }
+    }
+
+    public function searchDistributor(Request $request)
+    {
+        $keyword = $request->get('q');
+        $id_perusahaan = Auth::user()->id_perusahaan;
+
+        $query = Distributor::select('id_distributor', 'nama_distributor', 'kode_distributor')
+            ->whereHas('toko', function($q) use ($id_perusahaan) {
+                $q->where('id_perusahaan', $id_perusahaan);
+            })
+            ->active();
+
+        if ($keyword) {
+            $query->where(function($q) use ($keyword) {
+                $q->where('nama_distributor', 'like', "%{$keyword}%")
+                  ->orWhere('kode_distributor', 'like', "%{$keyword}%");
+            });
+        }
+
+        $result = $query->limit(20)->get();
+        return response()->json($result);
     }
 }
