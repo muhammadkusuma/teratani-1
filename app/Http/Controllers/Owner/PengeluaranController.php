@@ -13,15 +13,16 @@ class PengeluaranController extends Controller
 {
     public function index(Request $request)
     {
-        $idToko = session('toko_active_id');
+        // Get all stores for this company
+        $perusahaanStores = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)->pluck('id_toko');
         
-        if (!$idToko) {
-            return redirect()->route('owner.dashboard')
-                           ->with('error', 'Silakan pilih toko terlebih dahulu');
-        }
+        $query = Pengeluaran::with(['user', 'toko'])
+            ->whereIn('id_toko', $perusahaanStores);
 
-        $query = Pengeluaran::with(['user'])
-            ->where('id_toko', $idToko);
+        // Filter by specific Store if requested, otherwise default to "Semua" (All) which is already handled by whereIn
+        if ($request->filled('id_toko')) {
+            $query->where('id_toko', $request->id_toko);
+        }
 
         if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal_pengeluaran', '>=', $request->tanggal_dari);
@@ -35,22 +36,35 @@ class PengeluaranController extends Controller
 
         $pengeluarans = $query->orderBy('tanggal_pengeluaran', 'desc')->paginate(20);
 
-
         $today = now()->format('Y-m-d');
         $thisMonth = now()->month;
         $thisYear = now()->year;
 
+        // Clone query for summary stats to respect filters
+        $summaryQuery = clone $query;
+        // Check if we need to reset pagination/order for summary? No, sum() ignores order/limit.
+        // But for specific date ranges in summary (hari_ini etc), we usually want those strictly based on date,
+        // BUT scoped to the filtered Store(s).
+        
+        // Base scope for summary calculations (Filtered Store(s))
+        $baseSummaryQuery = Pengeluaran::whereIn('id_toko', $perusahaanStores);
+        if ($request->filled('id_toko')) {
+            $baseSummaryQuery->where('id_toko', $request->id_toko);
+        }
+
         $summary = [
-            'total_pengeluaran' => $query->sum('jumlah'), 
+            'total_pengeluaran' => $summaryQuery->sum('jumlah'), 
+            'jumlah_transaksi' => $summaryQuery->count(),        
 
-            'jumlah_transaksi' => $query->count(),        
-
-            'hari_ini' => Pengeluaran::where('id_toko', $idToko)->whereDate('tanggal_pengeluaran', $today)->sum('jumlah'),
-            'bulan_ini' => Pengeluaran::where('id_toko', $idToko)->whereMonth('tanggal_pengeluaran', $thisMonth)->whereYear('tanggal_pengeluaran', $thisYear)->sum('jumlah'),
-            'tahun_ini' => Pengeluaran::where('id_toko', $idToko)->whereYear('tanggal_pengeluaran', $thisYear)->sum('jumlah'),
+            'hari_ini' => (clone $baseSummaryQuery)->whereDate('tanggal_pengeluaran', $today)->sum('jumlah'),
+            'bulan_ini' => (clone $baseSummaryQuery)->whereMonth('tanggal_pengeluaran', $thisMonth)->whereYear('tanggal_pengeluaran', $thisYear)->sum('jumlah'),
+            'tahun_ini' => (clone $baseSummaryQuery)->whereYear('tanggal_pengeluaran', $thisYear)->sum('jumlah'),
         ];
+        
+        // Pass available stores for the filter dropdown
+        $tokos = Toko::where('id_perusahaan', Auth::user()->id_perusahaan)->get();
 
-        return view('owner.pengeluaran.index', compact('pengeluarans', 'summary'));
+        return view('owner.pengeluaran.index', compact('pengeluarans', 'summary', 'tokos'));
     }
 
     public function create()

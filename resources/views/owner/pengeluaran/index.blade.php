@@ -9,7 +9,15 @@
 <div class="bg-green-100 border border-green-400 text-green-700 px-2 py-1 mb-2 text-xs">{{ session('success') }}</div>
 @endif
 <div class="bg-white border border-gray-400 p-3 mb-3">
-    <form method="GET" class="grid grid-cols-4 gap-3">
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-3">
+        <div><label class="block text-xs font-bold mb-1">Toko</label>
+            <select name="id_toko" class="w-full border border-gray-400 p-1 text-xs shadow-inner">
+                <option value="">Semua Toko</option>
+                @foreach($tokos as $toko)
+                <option value="{{ $toko->id_toko }}" {{ request('id_toko') == $toko->id_toko ? 'selected' : '' }}>{{ $toko->nama_toko }}</option>
+                @endforeach
+            </select>
+        </div>
         <div><label class="block text-xs font-bold mb-1">Dari Tanggal</label><input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full border border-gray-400 p-1 text-xs shadow-inner"></div>
         <div><label class="block text-xs font-bold mb-1">Sampai Tanggal</label><input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full border border-gray-400 p-1 text-xs shadow-inner"></div>
         <div><label class="block text-xs font-bold mb-1">Kategori</label>
@@ -52,6 +60,7 @@
         <thead>
             <tr class="bg-gray-200 text-gray-700 text-xs uppercase">
                 <th class="border border-gray-400 p-2 w-10">No</th>
+                <th class="border border-gray-400 p-2">Toko</th>
                 <th class="border border-gray-400 p-2">Kode</th>
                 <th class="border border-gray-400 p-2">Tanggal</th>
                 <th class="border border-gray-400 p-2">Kategori</th>
@@ -65,6 +74,7 @@
             @forelse($pengeluarans as $key => $row)
             <tr class="hover:bg-yellow-50 text-xs">
                 <td class="border border-gray-300 p-2 text-center">{{ $pengeluarans->firstItem() + $key }}</td>
+                <td class="border border-gray-300 p-2 font-bold">{{ $row->toko->nama_toko ?? 'N/A' }}</td>
                 <td class="border border-gray-300 p-2 font-mono">{{ $row->kode_pengeluaran }}</td>
                 <td class="border border-gray-300 p-2">{{ $row->tanggal_pengeluaran->format('d/m/Y') }}</td>
                 <td class="border border-gray-300 p-2"><span class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded text-[10px] font-bold">{{ $row->kategori }}</span></td>
@@ -84,7 +94,7 @@
                 </td>
             </tr>
             @empty
-            <tr><td colspan="8" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada pengeluaran</td></tr>
+            <tr><td colspan="9" class="p-4 text-center text-gray-500 italic border border-gray-300">Belum ada pengeluaran</td></tr>
             @endforelse
         </tbody>
     </table>
