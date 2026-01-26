@@ -9,7 +9,7 @@
     </div>
 </div>
 <div class="bg-white border border-gray-400 p-4">
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
             <h3 class="font-bold text-sm border-b border-gray-300 pb-2 mb-3"><i class="fa fa-info-circle"></i> INFORMASI PENDAPATAN</h3>
             <div class="space-y-2 text-xs">
@@ -46,7 +46,7 @@
                     <i class="fa fa-file-pdf text-green-500 text-2xl"></i> Lihat Bukti Penerimaan (PDF)
                 </a>
             @else
-                <img src="{{ asset('storage/' . $pendapatanPasif->bukti_penerimaan) }}" alt="Bukti Penerimaan" class="max-w-md border border-gray-400">
+                <img src="{{ asset('storage/' . $pendapatanPasif->bukti_penerimaan) }}" alt="Bukti Penerimaan" class="max-w-full md:max-w-md border border-gray-400">
             @endif
         </div>
     </div>
