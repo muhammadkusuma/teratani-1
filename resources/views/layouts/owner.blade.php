@@ -139,6 +139,10 @@
         }
 
         .dropdown:hover .dropdown-content {
+            /* display: block;  <-- REMOVED: Managed by JS now */
+        }
+
+        .dropdown-content.show {
             display: block;
         }
 
@@ -242,7 +246,7 @@
 
                 {{-- Organisasi Dropdown (Global Admin Items) --}}
                 @if(in_array($jabatan, $level_full))
-                    <div class="dropdown inline-block">
+                    <div class="dropdown inline-block" onclick="toggleDropdown(this)">
                         <div class="menu-item {{ request()->routeIs('owner.users.*') || request()->routeIs('owner.karyawan.*') || request()->routeIs('owner.perusahaan.*') || request()->routeIs('owner.toko.index') ? 'active' : '' }} text-black">
                             🏢 Organisasi ▼
                         </div>
@@ -267,7 +271,7 @@
 
                     @if(in_array($jabatan, $level_gudang))
                         {{-- Inventaris Dropdown --}}
-                        <div class="dropdown inline-block">
+                        <div class="dropdown inline-block" onclick="toggleDropdown(this)">
                             <div class="menu-item {{ request()->routeIs('owner.toko.produk.*') || request()->routeIs('owner.stok.*') || request()->routeIs('owner.toko.pembelian.*') || request()->routeIs('owner.toko.gudang.*') || request()->routeIs('owner.riwayat-stok.*') ? 'active' : '' }} text-black">
                                 📦 Inventaris ▼
                             </div>
@@ -282,7 +286,7 @@
                     @endif
 
                     @if(in_array($jabatan, $level_kasir))
-                        <div class="dropdown inline-block">
+                        <div class="dropdown inline-block" onclick="toggleDropdown(this)">
                             <div class="menu-item {{ request()->routeIs('owner.pelanggan.*') || request()->routeIs('owner.retur-penjualan.*') ? 'active' : '' }} text-black">
                                 👥 Pelanggan ▼
                             </div>
@@ -294,7 +298,7 @@
                     @endif
 
                     @if(in_array($jabatan, $level_gudang))
-                        <div class="dropdown inline-block">
+                        <div class="dropdown inline-block" onclick="toggleDropdown(this)">
                             <div class="menu-item {{ request()->routeIs('owner.distributor.*') || request()->routeIs('owner.retur-pembelian.*') ? 'active' : '' }} text-black">
                                 🚚 Distributor ▼
                             </div>
@@ -307,7 +311,7 @@
 
                     @if(in_array($jabatan, $level_gudang))
                          {{-- Keuangan Dropdown --}}
-                         <div class="dropdown inline-block">
+                         <div class="dropdown inline-block" onclick="toggleDropdown(this)">
                             <div class="menu-item {{ request()->routeIs('owner.pengeluaran.*') || request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black">
                                 💵 Keuangan ▼
                             </div>
@@ -326,7 +330,7 @@
                     $tokos = Auth::user()->perusahaan->tokos ?? [];
                 @endphp
                 @if(count($tokos) > 0)
-                    <div class="dropdown inline-block">
+                    <div class="dropdown inline-block" onclick="toggleDropdown(this)">
                         <div class="menu-item text-black">
                             🏪 Ganti Toko ▼
                         </div>
@@ -406,7 +410,28 @@
                     navMenu.classList.remove('flex');
                 }
             }
+            
+            // Close dropdowns when clicking outside
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-content').forEach(el => {
+                    el.classList.remove('show');
+                });
+            }
         });
+
+        // Toggle dropdown function
+        function toggleDropdown(element) {
+            // Close other dropdowns first
+            document.querySelectorAll('.dropdown-content').forEach(el => {
+                if (el !== element.querySelector('.dropdown-content')) {
+                    el.classList.remove('show');
+                }
+            });
+            
+            // Toggle current
+            const content = element.querySelector('.dropdown-content');
+            content.classList.toggle('show');
+        }
     </script>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
