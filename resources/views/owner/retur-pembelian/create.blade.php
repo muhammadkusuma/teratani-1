@@ -34,19 +34,19 @@
             </div>
             <div>
                 <label class="block text-xs font-bold mb-1">Sumber Barang (Gudang / Toko) <span class="text-red-600">*</span></label>
-                <select id="source_select" class="w-full border border-gray-400 p-1 text-xs shadow-inner" required>
+                <select id="source_select" name="source_id" class="w-full border border-gray-400 p-1 text-xs shadow-inner" required>
                     <option value="">-- Pilih Sumber Barang --</option>
                     @foreach($tokos as $toko)
                         <optgroup label="Toko: {{ $toko->nama_toko }}">
-                            <option value="toko_{{ $toko->id_toko }}"> Stok Toko ({{ $toko->nama_toko }})</option>
+                            <option value="toko_{{ $toko->id_toko }}" {{ old('source_id') == 'toko_'.$toko->id_toko ? 'selected' : '' }}> Stok Toko ({{ $toko->nama_toko }})</option>
                             @foreach($gudangs->where('id_toko', $toko->id_toko) as $gudang)
-                                <option value="gudang_{{ $gudang->id_gudang }}"> Gudang: {{ $gudang->nama_gudang }}</option>
+                                <option value="gudang_{{ $gudang->id_gudang }}" {{ old('source_id') == 'gudang_'.$gudang->id_gudang ? 'selected' : '' }}> Gudang: {{ $gudang->nama_gudang }}</option>
                             @endforeach
                         </optgroup>
                     @endforeach
                 </select>
-                 <input type="hidden" name="id_gudang" id="id_gudang">
-                 <input type="hidden" name="id_toko" id="id_toko">
+                 <input type="hidden" name="id_gudang" id="id_gudang" value="{{ old('id_gudang') }}">
+                 <input type="hidden" name="id_toko" id="id_toko" value="{{ old('id_toko') }}">
             </div>
             <div>
                 <label class="block text-xs font-bold mb-1">Tanggal Retur <span class="text-red-600">*</span></label>
@@ -201,7 +201,16 @@
     }
     
     document.addEventListener('DOMContentLoaded', () => {
-        // Optional: Auto-add first row if needed, or wait for user action
+        // Handle old input for source_id and trigger change if exists
+        const oldSourceId = "{{ old('source_id') }}";
+        if (oldSourceId) {
+            // We don't need to manually set value here because Blade's 'selected' attribute handled it,
+            // but we might need to sync the hidden inputs if they weren't somehow (though Blade handles 'value' too)
+            // The itemsContainer will be empty after validation failure, 
+            // the user will usually have to re-add items or we could theoretically preserve those too 
+            // but preserving items requires more complex JS state management.
+            // For now, let's just make sure the source is correctly set.
+        }
     });
 </script>
 @endsection
