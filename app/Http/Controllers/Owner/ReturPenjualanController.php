@@ -93,13 +93,13 @@ class ReturPenjualanController extends Controller
                                         ->first();
                     
                     if ($stokToko) {
-                        $stokToko->increment('stok', $qty);
+                        $stokToko->increment('stok_fisik', $qty);
                     } else {
                         // Create if not exists (unlikely but safe)
                         StokToko::create([
                             'id_toko' => $id_toko,
                             'id_produk' => $id_produk,
-                            'stok' => $qty,
+                            'stok_fisik' => $qty,
                         ]);
                     }
                 }
