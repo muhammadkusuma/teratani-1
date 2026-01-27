@@ -33,9 +33,27 @@ class DistributorController extends Controller
             $query->where('id_toko', $request->id_toko);
         }
 
+        if ($request->filled('q')) {
+            $keyword = $request->q;
+            $query->where(function($q) use ($keyword) {
+                $q->where('nama_distributor', 'like', "%{$keyword}%")
+                  ->orWhere('kode_distributor', 'like', "%{$keyword}%")
+                  ->orWhere('nama_perusahaan', 'like', "%{$keyword}%");
+            });
+        }
+
         $distributors = $query->orderBy('nama_distributor')->paginate(20);
 
-        return view('owner.distributor.index', compact('distributors', 'userStores'));
+        // Calculate statistics based on current query (filtered)
+        $summary = [
+            'total' => (clone $query)->count(),
+            'toko' => $userStores->count(),
+            'aktif' => (clone $query)->where('is_active', true)->count(),
+            'non_aktif' => (clone $query)->where('is_active', false)->count(),
+            'baru' => (clone $query)->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+        ];
+
+        return view('owner.distributor.index', compact('distributors', 'userStores', 'summary'));
     }
 
     public function show($id)
