@@ -8,9 +8,6 @@
         <i class="fa fa-users"></i> DAFTAR PELANGGAN (CRM)
     </h2>
     <div class="flex gap-2">
-        <a href="{{ route('owner.pelanggan.piutang.index') }}" class="px-3 py-1 bg-green-700 text-white border border-green-900 shadow hover:bg-green-600 text-xs">
-            <i class="fa fa-hand-holding-usd"></i> KELOLA PIUTANG
-        </a>
         <a href="{{ route('owner.pelanggan.create') }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
             <i class="fa fa-plus"></i> TAMBAH PELANGGAN
         </a>

@@ -293,6 +293,7 @@
                             <div class="dropdown-content">
                                 <a href="{{ route('owner.retur-penjualan.index') }}">🔄 Retur Penjualan</a>
                                 <a href="{{ route('owner.pelanggan.index') }}">👥 Data Pelanggan</a>
+                                <a href="{{ route('owner.pelanggan.piutang.index') }}">💰 Kelola Piutang</a>
                             </div>
                         </div>
                     @endif
