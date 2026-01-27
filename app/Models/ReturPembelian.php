@@ -12,6 +12,7 @@ class ReturPembelian extends Model
         'id_pembelian',
         'id_distributor',
         'id_gudang',
+        'id_toko',
         'tgl_retur',
         'total_retur',
         'keterangan',
@@ -35,6 +36,11 @@ class ReturPembelian extends Model
     public function gudang()
     {
         return $this->belongsTo(Gudang::class, 'id_gudang');
+    }
+
+    public function toko()
+    {
+        return $this->belongsTo(Toko::class, 'id_toko');
     }
 
     public function details()

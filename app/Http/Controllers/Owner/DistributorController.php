@@ -33,9 +33,27 @@ class DistributorController extends Controller
             $query->where('id_toko', $request->id_toko);
         }
 
+        if ($request->filled('q')) {
+            $keyword = $request->q;
+            $query->where(function($q) use ($keyword) {
+                $q->where('nama_distributor', 'like', "%{$keyword}%")
+                  ->orWhere('kode_distributor', 'like', "%{$keyword}%")
+                  ->orWhere('nama_perusahaan', 'like', "%{$keyword}%");
+            });
+        }
+
         $distributors = $query->orderBy('nama_distributor')->paginate(20);
 
-        return view('owner.distributor.index', compact('distributors', 'userStores'));
+        // Calculate statistics based on current query (filtered)
+        $summary = [
+            'total' => (clone $query)->count(),
+            'toko' => $userStores->count(),
+            'aktif' => (clone $query)->where('is_active', true)->count(),
+            'non_aktif' => (clone $query)->where('is_active', false)->count(),
+            'baru' => (clone $query)->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count(),
+        ];
+
+        return view('owner.distributor.index', compact('distributors', 'userStores', 'summary'));
     }
 
     public function show($id)
@@ -322,7 +340,31 @@ class DistributorController extends Controller
             ->orderBy('id_utang_piutang', 'desc')
             ->paginate(20);
 
-        return view('owner.distributor.hutang.index', compact('transaksi', 'distributors', 'userStores'));
+        // Calculate Summary Statistics
+        $summaryQuery = UtangPiutangDistributor::whereHas('distributor.toko', function($q) {
+            $q->where('id_perusahaan', Auth::user()->id_perusahaan);
+        });
+
+        if ($request->filled('id_distributor')) {
+            $summaryQuery->where('id_distributor', $request->id_distributor);
+        }
+        if ($request->filled('jenis_transaksi')) {
+            $summaryQuery->where('jenis_transaksi', $request->jenis_transaksi);
+        }
+        if ($request->filled('tanggal_dari')) {
+            $summaryQuery->where('tanggal', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $summaryQuery->where('tanggal', '<=', $request->tanggal_sampai);
+        }
+
+        $summary = [
+            'total_utang' => (clone $summaryQuery)->where('jenis_transaksi', 'utang')->sum('nominal'),
+            'total_bayar' => (clone $summaryQuery)->where('jenis_transaksi', 'pembayaran')->sum('nominal'),
+        ];
+        $summary['saldo'] = $summary['total_utang'] - $summary['total_bayar'];
+
+        return view('owner.distributor.hutang.index', compact('transaksi', 'distributors', 'userStores', 'summary'));
     }
 
     public function hutangCreate(Request $request)
