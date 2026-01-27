@@ -3,26 +3,23 @@
 @section('title', 'Tambah Transaksi Utang Piutang Distributor')
 
 @section('content')
-<div class="mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 inline-block pr-4">
-        <i class="fa fa-plus-circle"></i> TAMBAH TRANSAKSI UTANG PIUTANG DISTRIBUTOR
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+    <h2 class="font-bold text-lg border-b-4 border-blue-600 pb-1 pr-6 uppercase tracking-tight">
+        <i class="fa fa-plus-circle text-blue-700"></i> Tambah Transaksi Utang Piutang
     </h2>
+    <a href="{{ route('owner.distributor.hutang.index') }}" class="w-full md:w-auto text-center px-4 py-1.5 bg-gray-200 border border-gray-400 hover:bg-gray-300 text-xs font-bold transition-all uppercase">
+        <i class="fa fa-arrow-left"></i> Kembali
+    </a>
 </div>
 
-@if(session('error'))
-    <div class="bg-red-100 border border-red-400 text-red-700 px-2 py-1 mb-2 text-xs">
-        {{ session('error') }}
-    </div>
-@endif
-
-<div class="bg-white border border-gray-400 p-4">
+<div class="bg-white border border-gray-300 p-6 shadow-sm rounded-sm">
     <form action="{{ route('owner.distributor.hutang.store') }}" method="POST">
         @csrf
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-                <label class="block text-xs font-bold mb-1">Distributor <span class="text-red-600">*</span></label>
-                <select name="id_distributor" required class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('id_distributor') border-red-500 @enderror">
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Distributor <span class="text-rose-600">*</span></label>
+                <select name="id_distributor" required class="w-full border p-2 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none @error('id_distributor') border-rose-500 @else border-gray-300 @enderror">
                     <option value="">-- Pilih Distributor --</option>
                     @foreach($distributors as $d)
                         <option value="{{ $d->id_distributor }}" {{ (old('id_distributor', $selectedDistributorId ?? null) == $d->id_distributor) ? 'selected' : '' }}>
@@ -31,63 +28,65 @@
                     @endforeach
                 </select>
                 @error('id_distributor')
-                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                    <span class="text-rose-600 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span>
                 @enderror
             </div>
 
             <div>
-                <label class="block text-xs font-bold mb-1">Tanggal <span class="text-red-600">*</span></label>
-                <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" required class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('tanggal') border-red-500 @enderror">
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Tanggal Transaksi <span class="text-rose-600">*</span></label>
+                <input type="date" name="tanggal" value="{{ old('tanggal', date('Y-m-d')) }}" required class="w-full border p-2 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none @error('tanggal') border-rose-500 @else border-gray-300 @enderror">
                 @error('tanggal')
-                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                    <span class="text-rose-600 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span>
                 @enderror
             </div>
 
             <div>
-                <label class="block text-xs font-bold mb-1">Jenis Transaksi <span class="text-red-600">*</span></label>
-                <select name="jenis_transaksi" required class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('jenis_transaksi') border-red-500 @enderror">
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Jenis Transaksi <span class="text-rose-600">*</span></label>
+                <select name="jenis_transaksi" required class="w-full border p-2 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none @error('jenis_transaksi') border-rose-500 @else border-gray-300 @enderror">
                     <option value="">-- Pilih Jenis --</option>
-                    <option value="utang" {{ old('jenis_transaksi') == 'utang' ? 'selected' : '' }}>Utang (Tambah Utang)</option>
-                    <option value="pembayaran" {{ old('jenis_transaksi') == 'pembayaran' ? 'selected' : '' }}>Pembayaran (Bayar Utang)</option>
+                    <option value="utang" {{ old('jenis_transaksi') == 'utang' ? 'selected' : '' }}>Utang (Tambah Tagihan)</option>
+                    <option value="pembayaran" {{ old('jenis_transaksi') == 'pembayaran' ? 'selected' : '' }}>Pembayaran (Kurangi Tagihan)</option>
                 </select>
                 @error('jenis_transaksi')
-                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                    <span class="text-rose-600 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span>
                 @enderror
             </div>
 
             <div>
-                <label class="block text-xs font-bold mb-1">Nominal <span class="text-red-600">*</span></label>
-                <input type="number" step="0.01" name="nominal" value="{{ old('nominal') }}" required placeholder="0" class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('nominal') border-red-500 @enderror">
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Nominal (Rp) <span class="text-rose-600">*</span></label>
+                <input type="number" step="0.01" name="nominal" value="{{ old('nominal') }}" required placeholder="0.00" class="w-full border p-2 text-xs shadow-inner focus:border-blue-500 transition-all outline-none @error('nominal') border-rose-500 @else border-gray-300 @enderror">
                 @error('nominal')
-                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                    <span class="text-rose-600 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span>
                 @enderror
             </div>
 
             <div>
-                <label class="block text-xs font-bold mb-1">No Referensi</label>
-                <input type="text" name="no_referensi" value="{{ old('no_referensi') }}" maxlength="50" placeholder="No PO, Invoice, dll" class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('no_referensi') border-red-500 @enderror">
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">No Referensi / Bukti</label>
+                <input type="text" name="no_referensi" value="{{ old('no_referensi') }}" maxlength="50" placeholder="No Invoice, Kwitansi, dll" class="w-full border p-2 text-xs shadow-inner focus:border-blue-500 transition-all outline-none @error('no_referensi') border-rose-500 @else border-gray-300 @enderror">
                 @error('no_referensi')
-                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                    <span class="text-rose-600 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span>
                 @enderror
             </div>
 
-            <div class="col-span-2">
-                <label class="block text-xs font-bold mb-1">Keterangan</label>
-                <textarea name="keterangan" rows="3" class="w-full border border-gray-400 p-2 text-xs shadow-inner @error('keterangan') border-red-500 @enderror">{{ old('keterangan') }}</textarea>
+            <div class="md:col-span-2 mt-2">
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Keterangan Tambahan</label>
+                <textarea name="keterangan" rows="3" class="w-full border p-2 text-xs shadow-inner focus:border-blue-500 transition-all outline-none @error('keterangan') border-rose-500 @else border-gray-300 @enderror" placeholder="Detail transaksi...">{{ old('keterangan') }}</textarea>
                 @error('keterangan')
-                    <span class="text-red-600 text-[10px]">{{ $message }}</span>
+                    <span class="text-rose-600 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span>
                 @enderror
             </div>
         </div>
 
-        <div class="flex gap-2 mt-4">
-            <button type="submit" class="px-4 py-2 bg-blue-600 text-white border border-blue-800 text-xs hover:bg-blue-500">
-                <i class="fa fa-save"></i> SIMPAN
+        <div class="flex flex-col md:flex-row gap-3 mt-8 border-t border-gray-100 pt-5">
+            <button type="submit" class="w-full md:w-auto bg-blue-700 text-white border border-blue-900 px-8 py-3 text-xs font-black shadow-lg hover:bg-blue-600 hover:scale-[1.02] transition-all rounded-sm uppercase tracking-widest">
+                <i class="fa fa-save"></i> Simpan Transaksi
             </button>
-            <a href="{{ route('owner.distributor.hutang.index') }}" class="px-4 py-2 bg-gray-400 text-white border border-gray-600 text-xs hover:bg-gray-300">
-                <i class="fa fa-times"></i> BATAL
+            <a href="{{ route('owner.distributor.hutang.index') }}" class="w-full md:w-auto text-center bg-gray-100 text-gray-700 border border-gray-300 px-8 py-3 text-xs font-black hover:bg-gray-200 transition-all rounded-sm uppercase tracking-widest">
+                <i class="fa fa-times"></i> Batalkan
             </a>
         </div>
+    </form>
+</div>
     </form>
 </div>
 @endsection

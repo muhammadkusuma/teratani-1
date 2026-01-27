@@ -340,7 +340,31 @@ class DistributorController extends Controller
             ->orderBy('id_utang_piutang', 'desc')
             ->paginate(20);
 
-        return view('owner.distributor.hutang.index', compact('transaksi', 'distributors', 'userStores'));
+        // Calculate Summary Statistics
+        $summaryQuery = UtangPiutangDistributor::whereHas('distributor.toko', function($q) {
+            $q->where('id_perusahaan', Auth::user()->id_perusahaan);
+        });
+
+        if ($request->filled('id_distributor')) {
+            $summaryQuery->where('id_distributor', $request->id_distributor);
+        }
+        if ($request->filled('jenis_transaksi')) {
+            $summaryQuery->where('jenis_transaksi', $request->jenis_transaksi);
+        }
+        if ($request->filled('tanggal_dari')) {
+            $summaryQuery->where('tanggal', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $summaryQuery->where('tanggal', '<=', $request->tanggal_sampai);
+        }
+
+        $summary = [
+            'total_utang' => (clone $summaryQuery)->where('jenis_transaksi', 'utang')->sum('nominal'),
+            'total_bayar' => (clone $summaryQuery)->where('jenis_transaksi', 'pembayaran')->sum('nominal'),
+        ];
+        $summary['saldo'] = $summary['total_utang'] - $summary['total_bayar'];
+
+        return view('owner.distributor.hutang.index', compact('transaksi', 'distributors', 'userStores', 'summary'));
     }
 
     public function hutangCreate(Request $request)
