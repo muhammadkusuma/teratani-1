@@ -21,7 +21,16 @@ class ReturPenjualanController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('owner.retur-penjualan.index', compact('returs'));
+        // Calculate Summary Statistics
+        $summaryQuery = ReturPenjualan::where('id_toko', $id_toko);
+        
+        $summary = [
+            'total_value' => (clone $summaryQuery)->sum('total_retur'),
+            'total_count' => (clone $summaryQuery)->count(),
+            'today_value' => (clone $summaryQuery)->whereDate('tgl_retur', now())->sum('total_retur'),
+        ];
+
+        return view('owner.retur-penjualan.index', compact('returs', 'summary'));
     }
 
     public function create()
