@@ -8,9 +8,6 @@
         <i class="fa fa-truck text-blue-700"></i> Distributor & Supplier
     </h2>
     <div class="flex flex-wrap gap-2 w-full md:w-auto">
-        <a href="{{ route('owner.distributor.hutang.index') }}" class="flex-1 md:flex-none text-center px-4 py-2 bg-emerald-600 text-white border border-emerald-800 shadow-md hover:bg-emerald-500 text-xs font-bold transition-all rounded-sm uppercase">
-            <i class="fa fa-money-bill-wave"></i> Kelola Hutang
-        </a>
         <a href="{{ route('owner.distributor.create') }}" class="flex-1 md:flex-none text-center px-4 py-2 bg-blue-700 text-white border border-blue-900 shadow-md hover:bg-blue-600 text-xs font-bold transition-all rounded-sm uppercase">
             <i class="fa fa-plus"></i> Tambah Baru
         </a>

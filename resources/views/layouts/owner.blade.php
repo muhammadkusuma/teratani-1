@@ -305,6 +305,7 @@
                             <div class="dropdown-content">
                                 <a href="{{ route('owner.retur-pembelian.index') }}">🔙 Retur Distributor</a>
                                 <a href="{{ route('owner.distributor.index') }}">🚚 Data Distributor</a>
+                                <a href="{{ route('owner.distributor.hutang.index') }}">💰 Kelola Hutang</a>
                             </div>
                         </div>
                     @endif
