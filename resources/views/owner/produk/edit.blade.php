@@ -65,7 +65,7 @@
                 <div class="grid grid-cols-2 gap-2">
                     <div>
                         <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">
-                            Satuan Kecil <span class="text-red-600">*</span>
+                            Satuan Kecil (Ecer) <span class="text-red-600">*</span>
                         </label>
                         <select name="id_satuan_kecil" required class="w-full border border-gray-300 p-2.5 md:p-2 text-xs bg-white shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
                             @foreach ($satuans as $sat)
@@ -76,7 +76,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Harga Beli (HPP)</label>
+                        <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Modal Beli</label>
                         <input type="number" name="harga_beli" value="{{ $produk->harga_beli }}" step="1" class="w-full border border-gray-300 p-2.5 md:p-2 text-xs text-right shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
                     </div>
                 </div>
@@ -111,12 +111,12 @@
                 {{-- Optional: Satuan Besar --}}
                 <div class="grid grid-cols-3 gap-2 bg-blue-50 p-3 border border-blue-200 rounded-sm">
                     <div class="col-span-3 text-[10px] font-black text-blue-800 mb-1 uppercase tracking-wider">
-                        <i class="fa fa-cubes"></i> Optional (Satuan Besar)
+                        <i class="fa fa-cubes"></i> Jual Per Paket/Dus? (Opsional)
                     </div>
                     <div>
-                        <label class="block text-[10px] mb-1 font-bold text-gray-600">Sat. Besar</label>
+                        <label class="block text-[10px] mb-1 font-bold text-gray-600">Nama Paket</label>
                         <select name="id_satuan_besar" class="w-full border border-gray-300 p-1.5 text-xs shadow-inner focus:border-blue-500 outline-none transition-all rounded-sm">
-                            <option value="">- Nihil -</option>
+                            <option value="">- Tidak -</option>
                             @foreach ($satuans as $sat)
                                 <option value="{{ $sat->id_satuan }}" {{ $produk->id_satuan_besar == $sat->id_satuan ? 'selected' : '' }}>
                                     {{ $sat->nama_satuan }}
@@ -125,7 +125,7 @@
                         </select>
                     </div>
                     <div class="col-span-2">
-                        <label class="block text-[10px] mb-1 font-bold text-gray-600">Konversi</label>
+                        <label class="block text-[10px] mb-1 font-bold text-gray-600">1 Paket Isi Berapa?</label>
                         <input type="number" name="nilai_konversi" value="{{ $produk->nilai_konversi }}" min="1" class="w-full border border-gray-300 p-1.5 text-xs text-right shadow-inner focus:border-blue-500 outline-none transition-all rounded-sm">
                     </div>
                 </div>

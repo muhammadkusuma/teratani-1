@@ -27,11 +27,11 @@ class Produk extends Model
     ];
 
     protected $casts = [
-        'harga_beli'        => 'decimal:2',
-        'harga_jual_umum'   => 'decimal:2',
-        'harga_jual_grosir' => 'decimal:2',
-        'harga_r1'          => 'decimal:2',
-        'harga_r2'          => 'decimal:2',
+        'harga_beli'        => 'integer',
+        'harga_jual_umum'   => 'integer',
+        'harga_jual_grosir' => 'integer',
+        'harga_r1'          => 'integer',
+        'harga_r2'          => 'integer',
         'is_active'         => 'boolean',
         'stok_minimum'      => 'integer',
     ];
