@@ -210,24 +210,32 @@
 <body class="bg-teal-700 overflow-hidden h-screen">
     <div class="win98-border bg-gray-300 h-screen flex flex-col">
         
-        <div class="bg-gradient-to-r from-blue-900 to-blue-600 text-white px-2 py-1.5 flex justify-between items-center">
-            <span class="font-bold text-base">📊 SISTEM TOKO TANI - {{ session('toko_active_nama', 'Pilih Toko') }}</span>
-            <form action="{{ route('logout') }}" method="POST" class="inline">
+        {{-- Header Bar --}}
+        <div class="bg-gradient-to-r from-blue-900 to-blue-600 text-white px-2 md:px-3 py-1.5 md:py-2 flex justify-between items-center gap-2">
+            <span class="font-bold text-xs md:text-sm lg:text-base truncate flex-1 min-w-0">
+                <span class="hidden md:inline">📊 SISTEM TOKO TANI - </span>
+                <span class="md:hidden">🏪 </span>{{ session('toko_active_nama', 'Pilih Toko') }}
+            </span>
+            <form action="{{ route('logout') }}" method="POST" class="inline flex-shrink-0">
                 @csrf
-                <button type="submit" class="win98-button text-sm px-3 py-1">✕ Keluar</button>
+                <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold border-2 border-red-800 shadow-md text-xs md:text-sm px-2 md:px-3 py-1 md:py-1.5 whitespace-nowrap transition-colors rounded-sm">
+                    <span class="md:hidden">✕</span>
+                    <span class="hidden md:inline">✕ Keluar</span>
+                </button>
             </form>
         </div>
 
         
-        <div class="bg-gray-300 border-b-2 border-gray-400 p-1 flex flex-wrap gap-1 relative items-center">
+        {{-- Navigation Bar --}}
+        <div class="bg-gray-300 border-b-2 border-gray-400 p-1 md:p-1.5 flex flex-wrap gap-1 relative items-center">
             
-            
-            <button id="mobile-menu-btn" class="md:hidden win98-button flex items-center gap-2">
-                <i class="fa-solid fa-bars"></i> Menu
+            {{-- Mobile Menu Button --}}
+            <button id="mobile-menu-btn" class="md:hidden win98-button flex items-center gap-1 md:gap-2 text-xs md:text-sm px-2 py-1">
+                <i class="fa-solid fa-bars"></i> <span class="hidden sm:inline">Menu</span>
             </button>
 
-            
-            <div id="nav-menu" class="hidden md:flex flex-wrap gap-1 w-full md:w-auto absolute md:relative top-full left-0 md:top-auto md:left-auto z-50 bg-gray-300 md:bg-transparent p-2 md:p-0 win98-border md:border-none shadow-lg md:shadow-none flex-col md:flex-row">
+            {{-- Navigation Menu --}}
+            <div id="nav-menu" class="hidden md:flex flex-wrap gap-1 w-full md:w-auto absolute md:relative top-full left-0 md:top-auto md:left-auto z-50 bg-gray-300 md:bg-transparent p-2 md:p-0 win98-border md:border-none shadow-lg md:shadow-none flex-col md:flex-row max-h-[80vh] md:max-h-none overflow-y-auto md:overflow-visible">
                 
                 @php
                     $jabatan = Auth::user()->jabatan;
