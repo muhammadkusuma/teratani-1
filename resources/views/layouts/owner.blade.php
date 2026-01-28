@@ -242,16 +242,26 @@
                     $jabatan = Auth::user()->jabatan;
 
                     // Definisi Level Akses
-                    // "Unknown" included for Owner accounts that aren't linked to Karyawan yet.
+                    // 'Owner' etc have full access
                     $level_full   = ['Owner', 'Manager', 'Supervisor', 'Admin', 'Unknown']; 
+                    
+                    // Specific Access Arrays (Strict Mode)
+                    // Users with these roles ONLY see their specific menus
+                    $is_kasir_strict  = in_array($jabatan, ['Kasir', 'Sales']);
+                    $is_gudang_strict = in_array($jabatan, ['Staff Gudang']);
+                    $is_full_access   = in_array($jabatan, $level_full);
+
+                    // Backward compatibility helper arrays (can be removed if we fully switch logic below)
                     $level_kasir  = array_merge($level_full, ['Kasir', 'Sales']); 
                     $level_gudang = array_merge($level_full, ['Staff Gudang']);
                 @endphp
 
+                @if($is_full_access)
                 <a href="{{ route('owner.dashboard') }}" 
                 class="menu-item {{ request()->routeIs('owner.dashboard') ? 'active' : '' }} text-black no-underline block md:inline-block">
                     🏠 Beranda
                 </a>
+                @endif
 
                 {{-- Organisasi Dropdown (Global Admin Items) --}}
                 @if(in_array($jabatan, $level_full))
@@ -320,7 +330,7 @@
                         </div>
                     @endif
 
-                    @if(in_array($jabatan, $level_gudang))
+                    @if($is_full_access)
                          {{-- Keuangan Dropdown --}}
                          <div class="dropdown inline-block" onclick="toggleDropdown(this)">
                             <div class="menu-item {{ request()->routeIs('owner.pengeluaran.*') || request()->routeIs('owner.pendapatan_pasif.*') ? 'active' : '' }} text-black">
@@ -340,7 +350,7 @@
                 @php
                     $tokos = Auth::user()->perusahaan->tokos ?? [];
                 @endphp
-                @if(count($tokos) > 0)
+                @if(count($tokos) > 0 && ($is_full_access || $is_gudang_strict))
                     <div class="dropdown inline-block" onclick="toggleDropdown(this)">
                         <div class="menu-item text-black">
                             🏪 Ganti Toko ▼
