@@ -12,20 +12,6 @@
     </a>
 </div>
 
-@if(session('success'))
-    <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-3 mb-4 shadow-sm text-xs flex items-center gap-2">
-        <i class="fa fa-check-circle text-emerald-600 text-sm"></i> 
-        <span>{{ session('success') }}</span>
-    </div>
-@endif
-
-@if(session('error'))
-    <div class="bg-rose-50 border-l-4 border-rose-500 text-rose-800 p-3 mb-4 shadow-sm text-xs flex items-center gap-2">
-        <i class="fa fa-exclamation-circle text-rose-600 text-sm"></i> 
-        <span>{{ session('error') }}</span>
-    </div>
-@endif
-
 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
     <div class="bg-gradient-to-br from-blue-50 to-white border-l-4 border-blue-600 p-4 shadow-sm rounded-r-md">
         <div class="text-[10px] text-blue-800 font-black uppercase tracking-widest mb-1">Total Piutang (Terfilter)</div>
