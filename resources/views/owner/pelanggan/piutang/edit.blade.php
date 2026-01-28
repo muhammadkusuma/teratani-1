@@ -62,7 +62,7 @@
 
             <div>
                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Nominal (Rp) <span class="text-rose-600">*</span></label>
-                <input type="number" step="0.01" name="nominal" value="{{ old('nominal', $transaksi->nominal) }}" required placeholder="0.00" class="w-full border p-2 text-xs shadow-inner focus:border-blue-500 transition-all outline-none @error('nominal') border-rose-500 @else border-gray-300 @enderror">
+                <input type="number" name="nominal" value="{{ old('nominal', number_format($transaksi->nominal, 0, '', '')) }}" required placeholder="0" class="w-full border p-2 text-xs shadow-inner focus:border-blue-500 transition-all outline-none @error('nominal') border-rose-500 @else border-gray-300 @enderror">
                 @error('nominal')
                     <span class="text-rose-600 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span>
                 @enderror
