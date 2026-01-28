@@ -71,7 +71,7 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Harga Beli (HPP)</label>
+                        <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Modal Beli</label>
                         <input type="number" name="harga_beli" value="0" step="1" class="w-full border border-gray-300 p-2.5 md:p-2 text-xs text-right shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
                     </div>
                 </div>
@@ -106,19 +106,19 @@
                 {{-- Optional: Satuan Besar --}}
                 <div class="grid grid-cols-3 gap-2 bg-blue-50 p-3 border border-blue-200 rounded-sm">
                     <div class="col-span-3 text-[10px] font-black text-blue-800 mb-1 uppercase tracking-wider">
-                        <i class="fa fa-cubes"></i> Optional (Satuan Besar)
+                        <i class="fa fa-cubes"></i> Jual Per Paket/Dus? (Opsional)
                     </div>
                     <div>
-                        <label class="block text-[10px] mb-1 font-bold text-gray-600">Sat. Besar</label>
+                        <label class="block text-[10px] mb-1 font-bold text-gray-600">Nama Paket</label>
                         <select name="id_satuan_besar" class="w-full border border-gray-300 p-1.5 text-xs shadow-inner focus:border-blue-500 outline-none transition-all rounded-sm">
-                            <option value="">- Nihil -</option>
+                            <option value="">- Tidak -</option>
                             @foreach ($satuans as $sat)
                                 <option value="{{ $sat->id_satuan }}">{{ $sat->nama_satuan }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="col-span-2">
-                        <label class="block text-[10px] mb-1 font-bold text-gray-600">Nilai Konversi (1 Besar = ... Kecil)</label>
+                        <label class="block text-[10px] mb-1 font-bold text-gray-600">1 Paket Isi Berapa?</label>
                         <input type="number" name="nilai_konversi" value="1" min="1" class="w-full border border-gray-300 p-1.5 text-xs text-right shadow-inner focus:border-blue-500 outline-none transition-all rounded-sm">
                     </div>
                 </div>
@@ -138,9 +138,9 @@
                     </div>
                     <div>
                         <label class="block font-black mb-2 text-[10px] bg-amber-100 text-amber-800 px-2 py-1 w-fit uppercase tracking-wider border border-amber-300 rounded-sm">
-                            <i class="fa fa-boxes"></i> Jumlah Stok Awal
+                            <i class="fa fa-boxes"></i> Jumlah Stok Awal <span class="text-red-600">*</span>
                         </label>
-                        <input type="number" name="stok_awal" value="0" min="0" class="w-full border border-gray-300 p-2.5 md:p-2 text-xs text-right font-bold bg-amber-50 shadow-inner focus:border-amber-500 focus:ring-1 focus:ring-amber-200 outline-none transition-all rounded-sm">
+                        <input type="number" name="stok_awal" value="" min="1" required class="w-full border border-gray-300 p-2.5 md:p-2 text-xs text-right font-bold bg-amber-50 shadow-inner focus:border-amber-500 focus:ring-1 focus:ring-amber-200 outline-none transition-all rounded-sm" placeholder="Min: 1">
                     </div>
                 </div>
             </div>

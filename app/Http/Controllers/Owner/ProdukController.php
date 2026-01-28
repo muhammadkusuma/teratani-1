@@ -111,7 +111,7 @@ class ProdukController extends Controller
             'harga_jual_grosir' => 'nullable|integer|min:0',
             'harga_r1'          => 'nullable|integer|min:0',
             'harga_r2'          => 'nullable|integer|min:0',
-            'stok_awal'         => 'nullable|integer|min:0',
+            'stok_awal'         => 'required|integer|min:1',
             'lokasi_stok_awal'  => 'nullable|string', // 'toko' or id_gudang
             'gambar_produk'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
