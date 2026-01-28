@@ -64,10 +64,21 @@
                         <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">
                             Satuan Kecil (Ecer) <span class="text-red-600">*</span>
                         </label>
-                        <select name="id_satuan_kecil" required class="w-full border border-gray-300 p-2.5 md:p-2 text-xs bg-white shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
-                            @foreach ($satuans as $sat)
-                                <option value="{{ $sat->id_satuan }}">{{ $sat->nama_satuan }}</option>
-                            @endforeach
+                        <select name="id_satuan_kecil" required class="satuan-select2 w-full border border-gray-300 p-2.5 md:p-2 text-xs bg-white shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
+                            @if(isset($satuans['kecil']))
+                                <optgroup label="━━ SATUAN ECERAN ━━">
+                                    @foreach ($satuans['kecil'] as $sat)
+                                        <option value="{{ $sat->id_satuan }}">{{ $sat->nama_satuan }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @if(isset($satuans['besar']))
+                                <optgroup label="━━ SATUAN GROSIR ━━">
+                                    @foreach ($satuans['besar'] as $sat)
+                                        <option value="{{ $sat->id_satuan }}">{{ $sat->nama_satuan }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
                         </select>
                     </div>
                     <div>
@@ -110,11 +121,22 @@
                     </div>
                     <div>
                         <label class="block text-[10px] mb-1 font-bold text-gray-600">Nama Paket</label>
-                        <select name="id_satuan_besar" class="w-full border border-gray-300 p-1.5 text-xs shadow-inner focus:border-blue-500 outline-none transition-all rounded-sm">
+                        <select name="id_satuan_besar" class="satuan-select2 w-full border border-gray-300 p-1.5 text-xs shadow-inner focus:border-blue-500 outline-none transition-all rounded-sm">
                             <option value="">- Tidak -</option>
-                            @foreach ($satuans as $sat)
-                                <option value="{{ $sat->id_satuan }}">{{ $sat->nama_satuan }}</option>
-                            @endforeach
+                            @if(isset($satuans['besar']))
+                                <optgroup label="━━ SATUAN GROSIR (PAKET) ━━">
+                                    @foreach ($satuans['besar'] as $sat)
+                                        <option value="{{ $sat->id_satuan }}">{{ $sat->nama_satuan }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
+                            @if(isset($satuans['kecil']))
+                                <optgroup label="━━ SATUAN ECERAN ━━">
+                                    @foreach ($satuans['kecil'] as $sat)
+                                        <option value="{{ $sat->id_satuan }}">{{ $sat->nama_satuan }}</option>
+                                    @endforeach
+                                </optgroup>
+                            @endif
                         </select>
                     </div>
                     <div class="col-span-2">
@@ -173,4 +195,14 @@
         </div>
     </form>
 </div>
+
+<script>
+$(document).ready(function() {
+    $(".satuan-select2").select2({
+        placeholder: "-- Pilih Satuan --",
+        allowClear: false,
+        width: "100%"
+    });
+});
+</script>
 @endsection

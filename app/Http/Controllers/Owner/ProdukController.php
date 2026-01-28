@@ -90,7 +90,7 @@ class ProdukController extends Controller
     {
         $toko = Toko::findOrFail($id_toko);
         $kategoris = Kategori::select('id_kategori', 'nama_kategori')->orderBy('nama_kategori')->get();
-        $satuans = Satuan::select('id_satuan', 'nama_satuan')->orderBy('nama_satuan')->get();
+        $satuans = Satuan::select('id_satuan', 'nama_satuan', 'tipe')->orderBy('tipe')->orderBy('nama_satuan')->get()->groupBy('tipe');
         $gudangs = Gudang::where('id_toko', $id_toko)->select('id_gudang', 'nama_gudang')->get();
         return view('owner.produk.create', compact('toko', 'kategoris', 'satuans', 'gudangs'));
     }
@@ -190,7 +190,7 @@ class ProdukController extends Controller
         $toko = Toko::findOrFail($id_toko);
         $produk = Produk::findOrFail($id_produk);
         $kategoris = Kategori::select('id_kategori', 'nama_kategori')->orderBy('nama_kategori')->get();
-        $satuans = Satuan::select('id_satuan', 'nama_satuan')->orderBy('nama_satuan')->get();
+        $satuans = Satuan::select('id_satuan', 'nama_satuan', 'tipe')->orderBy('tipe')->orderBy('nama_satuan')->get()->groupBy('tipe');
 
         $stokToko = StokToko::where('id_toko', $toko->id_toko)
             ->where('id_produk', $produk->id_produk)
