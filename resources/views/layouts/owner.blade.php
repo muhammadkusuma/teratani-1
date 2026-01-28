@@ -350,7 +350,7 @@
                 @php
                     $tokos = Auth::user()->perusahaan->tokos ?? [];
                 @endphp
-                @if(count($tokos) > 0 && $is_full_access)
+                @if(count($tokos) > 0 && ($is_full_access || $is_gudang_strict))
                     <div class="dropdown inline-block" onclick="toggleDropdown(this)">
                         <div class="menu-item text-black">
                             🏪 Ganti Toko ▼
