@@ -431,6 +431,7 @@
                         nama,
                         harga: price,
                         discount: 0,
+                        modal: product.harga_beli || 0, // Add modal price
                         stok,
                         qty: 1
                     });
@@ -596,6 +597,24 @@
 
         function prosesBayar() {
             if (cart.length === 0) return alert('KERANJANG KOSONG!');
+
+            // Check for below modal price
+            let belowModalItems = [];
+            cart.forEach(item => {
+                let netPrice = item.harga - (item.discount || 0);
+                if (netPrice < item.modal) {
+                    belowModalItems.push(`- ${item.nama} (Jual: ${new Intl.NumberFormat('id-ID').format(netPrice)} < Modal: ${new Intl.NumberFormat('id-ID').format(item.modal)})`);
+                }
+            });
+
+            if (belowModalItems.length > 0) {
+                let message = "PERINGATAN! Ada barang yang dijual DIBAWAH MODAL:\n\n" + 
+                              belowModalItems.join("\n") + 
+                              "\n\nApakah Anda yakin ingin melanjutkan transaksi?";
+                if (!confirm(message)) {
+                    return; // Stop transaction
+                }
+            }
 
             let total = cart.reduce((a, b) => a + ((b.harga - (b.discount || 0)) * b.qty), 0);
             let bayar = parseFloat($('#inputBayar').val()) || 0;

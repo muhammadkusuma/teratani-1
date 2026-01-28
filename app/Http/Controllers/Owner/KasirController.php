@@ -43,7 +43,7 @@ class KasirController extends Controller
         // OPTIMIZATION: Select only needed columns
         $cacheKey = "kasir_index_products_{$id_toko}";
         $produk = Cache::remember($cacheKey, 3600, function () use ($id_toko) {
-             return Produk::select('id_produk', 'nama_produk', 'harga_jual_umum', 'harga_jual_grosir', 'harga_r1', 'harga_r2', 'is_active', 'id_satuan_kecil')
+             return Produk::select('id_produk', 'nama_produk', 'harga_beli', 'harga_jual_umum', 'harga_jual_grosir', 'harga_r1', 'harga_r2', 'is_active', 'id_satuan_kecil')
                 ->where('is_active', 1)
                 ->whereHas('stokToko', function ($q) use ($id_toko) {
                     $q->where('id_toko', $id_toko)->where('stok_fisik', '>', 0);
@@ -79,7 +79,7 @@ class KasirController extends Controller
         $keyword = $request->get('keyword');
 
         // Initial Optimized Query
-        $query = Produk::select('id_produk', 'nama_produk', 'sku', 'barcode', 'harga_jual_umum', 'harga_jual_grosir', 'harga_r1', 'harga_r2', 'is_active')
+        $query = Produk::select('id_produk', 'nama_produk', 'sku', 'barcode', 'harga_beli', 'harga_jual_umum', 'harga_jual_grosir', 'harga_r1', 'harga_r2', 'is_active')
             ->where('is_active', 1)
             ->whereHas('stokToko', function ($q) use ($id_toko) {
                 // Ensure we only find products belonging to this store
@@ -113,6 +113,8 @@ class KasirController extends Controller
                  'harga_jual_grosir' => $p->harga_jual_grosir,
                  'harga_r1' => $p->harga_r1,
                  'harga_r2' => $p->harga_r2,
+                 'harga_r2' => $p->harga_r2,
+                 'harga_beli' => $p->harga_beli,
                  'stok_toko' => $p->stokToko, // Keep object structure but it's smaller now
              ];
         });
