@@ -3,121 +3,177 @@
 @section('title', 'Detail Perusahaan')
 
 @section('content')
-<div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
-        <i class="fa fa-building"></i> DETAIL PERUSAHAAN
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+    <h2 class="font-bold text-xl border-b-4 border-blue-600 pb-1 pr-6 uppercase tracking-tight">
+        <i class="fa fa-building text-blue-700"></i> Detail Perusahaan
     </h2>
-    <a href="{{ route('owner.perusahaan.edit') }}" class="px-3 py-1 bg-yellow-600 text-white border border-yellow-800 shadow hover:bg-yellow-500 text-xs">
-        <i class="fa fa-edit"></i> EDIT DATA
-    </a>
+    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+        <a href="{{ route('owner.perusahaan.edit') }}" class="flex-1 md:flex-none text-center px-4 py-2 bg-amber-400 border border-amber-600 hover:bg-amber-300 text-xs font-bold transition-all rounded-sm uppercase no-underline text-black">
+            <i class="fa fa-edit"></i> Edit Data
+        </a>
+    </div>
 </div>
 
 @if(session('success'))
-    <div class="bg-green-100 border border-green-400 text-green-700 px-2 py-1 mb-2 text-xs">
-        {{ session('success') }}
+    <div class="bg-emerald-100 border border-emerald-400 text-emerald-700 px-4 py-3 mb-4 rounded-sm shadow-sm">
+        <i class="fa fa-check-circle"></i> {{ session('success') }}
     </div>
 @endif
 
 @if($perusahaan)
-<div class="win98-panel mb-3">
-    <table class="w-full text-base">
-        <tr>
-            <td class="font-bold py-2 w-48">Nama Perusahaan</td>
-            <td class="py-2">: {{ $perusahaan->nama_perusahaan }}</td>
-        </tr>
-        <tr>
-            <td class="font-bold py-2">Alamat</td>
-            <td class="py-2">: {{ $perusahaan->alamat ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="font-bold py-2">Kota</td>
-            <td class="py-2">: {{ $perusahaan->kota ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="font-bold py-2">Provinsi</td>
-            <td class="py-2">: {{ $perusahaan->provinsi ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="font-bold py-2">Kode Pos</td>
-            <td class="py-2">: {{ $perusahaan->kode_pos ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="font-bold py-2">No. Telepon</td>
-            <td class="py-2">: {{ $perusahaan->no_telp ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="font-bold py-2">Email</td>
-            <td class="py-2">: {{ $perusahaan->email ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="font-bold py-2">Website</td>
-            <td class="py-2">: {{ $perusahaan->website ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="font-bold py-2">NPWP</td>
-            <td class="py-2">: {{ $perusahaan->npwp ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="font-bold py-2">Pemilik</td>
-            <td class="py-2">: {{ $perusahaan->pemilik ?? '-' }}</td>
-        </tr>
+<div class="bg-white border border-gray-300 p-4 md:p-6 mb-4 shadow-sm rounded-sm">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-xs">
+        <div class="bg-gray-50 p-3 rounded-sm border border-gray-200">
+            <span class="text-gray-500 font-bold uppercase text-[10px] tracking-wider block mb-1">Nama Perusahaan</span>
+            <span class="font-black text-sm text-gray-800">{{ $perusahaan->nama_perusahaan }}</span>
+        </div>
+
+        <div class="bg-gray-50 p-3 rounded-sm border border-gray-200">
+            <span class="text-gray-500 font-bold uppercase text-[10px] tracking-wider block mb-1">Pemilik</span>
+            <span class="font-semibold text-gray-800">{{ $perusahaan->pemilik ?? '-' }}</span>
+        </div>
+
+        <div class="md:col-span-2 bg-blue-50 p-3 rounded-sm border border-blue-200">
+            <span class="text-blue-700 font-bold uppercase text-[10px] tracking-wider block mb-1">Alamat Lengkap</span>
+            <span class="font-semibold text-gray-800">{{ $perusahaan->alamat ?? '-' }}</span>
+        </div>
+
+        <div class="bg-gray-50 p-3 rounded-sm border border-gray-200">
+            <span class="text-gray-500 font-bold uppercase text-[10px] tracking-wider block mb-1">Kota</span>
+            <span class="font-semibold text-gray-800">{{ $perusahaan->kota ?? '-' }}</span>
+        </div>
+
+        <div class="bg-gray-50 p-3 rounded-sm border border-gray-200">
+            <span class="text-gray-500 font-bold uppercase text-[10px] tracking-wider block mb-1">Provinsi</span>
+            <span class="font-semibold text-gray-800">{{ $perusahaan->provinsi ?? '-' }}</span>
+        </div>
+
+        <div class="bg-gray-50 p-3 rounded-sm border border-gray-200">
+            <span class="text-gray-500 font-bold uppercase text-[10px] tracking-wider block mb-1">Kode Pos</span>
+            <span class="font-semibold text-gray-800">{{ $perusahaan->kode_pos ?? '-' }}</span>
+        </div>
+
+        <div class="bg-gray-50 p-3 rounded-sm border border-gray-200">
+            <span class="text-gray-500 font-bold uppercase text-[10px] tracking-wider block mb-1">No. Telepon</span>
+            <span class="font-semibold text-gray-800">
+                <i class="fa fa-phone text-emerald-500"></i> {{ $perusahaan->no_telp ?? '-' }}
+            </span>
+        </div>
+
+        <div class="bg-gray-50 p-3 rounded-sm border border-gray-200">
+            <span class="text-gray-500 font-bold uppercase text-[10px] tracking-wider block mb-1">Email</span>
+            <span class="font-semibold text-gray-800">
+                <i class="fa fa-envelope text-blue-500"></i> {{ $perusahaan->email ?? '-' }}
+            </span>
+        </div>
+
+        <div class="bg-gray-50 p-3 rounded-sm border border-gray-200">
+            <span class="text-gray-500 font-bold uppercase text-[10px] tracking-wider block mb-1">Website</span>
+            <span class="font-semibold text-gray-800">
+                <i class="fa fa-globe text-blue-500"></i> {{ $perusahaan->website ?? '-' }}
+            </span>
+        </div>
+
+        <div class="bg-gray-50 p-3 rounded-sm border border-gray-200">
+            <span class="text-gray-500 font-bold uppercase text-[10px] tracking-wider block mb-1">NPWP</span>
+            <span class="font-mono font-semibold text-gray-800">{{ $perusahaan->npwp ?? '-' }}</span>
+        </div>
+
         @if($perusahaan->logo)
-        <tr>
-            <td class="font-bold py-2">Logo</td>
-            <td class="py-2">
-                <img src="{{ asset('storage/' . $perusahaan->logo) }}" alt="Logo Perusahaan" class="max-w-xs border-2 border-gray-400 mt-2">
-            </td>
-        </tr>
+        <div class="md:col-span-2 bg-gradient-to-br from-blue-50 to-white p-4 rounded-sm border border-blue-200 text-center">
+            <span class="text-blue-700 font-bold uppercase text-[10px] tracking-wider block mb-3">Logo Perusahaan</span>
+            <img src="{{ asset('storage/' . $perusahaan->logo) }}" alt="Logo Perusahaan" class="max-w-full md:max-w-xs border-2 border-blue-300 mx-auto rounded-sm shadow-md">
+        </div>
         @endif
-    </table>
+    </div>
 </div>
 
-<div class="win98-panel">
-    <h3 class="font-bold text-base mb-3 border-b-2 border-gray-400 pb-1">
-        <i class="fa fa-store"></i> DAFTAR TOKO / CABANG
+<div class="bg-white border border-gray-300 p-4 md:p-6 shadow-sm rounded-sm">
+    <h3 class="font-black text-sm border-b-2 border-blue-600 pb-2 mb-4 text-blue-900 uppercase tracking-wider">
+        <i class="fa fa-store"></i> Daftar Toko / Cabang
     </h3>
     
     @if($perusahaan->tokos->count() > 0)
-    <table class="win98-table">
-        <thead>
-            <tr>
-                <th class="text-center w-12">No</th>
-                <th>Kode</th>
-                <th>Nama Toko</th>
-                <th>Alamat</th>
-                <th class="text-center w-24">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($perusahaan->tokos as $key => $toko)
-            <tr>
-                <td class="text-center">{{ $key + 1 }}</td>
-                <td class="font-mono">{{ $toko->kode_toko }}</td>
-                <td>
-                    <span class="font-bold">{{ $toko->nama_toko }}</span>
-                    @if($toko->is_pusat)
-                        <span class="bg-blue-600 text-white px-2 py-0.5 text-xs font-bold ml-1">PUSAT</span>
-                    @endif
-                </td>
-                <td>{{ $toko->alamat ?? '-' }}, {{ $toko->kota ?? '-' }}</td>
-                <td class="text-center">
+    
+    {{-- Mobile Card View --}}
+    <div class="block md:hidden space-y-3">
+        @foreach($perusahaan->tokos as $key => $toko)
+        <div class="bg-gradient-to-br from-white to-gray-50 border-l-4 {{ $toko->is_pusat ? 'border-blue-600' : 'border-gray-300' }} p-3 shadow-sm rounded-sm">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <h4 class="font-black text-sm text-gray-800">{{ $toko->nama_toko }}</h4>
+                    <p class="text-[10px] font-mono text-gray-500">{{ $toko->kode_toko }}</p>
+                </div>
+                <div>
                     @if($toko->is_active)
-                        <span class="px-2 py-1 bg-green-200 text-green-800 text-xs font-bold">AKTIF</span>
+                        <span class="px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase border border-emerald-200">Aktif</span>
                     @else
-                        <span class="px-2 py-1 bg-red-200 text-red-800 text-xs font-bold">TUTUP</span>
+                        <span class="px-2 py-1 rounded-full bg-rose-100 text-rose-800 text-[9px] font-black uppercase border border-rose-200">Tutup</span>
                     @endif
-                </td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
+                </div>
+            </div>
+            @if($toko->is_pusat)
+                <span class="inline-block bg-blue-600 text-white px-2 py-1 text-[9px] font-black rounded-sm mb-2 shadow-sm">
+                    <i class="fa fa-star"></i> PUSAT
+                </span>
+            @endif
+            <p class="text-xs text-gray-600">
+                <i class="fa fa-map-marker-alt text-blue-400"></i>
+                {{ $toko->alamat ?? '-' }}, {{ $toko->kota ?? '-' }}
+            </p>
+        </div>
+        @endforeach
+    </div>
+
+    {{-- Desktop Table View --}}
+    <div class="hidden md:block overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-blue-900 text-white text-[10px] font-black uppercase tracking-widest">
+                    <th class="border border-blue-900 p-3 text-center w-12">No</th>
+                    <th class="border border-blue-900 p-3">Kode</th>
+                    <th class="border border-blue-900 p-3">Nama Toko</th>
+                    <th class="border border-blue-900 p-3">Alamat</th>
+                    <th class="border border-blue-900 p-3 text-center w-24">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($perusahaan->tokos as $key => $toko)
+                <tr class="hover:bg-blue-50 transition-colors text-xs border-b border-gray-200">
+                    <td class="p-3 text-center font-bold text-gray-400">{{ $key + 1 }}</td>
+                    <td class="p-3 font-mono text-xs text-blue-700 font-bold tracking-tighter">{{ $toko->kode_toko }}</td>
+                    <td class="p-3">
+                        <span class="font-black text-gray-800">{{ $toko->nama_toko }}</span>
+                        @if($toko->is_pusat)
+                            <span class="bg-blue-600 text-white px-2 py-0.5 text-[9px] font-black ml-1 rounded-sm shadow-sm">
+                                <i class="fa fa-star"></i> PUSAT
+                            </span>
+                        @endif
+                    </td>
+                    <td class="p-3 text-gray-600">{{ $toko->alamat ?? '-' }}, {{ $toko->kota ?? '-' }}</td>
+                    <td class="p-3 text-center">
+                        @if($toko->is_active)
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[9px] font-black uppercase tracking-tighter border border-emerald-200">Aktif</span>
+                        @else
+                            <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[9px] font-black uppercase tracking-tighter border border-rose-200">Tutup</span>
+                        @endif
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
     @else
-    <p class="text-gray-600 italic text-center py-4">Belum ada toko terdaftar</p>
+    <div class="text-center py-8">
+        <i class="fa fa-store text-gray-200 text-5xl block mb-3"></i>
+        <p class="text-gray-400 italic text-sm">Belum ada toko terdaftar</p>
+    </div>
     @endif
 </div>
 @else
-<div class="win98-panel">
-    <p class="text-red-600 font-bold text-center py-4">Data perusahaan tidak ditemukan</p>
+<div class="bg-white border border-rose-300 p-8 shadow-sm rounded-sm text-center">
+    <i class="fa fa-exclamation-triangle text-rose-400 text-5xl mb-3 block"></i>
+    <p class="text-rose-600 font-bold">Data perusahaan tidak ditemukan</p>
 </div>
 @endif
 @endsection

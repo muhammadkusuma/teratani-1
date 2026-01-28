@@ -3,17 +3,23 @@
 @section('title', 'Buat Retur Penjualan')
 
 @section('content')
-<div class="mb-4">
-    <h2 class="font-bold text-xl mb-4">Input Retur Penjualan (Dari Pelanggan)</h2>
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+    <h2 class="font-bold text-xl border-b-4 border-blue-600 pb-1 pr-6 uppercase tracking-tight text-blue-900">
+        <i class="fa fa-undo text-blue-700"></i> Input Retur Penjualan
+    </h2>
+    <a href="{{ route('owner.retur-penjualan.index') }}" class="w-full md:w-auto text-center px-4 py-1.5 bg-gray-200 border border-gray-400 hover:bg-gray-300 text-xs font-bold transition-all uppercase tracking-wider">
+        <i class="fa fa-arrow-left"></i> Kembali
+    </a>
 </div>
 
-<div class="bg-white p-6 rounded shadow">
+<div class="bg-white border border-gray-300 p-6 shadow-lg rounded-sm">
     <form action="{{ route('owner.retur-penjualan.store') }}" method="POST">
         @csrf
-        <div class="grid grid-cols-2 gap-4 mb-4">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Pelanggan</label>
-                <select name="id_pelanggan" class="w-full border rounded p-2" required>
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider italic">Pelanggan Konsumen <span class="text-rose-600">*</span></label>
+                <select name="id_pelanggan" class="w-full border border-gray-300 p-2.5 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm font-bold" required>
                     <option value="">-- Pilih Pelanggan --</option>
                     @foreach($pelanggans as $pelanggan)
                         <option value="{{ $pelanggan->id_pelanggan }}">{{ $pelanggan->nama_pelanggan }}</option>
@@ -21,93 +27,125 @@
                 </select>
             </div>
             <div>
-                <label class="block text-gray-700 text-sm font-bold mb-2">Tanggal Retur</label>
-                <input type="date" name="tgl_retur" class="w-full border rounded p-2" value="{{ date('Y-m-d') }}" required>
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider italic">Tanggal Retur <span class="text-rose-600">*</span></label>
+                <input type="date" name="tgl_retur" class="w-full border border-gray-300 p-2.5 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 outline-none transition-all rounded-sm font-mono font-bold" value="{{ date('Y-m-d') }}" required>
             </div>
         </div>
 
-        <div class="mb-4">
-            <label class="block text-gray-700 text-sm font-bold mb-2">Keterangan / Alasan Umum</label>
-            <textarea name="keterangan" class="w-full border rounded p-2"></textarea>
+        <div class="mb-8">
+            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider italic">Keterangan / Alasan Retur</label>
+            <textarea name="keterangan" class="w-full border border-gray-300 p-3 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 outline-none transition-all rounded-sm h-16" placeholder="Masukkan detail alasan retur barang..."></textarea>
         </div>
 
-        <h3 class="font-bold mb-2 text-lg">Item Retur</h3>
-        <table class="w-full border mb-4" id="itemTable">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="p-2 border text-left">Produk</th>
-                    <th class="p-2 border text-right">Qty</th>
-                    <th class="p-2 border text-right">Harga Satuan (Saat Retur)</th>
-                    <th class="p-2 border text-right">Subtotal</th> // New
-                    <th class="p-2 border text-center">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Rows will be added here -->
-            </tbody>
-        </table>
-        
-        <button type="button" onclick="addRow()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-3 rounded mb-4 text-sm">
-            + Tambah Item
-        </button>
+        <div class="flex items-center gap-2 mb-3 border-b border-gray-100 pb-2">
+            <i class="fa fa-list text-blue-700"></i>
+            <h3 class="font-black text-xs uppercase tracking-widest text-gray-700">Daftar Item Barang</h3>
+        </div>
 
-        <div class="flex items-center justify-between mt-4 border-t pt-4">
-            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Simpan Retur
+        {{-- Desktop Headers --}}
+        <div class="hidden md:grid md:grid-cols-12 bg-blue-900 text-white text-[10px] font-black uppercase tracking-widest p-3 rounded-t-sm mb-0">
+            <div class="col-span-5">Produk / Barang</div>
+            <div class="col-span-2 text-center">Qty</div>
+            <div class="col-span-2 text-right">Harga (Rp)</div>
+            <div class="col-span-2 text-right pr-4">Subtotal</div>
+            <div class="col-span-1 text-center">Aksi</div>
+        </div>
+
+        <div id="itemRows" class="space-y-4 md:space-y-0 border-x border-b border-gray-200 md:border-t-0 rounded-b-sm bg-gray-50/30">
+            <!-- Dynamic Rows/Cards Added Here -->
+        </div>
+        
+        <div class="mt-4">
+            <button type="button" onclick="addRow()" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 text-white font-black py-2.5 px-6 rounded-sm mb-8 text-xs shadow-sm flex items-center justify-center gap-2 transition-transform active:scale-95 uppercase tracking-tighter">
+                <i class="fa fa-plus-circle"></i> Tambah Item Lagi
             </button>
-            <a href="{{ route('owner.retur-penjualan.index') }}" class="text-blue-500 hover:text-blue-800">Batal</a>
+        </div>
+
+        <div class="bg-gray-50 border border-gray-200 p-6 rounded-sm flex flex-col md:flex-row items-center justify-between gap-4 mt-4">
+            <div class="flex flex-col">
+                <span class="text-[10px] font-black text-gray-400 uppercase tracking-widest italic leading-none">Status Proses</span>
+                <span class="text-xs font-bold text-emerald-700 uppercase flex items-center gap-1 mt-1">
+                    <i class="fa fa-check-circle"></i> Selesai (Otomatis Update Stok)
+                </span>
+            </div>
+            <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                <button type="submit" class="w-full md:w-auto bg-blue-700 hover:bg-blue-600 text-white font-black py-3 px-10 rounded-sm shadow-lg hover:shadow-xl transition-all uppercase tracking-widest text-xs active:scale-95">
+                    <i class="fa fa-save mr-2"></i> Simpan Retur
+                </button>
+                <a href="{{ route('owner.retur-penjualan.index') }}" class="w-full md:w-auto text-center bg-white border border-gray-300 text-gray-500 font-black py-3 px-10 rounded-sm hover:bg-gray-100 transition-all uppercase tracking-widest text-xs">
+                    Batal
+                </a>
+            </div>
         </div>
     </form>
 </div>
 
+@push('scripts')
 <script>
     const produks = @json($produks);
 
     function addRow() {
-        const tbody = document.querySelector('#itemTable tbody');
-        const index = tbody.children.length;
+        const container = document.getElementById('itemRows');
         
-        let produkOptions = '<option value="">-- Pilih Produk --</option>';
+        let produkOptions = '<option value="">-- Pilih Produk / Barang --</option>';
         produks.forEach(p => {
             produkOptions += `<option value="${p.id_produk}" data-harga="${p.harga_jual_umum}">${p.nama_produk} (${p.sku})</option>`;
         });
 
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td class="p-2 border">
-                <select name="produk_id[]" class="w-full border p-1" onchange="updateHarga(this)" required>
+        const row = document.createElement('div');
+        row.className = "item-row p-4 md:p-3 bg-white md:bg-transparent border border-gray-200 md:border-0 md:border-b md:border-gray-100 rounded-sm md:rounded-none md:grid md:grid-cols-12 md:gap-4 md:items-center relative shadow-sm md:shadow-none hover:bg-blue-50/30 transition-colors";
+        
+        row.innerHTML = `
+            <div class="col-span-5 mb-4 md:mb-0">
+                <label class="block md:hidden text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest italic">Produk</label>
+                <select name="produk_id[]" class="w-full border border-gray-300 p-2 text-xs shadow-sm bg-gray-50 md:bg-white focus:border-blue-500 outline-none rounded-sm font-bold appearance-none cursor-pointer" onchange="updateHarga(this)" required>
                     ${produkOptions}
                 </select>
-            </td>
-            <td class="p-2 border">
-                <input type="number" name="qty[]" class="w-20 border p-1 text-right" value="1" min="1" onchange="calculateRow(this)" required>
-            </td>
-            <td class="p-2 border">
-                <input type="number" name="harga_satuan[]" class="w-32 border p-1 text-right" value="0" required onchange="calculateRow(this)">
-            </td>
-            <td class="p-2 border text-right">
-                <span class="subtotal-display">0</span>
-            </td>
-            <td class="p-2 border text-center">
-                <button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700 font-bold">X</button>
-            </td>
+            </div>
+            <div class="col-span-2 mb-4 md:mb-0">
+                <label class="block md:hidden text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest italic text-center">Qty</label>
+                <input type="number" name="qty[]" class="w-full border border-gray-300 p-2 text-xs shadow-sm text-center font-black focus:border-blue-500 outline-none rounded-sm bg-gray-50 md:bg-white" value="1" min="1" onchange="calculateRow(this)" required>
+            </div>
+            <div class="col-span-2 mb-4 md:mb-0">
+                <label class="block md:hidden text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest italic text-right">Harga (Rp)</label>
+                <input type="number" name="harga_satuan[]" class="w-full border border-gray-300 p-2 text-xs shadow-sm text-right font-mono font-bold focus:border-blue-500 outline-none rounded-sm bg-gray-50 md:bg-white" value="0" required onchange="calculateRow(this)">
+            </div>
+            <div class="col-span-2 mb-2 md:mb-0 text-right md:pr-4">
+                <label class="block md:hidden text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest italic">Subtotal</label>
+                <span class="subtotal-display font-black text-blue-800 text-xs md:text-sm">0</span>
+            </div>
+            <div class="col-span-1 flex justify-center mt-2 md:mt-0 pt-3 md:pt-0 border-t border-gray-50 md:border-none">
+                <button type="button" onclick="removeRow(this)" class="w-full md:w-auto bg-rose-50 md:bg-transparent text-rose-500 hover:text-rose-700 md:hover:scale-110 transition-all font-bold p-2 md:p-1 rounded-sm border md:border-none border-rose-200">
+                    <span class="md:hidden text-[10px] font-black uppercase tracking-tighter mr-2">Hapus Item</span>
+                    <i class="fa fa-times-circle text-lg leading-none align-middle"></i>
+                </button>
+            </div>
         `;
-        tbody.appendChild(tr);
+        container.appendChild(row);
+    }
+
+    function removeRow(btn) {
+        const row = btn.closest('.item-row');
+        if (document.querySelectorAll('.item-row').length > 1) {
+            row.remove();
+        } else {
+            alert('Minimal harus ada 1 item barang yang di-retur.');
+        }
     }
 
     function updateHarga(select) {
         const option = select.options[select.selectedIndex];
         const harga = option.getAttribute('data-harga');
-        const row = select.closest('tr');
+        const row = select.closest('.item-row');
         const hargaInput = row.querySelector('input[name="harga_satuan[]"]');
         if (harga) {
-            hargaInput.value = parseInt(harga); // Assuming integer prices per standard
+            hargaInput.value = parseInt(harga);
             calculateRow(select);
         }
     }
 
     function calculateRow(element) {
-        const row = element.closest('tr');
+        const row = element.closest('.item-row');
         const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
         const harga = parseFloat(row.querySelector('input[name="harga_satuan[]"]').value) || 0;
         const subtotal = qty * harga;
@@ -120,4 +158,5 @@
         addRow();
     });
 </script>
+@endpush
 @endsection

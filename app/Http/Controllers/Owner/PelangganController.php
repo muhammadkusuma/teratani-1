@@ -194,7 +194,31 @@ class PelangganController extends Controller
             ->orderBy('id_piutang', 'desc')
             ->paginate(20);
 
-        return view('owner.pelanggan.piutang.index', compact('transaksi', 'pelanggans', 'userStores'));
+        // Calculate Summary Statistics
+        $summaryQuery = UtangPiutangPelanggan::whereHas('pelanggan.toko', function($q) {
+            $q->where('id_perusahaan', Auth::user()->id_perusahaan);
+        });
+
+        if ($request->filled('id_pelanggan')) {
+            $summaryQuery->where('id_pelanggan', $request->id_pelanggan);
+        }
+        if ($request->filled('jenis_transaksi')) {
+            $summaryQuery->where('jenis_transaksi', $request->jenis_transaksi);
+        }
+        if ($request->filled('tanggal_dari')) {
+            $summaryQuery->where('tanggal', '>=', $request->tanggal_dari);
+        }
+        if ($request->filled('tanggal_sampai')) {
+            $summaryQuery->where('tanggal', '<=', $request->tanggal_sampai);
+        }
+
+        $summary = [
+            'total_piutang' => (clone $summaryQuery)->where('jenis_transaksi', 'piutang')->sum('nominal'),
+            'total_bayar'   => (clone $summaryQuery)->where('jenis_transaksi', 'pembayaran')->sum('nominal'),
+        ];
+        $summary['saldo'] = $summary['total_piutang'] - $summary['total_bayar'];
+
+        return view('owner.pelanggan.piutang.index', compact('transaksi', 'pelanggans', 'userStores', 'summary'));
     }
 
     public function piutangCreate(Request $request)
