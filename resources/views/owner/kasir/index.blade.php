@@ -100,6 +100,8 @@
                                 <th class="px-1 text-left w-5">#</th>
                                 <th class="px-1 text-left">ITEM</th>
                                 <th class="px-1 text-center w-8">QTY</th>
+                                <th class="px-1 text-right w-16">HARGA</th>
+                                <th class="px-1 text-right w-14">DISC</th>
                                 <th class="px-1 text-right w-16">TOTAL</th>
                             </tr>
                         </thead>
@@ -428,6 +430,8 @@
                         id,
                         nama,
                         harga: price,
+                        discount: 0,
+                        modal: product.harga_beli || 0, // Add modal price
                         stok,
                         qty: 1
                     });
@@ -444,23 +448,27 @@
             let total = 0;
 
             if (cart.length === 0) {
-                html = '<tr><td colspan="4" class="text-center py-4 text-gray-400 italic">-- KERANJANG KOSONG --</td></tr>';
+                html = '<tr><td colspan="6" class="text-center py-4 text-gray-400 italic">-- KERANJANG KOSONG --</td></tr>';
             } else {
                 cart.forEach((item, idx) => {
-                    let sub = item.harga * item.qty;
+                    let discount = item.discount || 0;
+                    let sub = (item.harga - discount) * item.qty;
                     total += sub;
                     html += `
                     <tr class="border-b border-gray-300 hover:bg-blue-50 group">
                         <td class="px-1 py-1 text-center"><button class="text-red-600 font-bold hover:bg-red-200 px-1" onclick="hapusItem(${idx})">x</button></td>
-                        
-                        <td class="px-1 py-1 truncate max-w-[120px]" title="${item.nama}">
-                            ${item.nama}
-                            <div class="text-[9px] text-gray-500">@ ${new Intl.NumberFormat('id-ID').format(item.harga)}</div>
-                        </td>
-                        
+                        <td class="px-1 py-1 truncate max-w-[80px]" title="${item.nama}"><div class="text-[10px] font-bold">${item.nama}</div></td>
                         <td class="px-1 py-1 text-center">
                             <input type="number" class="w-8 text-center border border-gray-400 text-[10px] focus:bg-yellow-100 p-0" 
                                 value="${item.qty}" onchange="updateQty(${idx}, this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-right">
+                            <input type="number" class="w-full text-right border border-gray-400 text-[10px] focus:bg-yellow-100 p-0 font-mono" 
+                                value="${item.harga}" onchange="updateHarga(${idx}, this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-right">
+                            <input type="number" class="w-full text-right border border-gray-400 text-[10px] focus:bg-yellow-100 p-0 font-mono" 
+                                value="${discount}" onchange="updateDiscount(${idx}, this.value)" placeholder="0">
                         </td>
                         <td class="px-1 py-1 text-right font-mono">${new Intl.NumberFormat('id-ID').format(sub)}</td>
                     </tr>`;
@@ -492,8 +500,20 @@
             renderCart();
         }
 
+        function updateHarga(idx, val) {
+            let harga = parseFloat(val) || 0;
+            cart[idx].harga = harga;
+            renderCart();
+        }
+
+        function updateDiscount(idx, val) {
+            let discount = parseFloat(val) || 0;
+            cart[idx].discount = discount;
+            renderCart();
+        }
+
         function hitungKembalian() {
-            let total = cart.reduce((a, b) => a + (b.harga * b.qty), 0);
+            let total = cart.reduce((a, b) => a + ((b.harga - (b.discount || 0)) * b.qty), 0);
             let bayar = parseFloat($('#inputBayar').val()) || 0;
             let metode = $('#metodeBayar').val();
             let selisih = bayar - total;
@@ -576,51 +596,126 @@
         let lastTransactionId = null; 
 
         function prosesBayar() {
-            if (cart.length === 0) return alert('KERANJANG KOSONG!');
+            if (cart.length === 0) return Swal.fire('Error', 'KERANJANG KOSONG!', 'error');
 
-            let total = cart.reduce((a, b) => a + (b.harga * b.qty), 0);
+            let total = cart.reduce((a, b) => a + ((b.harga - (b.discount || 0)) * b.qty), 0);
             let bayar = parseFloat($('#inputBayar').val()) || 0;
             let metode = $('#metodeBayar').val();
+            let kembalian = bayar - total;
 
+            // Check for below modal price
+            let belowModalItems = [];
+            cart.forEach(item => {
+                let netPrice = item.harga - (item.discount || 0);
+                if (netPrice < item.modal) {
+                    belowModalItems.push(`- ${item.nama} (Jual: ${new Intl.NumberFormat('id-ID').format(netPrice)} < Modal: ${new Intl.NumberFormat('id-ID').format(item.modal)})`);
+                }
+            });
+
+            if (belowModalItems.length > 0) {
+                let message = "PERINGATAN! Ada barang yang dijual DIBAWAH MODAL:\n" + 
+                              belowModalItems.join("\n");
+                
+                Swal.fire({
+                    title: 'Peringatan Harga',
+                    text: message,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Tetap Lanjutkan',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showFinalConfirmation(total, bayar, metode, kembalian);
+                    }
+                });
+            } else {
+                showFinalConfirmation(total, bayar, metode, kembalian);
+            }
+        }
+
+        function showFinalConfirmation(total, bayar, metode, kembalian) {
             if (metode !== 'Hutang' && bayar < total) {
-                alert('PEMBAYARAN KURANG!');
+                Swal.fire('Pembayaran Kurang', 'Nominal pembayaran kurang dari total tagihan!', 'error');
                 $('#inputBayar').focus();
                 return;
             }
 
+            let htmlContent = `
+                <div class="text-left font-mono">
+                    <div class="flex justify-between mb-1">
+                        <span>Total Belanja:</span>
+                        <span class="font-bold">Rp ${new Intl.NumberFormat('id-ID').format(total)}</span>
+                    </div>
+                    <div class="flex justify-between mb-1">
+                        <span>Metode Bayar:</span>
+                        <span class="font-bold">${metode}</span>
+                    </div>
+                    <div class="flex justify-between mb-1">
+                        <span>Bayar:</span>
+                        <span class="font-bold">Rp ${new Intl.NumberFormat('id-ID').format(bayar)}</span>
+                    </div>
+                    <hr class="my-2">
+                    <div class="flex justify-between text-lg">
+                        <span>${metode === 'Hutang' ? 'Sisa Hutang:' : 'Kembalian:'}</span>
+                        <span class="font-bold ${metode === 'Hutang' ? 'text-red-600' : 'text-green-600'}">
+                            Rp ${new Intl.NumberFormat('id-ID').format(Math.abs(kembalian))}
+                        </span>
+                    </div>
+                </div>
+            `;
+
+            Swal.fire({
+                title: 'Konfirmasi Pembayaran',
+                html: htmlContent,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Proses Bayar!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitTransaction(bayar, metode);
+                }
+            });
+        }
+
+        function submitTransaction(bayar, metode) {
             let btn = $('button[onclick="prosesBayar()"]');
             let oriText = btn.html();
             btn.prop('disabled', true).text('MEMPROSES...');
 
             $.post("{{ route('owner.kasir.store') }}", {
                     _token: "{{ csrf_token() }}",
-                    // We must filter the cart to only send what the backend expects, but the backend likely only needs ID and QTY.
-                    // If backend recalculates price, we assume it trusts the client or (better) we should update the backend to respect the applied price or recalculate based on customer category.
-                    // For now, let's look at the controller. It fetches the product again.
-                    // WAIT: The controller currently uses `harga_jual_umum`. We need to fix the controller too or pass the resolved price?
-                    // Best practice: Pass the customer ID to backend, backend looks up category, backend determines price. JS is just for display.
-                    // But the controller 'store' method doesn't seem to account for customer category price calculation yet.
-                    // See KasirController line 128: $harga = $produk->harga_jual_umum;
-                    // I MUST UPDATE THE CONTROLLER STORE METHOD AS WELL.
-                    items: cart.map(i => ({ id: i.id, qty: i.qty })), 
+                    // Fix: Pass resolved attributes. Ideally backend should validate prices.
+                    items: cart.map(i => ({ id: i.id, qty: i.qty, harga_manual: i.harga, discount: i.discount || 0 })), 
                     bayar: bayar,
                     id_pelanggan: $('#pelanggan').val(),
-                    kategori_harga: currentCategory, // Send the active price category
+                    kategori_harga: currentCategory, 
                     metode_bayar: metode
                 })
                 .done(res => {
                     btn.prop('disabled', false).html(oriText);
                     lastTransactionId = res.id_penjualan;
-                    $('#modalCetak').removeClass('hidden').addClass('flex');
-                    cart = [];
-                    renderCart();
-                    $('#inputBayar').val('');
-                    $('#pelanggan').val('');
-                    currentCategory = 'umum'; // Reset category
+                    
+                    Swal.fire({
+                        title: 'Berhasil!',
+                        text: 'Transaksi berhasil disimpan.',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        $('#modalCetak').removeClass('hidden').addClass('flex');
+                        cart = [];
+                        renderCart();
+                        $('#inputBayar').val('');
+                        $('#pelanggan').val('');
+                        currentCategory = 'umum'; 
+                    });
                 })
                 .fail(xhr => {
                     btn.prop('disabled', false).html(oriText);
-                    alert('GAGAL: ' + (xhr.responseJSON ? xhr.responseJSON.message : 'Terjadi kesalahan sistem.'));
+                    Swal.fire('Gagal', (xhr.responseJSON ? xhr.responseJSON.message : 'Terjadi kesalahan sistem.'), 'error');
                 });
         }
 

@@ -20,6 +20,16 @@ class ProdukController extends Controller
     public function index(Request $request, $id_toko)
     {
         $toko = Toko::findOrFail($id_toko);
+        
+        // Get all tokos for the selector
+        $allTokos = Toko::where('id_perusahaan', $toko->id_perusahaan)
+            ->where('is_active', 1)
+            ->orderBy('nama_toko')
+            ->get();
+
+        // Determine which toko to display products for
+        $selectedTokoId = $request->get('selected_toko', $id_toko);
+        $selectedToko = Toko::find($selectedTokoId) ?? $toko;
 
         $query = Produk::query()
             ->select([
@@ -36,8 +46,9 @@ class ProdukController extends Controller
                 'nilai_konversi'
             ]);
 
-        $query->whereHas('stokTokos', function ($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko);
+        // Filter products that exist in selected toko
+        $query->whereHas('stokTokos', function ($q) use ($selectedTokoId) {
+            $q->where('id_toko', $selectedTokoId);
         });
 
         if ($request->has('search') && $request->search != null) {
@@ -50,30 +61,36 @@ class ProdukController extends Controller
         }
 
         $produks = $query->with([
-            'stokTokos' => function ($q) use ($id_toko) {
+            // Load ALL toko stocks (we'll filter in the view)
+            'stokTokos' => function ($q) {
                 $q->select('id_produk', 'id_toko', 'stok_fisik', 'stok_minimal')
-                  ->where('id_toko', $id_toko);
+                  ->with('toko:id_toko,nama_toko');
+            },
+            // All warehouse stocks (from all tokos)
+            'stokGudangs' => function ($q) {
+                $q->select('id_produk', 'id_gudang', 'stok_fisik')
+                  ->with('gudang:id_gudang,nama_gudang,id_toko');
             },
             'kategori:id_kategori,nama_kategori',
             'satuanKecil:id_satuan,nama_satuan',
             'satuanBesar:id_satuan,nama_satuan'
         ])
-            ->withSum(['stokGudangs as total_stok_gudang' => function ($q) use ($id_toko) {
-                $q->whereHas('gudang', function ($gq) use ($id_toko) {
-                    $gq->where('id_toko', $id_toko);
+            ->withSum(['stokGudangs as total_stok_gudang' => function ($q) use ($selectedTokoId) {
+                $q->whereHas('gudang', function ($gq) use ($selectedTokoId) {
+                    $gq->where('id_toko', $selectedTokoId);
                 });
             }], 'stok_fisik')
             ->paginate(10)
             ->withQueryString();
 
-        return view('owner.produk.index', compact('toko', 'produks'));
+        return view('owner.produk.index', compact('toko', 'selectedToko', 'allTokos', 'produks'));
     }
 
     public function create($id_toko)
     {
         $toko = Toko::findOrFail($id_toko);
         $kategoris = Kategori::select('id_kategori', 'nama_kategori')->orderBy('nama_kategori')->get();
-        $satuans = Satuan::select('id_satuan', 'nama_satuan')->orderBy('nama_satuan')->get();
+        $satuans = Satuan::select('id_satuan', 'nama_satuan', 'tipe')->orderBy('tipe')->orderBy('nama_satuan')->get()->groupBy('tipe');
         $gudangs = Gudang::where('id_toko', $id_toko)->select('id_gudang', 'nama_gudang')->get();
         return view('owner.produk.create', compact('toko', 'kategoris', 'satuans', 'gudangs'));
     }
@@ -94,7 +111,7 @@ class ProdukController extends Controller
             'harga_jual_grosir' => 'nullable|integer|min:0',
             'harga_r1'          => 'nullable|integer|min:0',
             'harga_r2'          => 'nullable|integer|min:0',
-            'stok_awal'         => 'nullable|integer|min:0',
+            'stok_awal'         => 'required|integer|min:1',
             'lokasi_stok_awal'  => 'nullable|string', // 'toko' or id_gudang
             'gambar_produk'     => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
@@ -173,7 +190,7 @@ class ProdukController extends Controller
         $toko = Toko::findOrFail($id_toko);
         $produk = Produk::findOrFail($id_produk);
         $kategoris = Kategori::select('id_kategori', 'nama_kategori')->orderBy('nama_kategori')->get();
-        $satuans = Satuan::select('id_satuan', 'nama_satuan')->orderBy('nama_satuan')->get();
+        $satuans = Satuan::select('id_satuan', 'nama_satuan', 'tipe')->orderBy('tipe')->orderBy('nama_satuan')->get()->groupBy('tipe');
 
         $stokToko = StokToko::where('id_toko', $toko->id_toko)
             ->where('id_produk', $produk->id_produk)

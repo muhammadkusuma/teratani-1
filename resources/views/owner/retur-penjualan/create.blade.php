@@ -19,10 +19,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div>
                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider italic">Pelanggan Konsumen <span class="text-rose-600">*</span></label>
-                <select name="id_pelanggan" class="w-full border border-gray-300 p-2.5 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm font-bold" required>
+                <select id="pelangganSelect" name="id_pelanggan" class="w-full border border-gray-300 p-2.5 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm font-bold" onchange="updatePelangganKategori()" required>
                     <option value="">-- Pilih Pelanggan --</option>
                     @foreach($pelanggans as $pelanggan)
-                        <option value="{{ $pelanggan->id_pelanggan }}">{{ $pelanggan->nama_pelanggan }}</option>
+                        <option value="{{ $pelanggan->id_pelanggan }}" data-kategori-harga="{{ $pelanggan->kategori_harga ?? 'umum' }}">{{ $pelanggan->nama_pelanggan }}</option>
                     @endforeach
                 </select>
             </div>
@@ -46,7 +46,7 @@
         <div class="hidden md:grid md:grid-cols-12 bg-blue-900 text-white text-[10px] font-black uppercase tracking-widest p-3 rounded-t-sm mb-0">
             <div class="col-span-5">Produk / Barang</div>
             <div class="col-span-2 text-center">Qty</div>
-            <div class="col-span-2 text-right">Harga (Rp)</div>
+            <div class="col-span-2 text-center">Pilih Harga</div>
             <div class="col-span-2 text-right pr-4">Subtotal</div>
             <div class="col-span-1 text-center">Aksi</div>
         </div>
@@ -83,13 +83,33 @@
 @push('scripts')
 <script>
     const produks = @json($produks);
+    let selectedKategoriHarga = 'umum'; // Default kategori harga
+
+    function updatePelangganKategori() {
+        const select = document.getElementById('pelangganSelect');
+        const option = select.options[select.selectedIndex];
+        selectedKategoriHarga = option.getAttribute('data-kategori-harga') || 'umum';
+        
+        // Update all existing rows to reflect new customer category
+        const rows = document.querySelectorAll('.item-row');
+        rows.forEach(row => {
+            const produkSelect = row.querySelector('select[name="produk_id[]"]');
+            if (produkSelect.value) {
+                updateHarga(produkSelect);
+            }
+        });
+    }
 
     function addRow() {
         const container = document.getElementById('itemRows');
         
         let produkOptions = '<option value="">-- Pilih Produk / Barang --</option>';
         produks.forEach(p => {
-            produkOptions += `<option value="${p.id_produk}" data-harga="${p.harga_jual_umum}">${p.nama_produk} (${p.sku})</option>`;
+            produkOptions += `<option value="${p.id_produk}" 
+                data-harga-umum="${p.harga_jual_umum || 0}" 
+                data-harga-grosir="${p.harga_jual_grosir || 0}" 
+                data-harga-r1="${p.harga_r1 || 0}" 
+                data-harga-r2="${p.harga_r2 || 0}">${p.nama_produk} (${p.sku})</option>`;
         });
 
         const row = document.createElement('div');
@@ -107,8 +127,12 @@
                 <input type="number" name="qty[]" class="w-full border border-gray-300 p-2 text-xs shadow-sm text-center font-black focus:border-blue-500 outline-none rounded-sm bg-gray-50 md:bg-white" value="1" min="1" onchange="calculateRow(this)" required>
             </div>
             <div class="col-span-2 mb-4 md:mb-0">
-                <label class="block md:hidden text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest italic text-right">Harga (Rp)</label>
-                <input type="number" name="harga_satuan[]" class="w-full border border-gray-300 p-2 text-xs shadow-sm text-right font-mono font-bold focus:border-blue-500 outline-none rounded-sm bg-gray-50 md:bg-white" value="0" required onchange="calculateRow(this)">
+                <label class="block md:hidden text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest italic">Pilih Harga</label>
+                <select class="price-select w-full border border-gray-300 p-2 text-xs shadow-sm bg-gray-50 md:bg-white focus:border-blue-500 outline-none rounded-sm font-bold" onchange="updateHargaFromSelect(this)" disabled>
+                    <option value="">-- Pilih harga --</option>
+                </select>
+                <input type="hidden" name="harga_satuan[]" class="harga-input" value="0" required>
+                <div class="text-right mt-1 text-[9px] font-mono font-bold text-blue-700 price-display">Rp 0</div>
             </div>
             <div class="col-span-2 mb-2 md:mb-0 text-right md:pr-4">
                 <label class="block md:hidden text-[9px] font-black text-gray-400 uppercase mb-1 tracking-widest italic">Subtotal</label>
@@ -133,21 +157,81 @@
         }
     }
 
-    function updateHarga(select) {
-        const option = select.options[select.selectedIndex];
-        const harga = option.getAttribute('data-harga');
-        const row = select.closest('.item-row');
-        const hargaInput = row.querySelector('input[name="harga_satuan[]"]');
-        if (harga) {
-            hargaInput.value = parseInt(harga);
-            calculateRow(select);
+    function updateHarga(selectElement) {
+        const option = selectElement.options[selectElement.selectedIndex];
+        const row = selectElement.closest('.item-row');
+        const priceSelect = row.querySelector('.price-select');
+        const hargaInput = row.querySelector('.harga-input');
+        
+        if (!option.value) {
+            priceSelect.disabled = true;
+            priceSelect.innerHTML = '<option value="">-- Pilih harga --</option>';
+            hargaInput.value = 0;
+            updatePriceDisplay(row);
+            calculateRow(selectElement);
+            return;
         }
+
+        // Get all prices from data attributes
+        const hargaUmum = parseFloat(option.getAttribute('data-harga-umum')) || 0;
+        const hargaGrosir = parseFloat(option.getAttribute('data-harga-grosir')) || 0;
+        const hargaR1 = parseFloat(option.getAttribute('data-harga-r1')) || 0;
+        const hargaR2 = parseFloat(option.getAttribute('data-harga-r2')) || 0;
+
+        // Build price options
+        let priceOptions = '';
+        const prices = [];
+
+        if (hargaR1 > 0) {
+            prices.push({label: 'R1', value: hargaR1, key: 'r1'});
+        }
+        if (hargaR2 > 0) {
+            prices.push({label: 'R2', value: hargaR2, key: 'r2'});
+        }
+        if (hargaGrosir > 0) {
+            prices.push({label: 'Grosir', value: hargaGrosir, key: 'grosir'});
+        }
+        if (hargaUmum > 0) {
+            prices.push({label: 'Umum', value: hargaUmum, key: 'umum'});
+        }
+
+        // Generate options
+        prices.forEach(price => {
+            const formatHarga = new Intl.NumberFormat('id-ID').format(price.value);
+            const selected = price.key === selectedKategoriHarga ? 'selected' : '';
+            priceOptions += `<option value="${price.value}" ${selected}>Harga ${price.label} - Rp ${formatHarga}</option>`;
+        });
+
+        priceSelect.innerHTML = priceOptions;
+        priceSelect.disabled = false;
+
+        // Set the selected price value
+        const selectedPrice = priceSelect.value || hargaUmum;
+        hargaInput.value = selectedPrice;
+        
+        updatePriceDisplay(row);
+        calculateRow(selectElement);
+    }
+
+    function updateHargaFromSelect(selectElement) {
+        const row = selectElement.closest('.item-row');
+        const hargaInput = row.querySelector('.harga-input');
+        hargaInput.value = selectElement.value;
+        updatePriceDisplay(row);
+        calculateRow(selectElement);
+    }
+
+    function updatePriceDisplay(row) {
+        const hargaInput = row.querySelector('.harga-input');
+        const priceDisplay = row.querySelector('.price-display');
+        const harga = parseFloat(hargaInput.value) || 0;
+        priceDisplay.innerText = 'Rp ' + new Intl.NumberFormat('id-ID').format(harga);
     }
 
     function calculateRow(element) {
         const row = element.closest('.item-row');
         const qty = parseFloat(row.querySelector('input[name="qty[]"]').value) || 0;
-        const harga = parseFloat(row.querySelector('input[name="harga_satuan[]"]').value) || 0;
+        const harga = parseFloat(row.querySelector('.harga-input').value) || 0;
         const subtotal = qty * harga;
         
         row.querySelector('.subtotal-display').innerText = new Intl.NumberFormat('id-ID').format(subtotal);

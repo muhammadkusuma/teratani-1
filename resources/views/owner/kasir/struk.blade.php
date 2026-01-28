@@ -1,110 +1,210 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk #{{ $penjualan->no_faktur }}</title>
     <style>
-        body {
-            font-family: 'Courier New', monospace;
-            font-size: 12px;
+        @page {
             margin: 0;
-            padding: 10px;
+            /* size: auto;  Let printer driver decide */
+        }
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 10px;
+            margin: 0;
+            padding: 2mm; /* Small padding for safety */
             color: #000;
+            width: 100%; /* Fluid width */
+            max-width: 100%;
+            background: #fff;
+            box-sizing: border-box; /* Include padding in width */
         }
-
-        .text-center {
+        .header {
             text-align: center;
+            margin-bottom: 5px;
         }
-
-        .text-end {
-            text-align: right;
+        .logo-placeholder {
+            width: 40px;
+            height: 40px;
+            background-color: #eee;
+            margin: 0 auto 5px;
+            border: 1px dashed #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            color: #888;
         }
-
-        .bold {
+        .logo-img {
+            max-width: 80%; /* Limit width relative to container */
+            max-height: 20mm;
+            margin-bottom: 5px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .header h2 {
+            margin: 0;
+            font-size: 12px;
             font-weight: bold;
+            text-transform: uppercase;
         }
-
-        .line {
+        .header p {
+            margin: 0;
+            font-size: 9px;
+            line-height: 1.2;
+            word-wrap: break-word; /* Ensure long text wraps */
+        }
+        .metadata {
+            margin-bottom: 5px;
+            font-size: 9px;
             border-bottom: 1px dashed #000;
-            margin: 5px 0;
+            padding-bottom: 5px;
         }
-
-        table {
+        .metadata table {
             width: 100%;
-            border-collapse: collapse;
         }
-
-        td {
+        .metadata td {
+            padding: 0;
             vertical-align: top;
         }
-
+        .items {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 5px;
+            font-size: 9px;
+        }
+        .items td {
+            padding: 2px 0;
+            vertical-align: top;
+        }
+        /* Ensure tables don't overflow */
+        table {
+            table-layout: fixed; 
+            width: 100%;
+        }
+        .items td:first-child {
+            /* Let the item name take space */
+        }
+        .item-name {
+            font-weight: bold;
+            display: block;
+            word-wrap: break-word;
+        }
+        .item-details {
+            display: flex;
+            justify-content: space-between;
+        }
+        .totals {
+            width: 100%;
+            margin-bottom: 10px;
+            font-size: 9px;
+            border-top: 1px dashed #000;
+            padding-top: 5px;
+        }
+        .totals td {
+            padding: 1px 0;
+            text-align: right;
+        }
+        .totals td:first-child {
+            text-align: left;
+        }
+        .footer {
+            text-align: center;
+            font-size: 9px;
+            font-weight: bold;
+            margin-top: 10px;
+            border-top: 1px dashed #000;
+            padding-top: 5px;
+        }
+        /* Utility for dashed lines if needed explicitly */
+        .dashed-line {
+            border-top: 1px dashed #000;
+            margin: 5px 0;
+            display: none; 
+        }
+        
         @media print {
-            @page {
+            body { 
+                width: 100%;
                 margin: 0;
-                size: 80mm auto;
+                padding: 0; /* Printers often have their own non-printable margins */
             }
-
-            /* Ukuran Kertas Thermal 80mm */
+            .no-print {
+                display: none;
+            }
         }
     </style>
 </head>
-
 <body onload="window.print()">
 
-    <div class="text-center">
-        <h3 style="margin:0">{{ $toko->nama_toko ?? 'Toko' }}</h3>
-        <p style="margin:0">{{ $toko->alamat ?? '-' }}</p>
-        <p class="line"></p>
+    <div class="header">
+        <!-- Logo Placeholder -->
+        <img src="{{ asset('images/logo-struk.png') }}" alt="LOGO" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="logo-placeholder" style="display: none;">
+            LOGO
+        </div>
+        
+        <h2>{{ $toko->nama_toko ?? 'TOKO TANI' }}</h2>
+        <p>{{ $toko->alamat ?? 'Alamat Toko' }}</p>
+        <p>{{ $toko->kota ?? '' }}</p>
+        <p>WA/HP : {{ $toko->no_telepon ?? '-' }}</p>
     </div>
 
-    <table>
-        <tr>
-            <td>No: {{ $penjualan->no_faktur }}</td>
-            <td class="text-end">{{ date('d/m/Y H:i', strtotime($penjualan->tgl_transaksi)) }}</td>
-        </tr>
-        <tr>
-            <td>Kasir: {{ $penjualan->user->name ?? 'Admin' }}</td>
-            <td class="text-end">{{ $penjualan->metode_bayar }}</td>
-        </tr>
-    </table>
-
-    <div class="line"></div>
-
-    <table>
-        @foreach ($penjualan->details as $item)
+    <!-- Metadata -->
+    <div class="metadata">
+        <table>
             <tr>
-                <td colspan="2">{{ $item->produk->nama_produk }}</td>
+                <td style="width: 50%;">Faktur: {{ $penjualan->no_faktur }}</td>
+                <td style="text-align: right;">{{ date('d/m/y H:i', strtotime($penjualan->tgl_transaksi)) }}</td>
             </tr>
             <tr>
-                <td>{{ $item->qty }} x {{ number_format($item->harga_jual_satuan) }}</td>
-                <td class="text-end">{{ number_format($item->subtotal) }}</td>
+                <td>Ksr: {{ $penjualan->user->username ?? 'Admin' }}</td>
+                <td style="text-align: right;">Plg: {{ $penjualan->pelanggan->nama_pelanggan ?? 'Umum' }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <table class="items">
+        @foreach ($penjualan->details as $item)
+            <tr>
+                <td>
+                    <span class="item-name">{{ $item->produk->nama_produk }}</span>
+                    <div class="item-details">
+                        <span>{{ $item->qty }}x {{ number_format($item->harga_jual_satuan, 0, ',', '.') }}</span>
+                        <span>{{ number_format($item->subtotal, 0, ',', '.') }}</span>
+                    </div>
+                </td>
             </tr>
         @endforeach
     </table>
 
-    <div class="line"></div>
-
-    <table>
+    <table class="totals">
+        @if ($penjualan->diskon_nota > 0)
+            <tr>
+                <td>Diskon :</td>
+                <td>{{ number_format($penjualan->diskon_nota, 0, ',', '.') }}</td>
+            </tr>
+        @endif
         <tr>
-            <td>Total</td>
-            <td class="text-end bold">{{ number_format($penjualan->total_netto) }}</td>
+            <td style="font-weight: bold;">Total :</td>
+            <td style="font-weight: bold;">{{ number_format($penjualan->total_netto, 0, ',', '.') }}</td>
+        </tr>
+         <tr>
+            <td>Bayar :</td>
+            <td>{{ number_format($penjualan->jumlah_bayar, 0, ',', '.') }}</td>
         </tr>
         <tr>
-            <td>Bayar</td>
-            <td class="text-end">{{ number_format($penjualan->jumlah_bayar) }}</td>
-        </tr>
-        <tr>
-            <td>Kembali/Sisa</td>
-            <td class="text-end">{{ number_format($penjualan->kembalian) }}</td>
+            <td>{{ $penjualan->metode_bayar == 'Hutang' ? 'Sisa' : 'Kembali' }} :</td>
+            <td>{{ number_format($penjualan->metode_bayar == 'Hutang' ? $penjualan->total_netto - $penjualan->jumlah_bayar : $penjualan->kembalian, 0, ',', '.') }}</td>
         </tr>
     </table>
 
-    <div class="text-center" style="margin-top: 15px;">
-        <p>Terima Kasih</p>
+    <div class="footer">
+        <p>TERIMA KASIH</p>
+        <p>SEMOGA BERKAH & JADI LANGGANAN</p>
     </div>
 
 </body>
-
 </html>

@@ -62,13 +62,13 @@
             
             {{-- Stok Breakdown --}}
             <div class="space-y-2 mb-2 pt-2 border-t border-gray-200">
-                <div class="flex justify-between items-center bg-blue-50 border border-blue-200 p-2 rounded-sm">
-                    <span class="text-[10px] text-blue-700 uppercase font-bold">
+                <div class="flex justify-between items-center {{ $stokToko < 10 ? 'bg-red-100 border-red-400' : 'bg-blue-50 border-blue-200' }} border p-2 rounded-sm">
+                    <span class="text-[10px] {{ $stokToko < 10 ? 'text-red-700' : 'text-blue-700' }} uppercase font-bold">
                         <i class="fa fa-store"></i> Stok Toko
                     </span>
                     <div class="text-right">
-                        <div class="font-mono font-black text-blue-800">{{ number_format($stokToko) }}</div>
-                        <div class="text-[9px] text-gray-500">Min: {{ $stokMinimal }}</div>
+                        <div class="font-mono font-black {{ $stokToko < 10 ? 'text-red-800' : 'text-blue-800' }}">{{ number_format($stokToko) }}</div>
+                        <div class="text-[9px] {{ $stokToko < 10 ? 'text-red-600' : 'text-gray-500' }}">Min: {{ $stokMinimal }}</div>
                     </div>
                 </div>
                 
@@ -77,11 +77,11 @@
                         $stokGudang = $gudangStockMap[$gudang->id_gudang] ?? 0;
                     @endphp
                     @if($stokGudang > 0)
-                        <div class="flex justify-between items-center bg-purple-50 border border-purple-200 p-2 rounded-sm">
-                            <span class="text-[10px] text-purple-700 uppercase font-bold">
+                        <div class="flex justify-between items-center {{ $stokGudang < 10 ? 'bg-red-100 border-red-400' : 'bg-purple-50 border-purple-200' }} border p-2 rounded-sm">
+                            <span class="text-[10px] {{ $stokGudang < 10 ? 'text-red-700' : 'text-purple-700' }} uppercase font-bold">
                                 <i class="fa fa-warehouse"></i> {{ $gudang->nama_gudang }}
                             </span>
-                            <div class="font-mono font-bold text-purple-800">{{ number_format($stokGudang) }}</div>
+                            <div class="font-mono font-bold {{ $stokGudang < 10 ? 'text-red-800' : 'text-purple-800' }}">{{ number_format($stokGudang) }}</div>
                         </div>
                     @endif
                 @endforeach
@@ -161,15 +161,18 @@
                     <td class="p-3 text-gray-700">{{ $item->kategori->nama_kategori ?? '-' }}</td>
                     
                     {{-- Stok Toko --}}
-                    <td class="p-3 text-center font-mono font-bold text-blue-700">
+                    <td class="p-3 text-center font-mono font-bold {{ $stokToko < 10 ? 'bg-red-100 text-red-700 font-black' : 'text-blue-700' }}">
                         {{ number_format($stokToko) }}
-                        <div class="text-[9px] text-gray-500">Min: {{ $stokMinimal }}</div>
+                        <div class="text-[9px] {{ $stokToko < 10 ? 'text-red-600' : 'text-gray-500' }}">Min: {{ $stokMinimal }}</div>
                     </td>
                     
                     {{-- Stok per Gudang --}}
                     @foreach($gudangs as $gudang)
-                        <td class="p-3 text-center font-mono text-purple-700 font-bold">
-                            {{ number_format($gudangStockMap[$gudang->id_gudang] ?? 0) }}
+                        @php
+                            $stokGudang = $gudangStockMap[$gudang->id_gudang] ?? 0;
+                        @endphp
+                        <td class="p-3 text-center font-mono font-bold {{ $stokGudang < 10 ? 'bg-red-100 text-red-700 font-black' : 'text-purple-700' }}">
+                            {{ number_format($stokGudang) }}
                         </td>
                     @endforeach
                     

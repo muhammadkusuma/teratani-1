@@ -36,12 +36,15 @@ class ReturPenjualanController extends Controller
     public function create()
     {
         $id_toko = session('toko_active_id');
-        // Fetch products for dropdown, maybe improve with AJAX search later
-        $produks = Produk::whereHas('stokTokos', function($q) use ($id_toko) {
-            $q->where('id_toko', $id_toko);
-        })->get();
+        // Fetch products for dropdown with all price fields
+        $produks = Produk::select('id_produk', 'sku', 'nama_produk', 'harga_jual_umum', 'harga_jual_grosir', 'harga_r1', 'harga_r2')
+            ->whereHas('stokTokos', function($q) use ($id_toko) {
+                $q->where('id_toko', $id_toko);
+            })->get();
         
-        $pelanggans = \App\Models\Pelanggan::where('id_toko', $id_toko)->get();
+        $pelanggans = \App\Models\Pelanggan::select('id_pelanggan', 'nama_pelanggan', 'kategori_harga')
+            ->where('id_toko', $id_toko)
+            ->get();
 
         return view('owner.retur-penjualan.create', compact('produks', 'pelanggans'));
     }
