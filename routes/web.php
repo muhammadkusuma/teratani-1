@@ -29,9 +29,55 @@ use Illuminate\Support\Facades\Cache;
 Route::get('/version', function () {
     $phpVersion = phpversion();
     $laravelVersion = app()->version();
-    $dbVersion = DB::select('SELECT VERSION() as version')[0]->version;
-    
-    return "PHP: $phpVersion<br>Laravel: $laravelVersion<br>Database: $dbVersion";
+    try {
+        $dbVersion = DB::select('SELECT VERSION() as version')[0]->version;
+        $dbName = DB::connection()->getDatabaseName();
+
+        // Database Stats (Size & Rows)
+        $stats = DB::select("
+            SELECT 
+                SUM(TABLE_ROWS) as total_rows, 
+                SUM(DATA_LENGTH + INDEX_LENGTH) as total_size 
+            FROM INFORMATION_SCHEMA.TABLES 
+            WHERE TABLE_SCHEMA = ?
+        ", [$dbName])[0];
+        
+        $totalRows = number_format($stats->total_rows ?? 0);
+        $totalSizeMb = number_format(($stats->total_size ?? 0) / 1024 / 1024, 2);
+
+        // Benchmark Read (Simple Select)
+        $startRead = microtime(true);
+        DB::select('SELECT 1');
+        $readTime = round((microtime(true) - $startRead) * 1000, 2);
+
+        // Benchmark Write (Transaction + Temp Table to avoid side effects)
+        $startWrite = microtime(true);
+        DB::transaction(function () {
+            DB::statement('CREATE TEMPORARY TABLE IF NOT EXISTS _speed_test (id int)');
+            DB::statement('INSERT INTO _speed_test VALUES (1)');
+            DB::statement('DROP TEMPORARY TABLE _speed_test');
+        });
+        $writeTime = round((microtime(true) - $startWrite) * 1000, 2);
+
+        return "
+            <div style='font-family: monospace; line-height: 1.5;'>
+                <strong>System Versions</strong><br>
+                PHP: $phpVersion<br>
+                Laravel: $laravelVersion<br>
+                Database: $dbVersion<br>
+                <br>
+                <strong>Database Stats ($dbName)</strong><br>
+                Total Rows: $totalRows<br>
+                Total Size: $totalSizeMb MB<br>
+                <br>
+                <strong>Performance Benchmarks</strong><br>
+                Read Latency (SELECT 1): {$readTime} ms<br>
+                Write Latency (Temp Table): {$writeTime} ms
+            </div>
+        ";
+    } catch (\Exception $e) {
+        return "Error gathering stats: " . $e->getMessage();
+    }
 });
 
 Route::get('/', [AuthController::class, 'showLoginForm']);
