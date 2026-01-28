@@ -3,117 +3,132 @@
 @section('title', 'Edit Detail Perusahaan')
 
 @section('content')
-<div class="flex justify-between items-center mb-3">
-    <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
-        <i class="fa fa-edit"></i> EDIT DETAIL PERUSAHAAN
+<div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
+    <h2 class="font-bold text-xl border-b-4 border-blue-600 pb-1 pr-6 uppercase tracking-tight">
+        <i class="fa fa-building-edit text-blue-700"></i> Edit Perusahaan
     </h2>
-    <a href="{{ route('owner.perusahaan.index') }}" class="px-3 py-1 bg-gray-500 text-white border border-gray-700 shadow hover:bg-gray-400 text-xs">
-        <i class="fa fa-arrow-left"></i> KEMBALI
-    </a>
+    <div class="flex flex-wrap gap-2 w-full md:w-auto">
+        <a href="{{ route('owner.perusahaan.index') }}" class="flex-1 md:flex-none text-center px-4 py-2 bg-gray-600 text-white border border-gray-800 shadow-md hover:bg-gray-500 text-xs font-bold transition-all rounded-sm uppercase no-underline">
+            <i class="fa fa-arrow-left"></i> Kembali
+        </a>
+    </div>
 </div>
 
 @if($errors->any())
-    <div class="bg-red-100 border border-red-400 text-red-700 px-2 py-1 mb-2 text-xs">
-        <ul class="list-disc list-inside">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
+<div class="bg-rose-100 border border-rose-400 text-rose-700 px-4 py-3 mb-4 rounded-sm shadow-sm">
+    <div class="font-bold text-xs mb-2 flex items-center gap-2">
+        <i class="fa fa-exclamation-triangle"></i> Terdapat kesalahan:
     </div>
+    <ul class="list-disc ml-6 text-xs space-y-1">
+        @foreach($errors->all() as $error)
+        <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+</div>
 @endif
 
-<div class="win98-panel">
+<div class="bg-white border border-gray-300 p-4 md:p-6 shadow-sm rounded-sm">
     <form action="{{ route('owner.perusahaan.update') }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         
-        <div class="grid grid-cols-1 gap-4">
+        <div class="space-y-4">
             <div>
-                <label class="block font-bold mb-1 text-base">Nama Perusahaan <span class="text-red-600">*</span></label>
+                <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">
+                    Nama Perusahaan <span class="text-red-600">*</span>
+                </label>
                 <input type="text" name="nama_perusahaan" value="{{ old('nama_perusahaan', $perusahaan->nama_perusahaan) }}" 
-                       class="win98-input w-full" required>
+                       class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm" required>
             </div>
 
             <div>
-                <label class="block font-bold mb-1 text-base">Owner / Pemilik Perusahaan</label>
+                <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">
+                    Pemilik Perusahaan
+                </label>
                 <input type="text" name="pemilik" value="{{ old('pemilik', $perusahaan->pemilik) }}" 
-                       class="win98-input w-full">
+                       class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
             </div>
 
             <div>
-                <label class="block font-bold mb-1 text-base">Alamat</label>
-                <textarea name="alamat" rows="3" class="win98-input w-full">{{ old('alamat', $perusahaan->alamat) }}</textarea>
+                <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Alamat</label>
+                <textarea name="alamat" rows="3" class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">{{ old('alamat', $perusahaan->alamat) }}</textarea>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-bold mb-1 text-base">Kota</label>
+                    <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Kota</label>
                     <input type="text" name="kota" value="{{ old('kota', $perusahaan->kota) }}" 
-                           class="win98-input w-full">
+                           class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
                 </div>
 
                 <div>
-                    <label class="block font-bold mb-1 text-base">Provinsi</label>
+                    <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Provinsi</label>
                     <input type="text" name="provinsi" value="{{ old('provinsi', $perusahaan->provinsi) }}" 
-                           class="win98-input w-full">
+                           class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-bold mb-1 text-base">Kode Pos</label>
+                    <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Kode Pos</label>
                     <input type="text" name="kode_pos" value="{{ old('kode_pos', $perusahaan->kode_pos) }}" 
-                           class="win98-input w-full">
+                           class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
                 </div>
 
                 <div>
-                    <label class="block font-bold mb-1 text-base">No. Telepon</label>
+                    <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">No. Telepon</label>
                     <input type="text" name="no_telp" value="{{ old('no_telp', $perusahaan->no_telp) }}" 
-                           class="win98-input w-full">
+                           class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                    <label class="block font-bold mb-1 text-base">Email</label>
+                    <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Email</label>
                     <input type="email" name="email" value="{{ old('email', $perusahaan->email) }}" 
-                           class="win98-input w-full">
+                           class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
                 </div>
 
                 <div>
-                    <label class="block font-bold mb-1 text-base">Website</label>
+                    <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Website</label>
                     <input type="text" name="website" value="{{ old('website', $perusahaan->website) }}" 
-                           class="win98-input w-full" placeholder="www.example.com">
+                           class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm" 
+                           placeholder="www.example.com">
                 </div>
             </div>
 
             <div>
-                <label class="block font-bold mb-1 text-base">NPWP</label>
+                <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">NPWP</label>
                 <input type="text" name="npwp" value="{{ old('npwp', $perusahaan->npwp) }}" 
-                       class="win98-input w-full" placeholder="00.000.000.0-000.000">
+                       class="border border-gray-300 p-2.5 md:p-2 w-full text-xs shadow-inner font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm" 
+                       placeholder="00.000.000.0-000.000">
             </div>
 
             <div>
-                <label class="block font-bold mb-1 text-base">Logo Perusahaan</label>
+                <label class="block font-black mb-2 text-[10px] text-gray-500 uppercase tracking-wider">Logo Perusahaan</label>
                 @if($perusahaan->logo)
-                    <div class="mb-2">
+                    <div class="mb-3 bg-blue-50 border border-blue-200 p-3 rounded-sm">
+                        <p class="text-xs text-blue-700 font-bold mb-2">Logo saat ini:</p>
                         <img src="{{ asset('storage/' . $perusahaan->logo) }}" alt="Logo Perusahaan" 
-                             class="max-w-xs border-2 border-gray-400">
-                        <p class="text-xs text-gray-600 mt-1">Logo saat ini</p>
+                             class="max-w-full md:max-w-xs border-2 border-blue-300 rounded-sm shadow">
                     </div>
                 @endif
-                <input type="file" name="logo" accept="image/*" class="win98-input w-full">
-                <p class="text-xs text-gray-600 mt-1">Format: JPG, PNG, GIF. Maksimal 2MB</p>
+                <input type="file" name="logo" accept="image/*" 
+                       class="border border-gray-300 p-2 md:p-1 w-full text-xs rounded-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all">
+                <p class="text-xs text-gray-500 mt-1.5 flex items-center gap-1">
+                    <i class="fa fa-info-circle text-blue-400"></i>
+                    <span>Format: JPG, PNG, GIF. Maksimal 2MB</span>
+                </p>
             </div>
         </div>
 
-        <div class="flex gap-2 mt-6 pt-4 border-t-2 border-gray-400">
-            <button type="submit" class="win98-button bg-blue-600 text-white border-blue-800 hover:bg-blue-500">
-                <i class="fa fa-save"></i> SIMPAN PERUBAHAN
-            </button>
-            <a href="{{ route('owner.perusahaan.index') }}" class="win98-button">
-                <i class="fa fa-times"></i> BATAL
+        <div class="flex flex-col md:flex-row justify-end gap-2 mt-6 pt-4 border-t border-gray-200">
+            <a href="{{ route('owner.perusahaan.index') }}" class="w-full md:w-auto text-center px-6 py-2.5 md:py-2 bg-gray-100 text-gray-700 border border-gray-300 text-xs font-bold hover:bg-gray-200 transition-colors shadow-sm rounded-sm uppercase no-underline">
+                <i class="fa fa-times"></i> Batal
             </a>
+            <button type="submit" class="w-full md:w-auto px-6 py-2.5 md:py-2 bg-blue-700 text-white border border-blue-900 text-xs font-bold hover:bg-blue-600 transition-colors shadow-sm rounded-sm uppercase">
+                <i class="fa fa-save"></i> Simpan Perubahan
+            </button>
         </div>
     </form>
 </div>
