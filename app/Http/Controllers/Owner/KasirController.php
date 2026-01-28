@@ -123,11 +123,13 @@ class KasirController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'items'        => 'required|array',
-            'items.*.id'   => 'required|exists:produk,id_produk',
-            'items.*.qty'  => 'required|numeric|min:1',
-            'bayar'        => 'required|numeric|min:0',
-            'metode_bayar' => 'required|in:Tunai,Transfer,Hutang',
+            'items'                => 'required|array',
+            'items.*.id'           => 'required|exists:produk,id_produk',
+            'items.*.qty'          => 'required|numeric|min:1',
+            'items.*.harga_manual' => 'required|numeric|min:0',
+            'items.*.discount'     => 'nullable|numeric|min:0',
+            'bayar'                => 'required|numeric|min:0',
+            'metode_bayar'         => 'required|in:Tunai,Transfer,Hutang',
         ]);
 
         $id_toko = $this->getTokoAktif();
@@ -175,20 +177,18 @@ class KasirController extends Controller
                     throw new \Exception("Stok {$produk->nama_produk} kurang (Sisa: $stok_sekarang).");
                 }
 
-                
+                // USE MANUAL PRICE FROM REQUEST
+                $harga = $item['harga_manual'];
+                $discount = $item['discount'] ?? 0;
 
-                $harga = $produk->harga_jual_umum;
-                if ($kategoriHarga == 'grosir' && $produk->harga_jual_grosir) $harga = $produk->harga_jual_grosir;
-                if ($kategoriHarga == 'r1' && $produk->harga_r1) $harga = $produk->harga_r1;
-                if ($kategoriHarga == 'r2' && $produk->harga_r2) $harga = $produk->harga_r2;
-
-                $subtotal    = $harga * $item['qty'];
+                $subtotal    = ($harga - $discount) * $item['qty'];
                 $total_bruto += $subtotal;
 
                 $items_fix[]  = [
                     'produk'   => $produk,
                     'qty'      => $item['qty'],
                     'harga'    => $harga,
+                    'discount' => $discount,
                     'subtotal' => $subtotal,
                 ];
             }
@@ -253,6 +253,7 @@ class KasirController extends Controller
                     'satuan_jual'           => $data['produk']->satuanKecil->nama_satuan ?? 'Pcs',
                     'harga_modal_saat_jual' => $data['produk']->harga_beli_rata_rata ?? 0,
                     'harga_jual_satuan'     => $data['harga'],
+                    'discount'              => $data['discount'],
                     'subtotal'              => $data['subtotal'],
                 ]);
 

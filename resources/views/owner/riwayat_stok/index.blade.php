@@ -92,7 +92,7 @@
                     </span>
                 @elseif($riwayat->id_toko)
                     <span class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded text-[10px] border border-blue-300 font-bold">
-                        <i class="fa fa-store"></i> {{ $riwayat->toko->kode_toko }}
+                        <i class="fa fa-store"></i> {{ $riwayat->toko->nama_toko }}
                     </span>
                 @else
                     <span class="text-gray-400">-</span>
@@ -167,7 +167,7 @@
                         </span>
                     @elseif($riwayat->id_toko)
                         <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-[10px] border border-blue-300 font-bold inline-block">
-                            <i class="fa fa-store"></i> {{ $riwayat->toko->kode_toko }}
+                            <i class="fa fa-store"></i> {{ $riwayat->toko->nama_toko }}
                         </span>
                     @else
                         <span class="text-gray-400">-</span>

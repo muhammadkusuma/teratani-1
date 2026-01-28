@@ -100,6 +100,8 @@
                                 <th class="px-1 text-left w-5">#</th>
                                 <th class="px-1 text-left">ITEM</th>
                                 <th class="px-1 text-center w-8">QTY</th>
+                                <th class="px-1 text-right w-16">HARGA</th>
+                                <th class="px-1 text-right w-14">DISC</th>
                                 <th class="px-1 text-right w-16">TOTAL</th>
                             </tr>
                         </thead>
@@ -428,6 +430,7 @@
                         id,
                         nama,
                         harga: price,
+                        discount: 0,
                         stok,
                         qty: 1
                     });
@@ -444,23 +447,27 @@
             let total = 0;
 
             if (cart.length === 0) {
-                html = '<tr><td colspan="4" class="text-center py-4 text-gray-400 italic">-- KERANJANG KOSONG --</td></tr>';
+                html = '<tr><td colspan="6" class="text-center py-4 text-gray-400 italic">-- KERANJANG KOSONG --</td></tr>';
             } else {
                 cart.forEach((item, idx) => {
-                    let sub = item.harga * item.qty;
+                    let discount = item.discount || 0;
+                    let sub = (item.harga - discount) * item.qty;
                     total += sub;
                     html += `
                     <tr class="border-b border-gray-300 hover:bg-blue-50 group">
                         <td class="px-1 py-1 text-center"><button class="text-red-600 font-bold hover:bg-red-200 px-1" onclick="hapusItem(${idx})">x</button></td>
-                        
-                        <td class="px-1 py-1 truncate max-w-[120px]" title="${item.nama}">
-                            ${item.nama}
-                            <div class="text-[9px] text-gray-500">@ ${new Intl.NumberFormat('id-ID').format(item.harga)}</div>
-                        </td>
-                        
+                        <td class="px-1 py-1 truncate max-w-[80px]" title="${item.nama}"><div class="text-[10px] font-bold">${item.nama}</div></td>
                         <td class="px-1 py-1 text-center">
                             <input type="number" class="w-8 text-center border border-gray-400 text-[10px] focus:bg-yellow-100 p-0" 
                                 value="${item.qty}" onchange="updateQty(${idx}, this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-right">
+                            <input type="number" class="w-full text-right border border-gray-400 text-[10px] focus:bg-yellow-100 p-0 font-mono" 
+                                value="${item.harga}" onchange="updateHarga(${idx}, this.value)">
+                        </td>
+                        <td class="px-1 py-1 text-right">
+                            <input type="number" class="w-full text-right border border-gray-400 text-[10px] focus:bg-yellow-100 p-0 font-mono" 
+                                value="${discount}" onchange="updateDiscount(${idx}, this.value)" placeholder="0">
                         </td>
                         <td class="px-1 py-1 text-right font-mono">${new Intl.NumberFormat('id-ID').format(sub)}</td>
                     </tr>`;
@@ -492,8 +499,20 @@
             renderCart();
         }
 
+        function updateHarga(idx, val) {
+            let harga = parseFloat(val) || 0;
+            cart[idx].harga = harga;
+            renderCart();
+        }
+
+        function updateDiscount(idx, val) {
+            let discount = parseFloat(val) || 0;
+            cart[idx].discount = discount;
+            renderCart();
+        }
+
         function hitungKembalian() {
-            let total = cart.reduce((a, b) => a + (b.harga * b.qty), 0);
+            let total = cart.reduce((a, b) => a + ((b.harga - (b.discount || 0)) * b.qty), 0);
             let bayar = parseFloat($('#inputBayar').val()) || 0;
             let metode = $('#metodeBayar').val();
             let selisih = bayar - total;
@@ -578,7 +597,7 @@
         function prosesBayar() {
             if (cart.length === 0) return alert('KERANJANG KOSONG!');
 
-            let total = cart.reduce((a, b) => a + (b.harga * b.qty), 0);
+            let total = cart.reduce((a, b) => a + ((b.harga - (b.discount || 0)) * b.qty), 0);
             let bayar = parseFloat($('#inputBayar').val()) || 0;
             let metode = $('#metodeBayar').val();
 
@@ -602,7 +621,7 @@
                     // But the controller 'store' method doesn't seem to account for customer category price calculation yet.
                     // See KasirController line 128: $harga = $produk->harga_jual_umum;
                     // I MUST UPDATE THE CONTROLLER STORE METHOD AS WELL.
-                    items: cart.map(i => ({ id: i.id, qty: i.qty })), 
+                    items: cart.map(i => ({ id: i.id, qty: i.qty, harga_manual: i.harga, discount: i.discount || 0 })), 
                     bayar: bayar,
                     id_pelanggan: $('#pelanggan').val(),
                     kategori_harga: currentCategory, // Send the active price category
