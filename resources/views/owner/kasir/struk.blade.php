@@ -7,17 +7,18 @@
     <style>
         @page {
             margin: 0;
-            size: 58mm auto; /* Default to 58mm, can be overridden or auto-detected by printer driver usually but explicit size helps */
+            /* size: auto;  Let printer driver decide */
         }
         body {
-            font-family: 'Courier New', Courier, monospace; /* Monospace is better for receipts */
+            font-family: 'Courier New', Courier, monospace;
             font-size: 10px;
             margin: 0;
-            padding: 2mm;
+            padding: 2mm; /* Small padding for safety */
             color: #000;
-            width: 58mm; /* Target 58mm width */
-            max-width: 58mm;
+            width: 100%; /* Fluid width */
+            max-width: 100%;
             background: #fff;
+            box-sizing: border-box; /* Include padding in width */
         }
         .header {
             text-align: center;
@@ -36,7 +37,7 @@
             color: #888;
         }
         .logo-img {
-            max-width: 40mm;
+            max-width: 80%; /* Limit width relative to container */
             max-height: 20mm;
             margin-bottom: 5px;
             display: block;
@@ -53,6 +54,7 @@
             margin: 0;
             font-size: 9px;
             line-height: 1.2;
+            word-wrap: break-word; /* Ensure long text wraps */
         }
         .metadata {
             margin-bottom: 5px;
@@ -77,9 +79,18 @@
             padding: 2px 0;
             vertical-align: top;
         }
+        /* Ensure tables don't overflow */
+        table {
+            table-layout: fixed; 
+            width: 100%;
+        }
+        .items td:first-child {
+            /* Let the item name take space */
+        }
         .item-name {
             font-weight: bold;
             display: block;
+            word-wrap: break-word;
         }
         .item-details {
             display: flex;
@@ -96,6 +107,9 @@
             padding: 1px 0;
             text-align: right;
         }
+        .totals td:first-child {
+            text-align: left;
+        }
         .footer {
             text-align: center;
             font-size: 9px;
@@ -108,14 +122,17 @@
         .dashed-line {
             border-top: 1px dashed #000;
             margin: 5px 0;
-            display: none; /* Hide explicit dividers if borders are used */
+            display: none; 
         }
         
         @media print {
             body { 
-                width: 100%; /* Full width of page */
+                width: 100%;
                 margin: 0;
-                padding: 0;
+                padding: 0; /* Printers often have their own non-printable margins */
+            }
+            .no-print {
+                display: none;
             }
         }
     </style>
