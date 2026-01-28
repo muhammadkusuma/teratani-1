@@ -26,9 +26,12 @@ use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 
-Route::get('/redis-test', function () {
-    Cache::put('test', 'Laravel + Redis OK', 60);
-    return Cache::get('test');
+Route::get('/version', function () {
+    $phpVersion = phpversion();
+    $laravelVersion = app()->version();
+    $dbVersion = DB::select('SELECT VERSION() as version')[0]->version;
+    
+    return "PHP: $phpVersion<br>Laravel: $laravelVersion<br>Database: $dbVersion";
 });
 
 Route::get('/', [AuthController::class, 'showLoginForm']);
