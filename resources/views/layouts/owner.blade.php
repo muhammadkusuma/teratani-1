@@ -280,13 +280,12 @@
                     @if(in_array($jabatan, $level_gudang))
                         {{-- Inventaris Dropdown --}}
                         <div class="dropdown inline-block" onclick="toggleDropdown(this)">
-                            <div class="menu-item {{ request()->routeIs('owner.toko.produk.*') || request()->routeIs('owner.stok.*') || request()->routeIs('owner.toko.pembelian.*') || request()->routeIs('owner.toko.gudang.*') || request()->routeIs('owner.riwayat-stok.*') ? 'active' : '' }} text-black">
+                            <div class="menu-item {{ request()->routeIs('owner.toko.produk.*') || request()->routeIs('owner.stok.*') || request()->routeIs('owner.toko.gudang.*') || request()->routeIs('owner.riwayat-stok.*') ? 'active' : '' }} text-black">
                                 📦 Inventaris ▼
                             </div>
                             <div class="dropdown-content">
                                 <a href="{{ route('owner.toko.produk.index', session('toko_active_id')) }}">📦 Produk</a>
                                 <a href="{{ route('owner.stok.index') }}">📊 Stok</a>
-                                <a href="{{ route('owner.toko.pembelian.index', session('toko_active_id')) }}">🧺 Pembelian</a>
                                 <a href="{{ route('owner.toko.gudang.index', session('toko_active_id')) }}">🏭 Gudang</a>
                                 <a href="{{ route('owner.riwayat-stok.index') }}">📋 Log Stok</a>
                             </div>
@@ -308,10 +307,11 @@
 
                     @if(in_array($jabatan, $level_gudang))
                         <div class="dropdown inline-block" onclick="toggleDropdown(this)">
-                            <div class="menu-item {{ request()->routeIs('owner.distributor.*') || request()->routeIs('owner.retur-pembelian.*') ? 'active' : '' }} text-black">
+                            <div class="menu-item {{ request()->routeIs('owner.distributor.*') || request()->routeIs('owner.retur-pembelian.*') || request()->routeIs('owner.toko.pembelian.*') ? 'active' : '' }} text-black">
                                 🚚 Distributor ▼
                             </div>
                             <div class="dropdown-content">
+                                <a href="{{ route('owner.toko.pembelian.index', session('toko_active_id')) }}">🧺 Pembelian</a>
                                 <a href="{{ route('owner.retur-pembelian.index') }}">🔙 Retur Distributor</a>
                                 <a href="{{ route('owner.distributor.index') }}">🚚 Data Distributor</a>
                                 <a href="{{ route('owner.distributor.hutang.index') }}">💰 Kelola Hutang</a>
