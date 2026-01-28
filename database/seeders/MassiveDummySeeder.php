@@ -33,7 +33,7 @@ class MassiveDummySeeder extends Seeder
             return;
         }
 
-        $this->command->info("STARTING MASSIVE SEEDING V3 (EXTENDED COVERAGE)...");
+        $this->command->info("STARTING MASSIVE SEEDING V3.1 (FIXED VISIBILITY)...");
         $timestamp = Carbon::now();
 
         // 0. Clean old dummy data
@@ -131,17 +131,20 @@ class MassiveDummySeeder extends Seeder
         // ----------------------------------------------------
         // 4. PURCHASES (Pembelian) & DEBTS (Utang)
         // ----------------------------------------------------
-        $this->command->info("Generating 500 Purchases...");
-        // 500 Purchases
-        // Some cash, some credit
-        // Also Generate Stock History from Purchases
+        $this->command->info("Generating Purhcases (Including THIS MONTH)...");
 
         foreach($distributorIds as $did) {
             // Each distributor has ~10 purchases
             $purchaseCount = rand(5, 15);
             
             for($p=0; $p<$purchaseCount; $p++) {
-                $purDate = Carbon::create(2026, rand(1, 12), rand(1, 28)); // CHANGED TO 2026
+                // Ensure some dates are RECENT (this month)
+                if ($p < 2) {
+                    $purDate = Carbon::now()->subDays(rand(0, 10)); // Recent
+                } else {
+                    $purDate = Carbon::create(2025, rand(1, 12), rand(1, 28)); // History
+                }
+
                 $faktur = "INV-" . $did . "-" . $p . rand(100,999);
                 
                 // 30% credit
@@ -219,8 +222,8 @@ class MassiveDummySeeder extends Seeder
                     ]);
                 }
 
-                // Generate Return (Retur Pembelian) - 5% chance
-                if(rand(1, 100) <= 5) {
+                // Generate Return (Retur Pembelian) - 10% chance
+                if(rand(1, 100) <= 10) {
                     $retTotal = 0;
                     $retDetails = [];
                     // Pick 1 item to return
@@ -230,11 +233,16 @@ class MassiveDummySeeder extends Seeder
                     $retSub = $retQty * $retPrice;
                     $retTotal = $retSub;
                     $retDate = $purDate->copy()->addDays(rand(1,5));
+                    
+                    // FIX: Must allow null gudang if returning from Toko, OR pick a random gudang.
+                    // However, controller requires Valid Gudang ID for filtering.
+                    // So we will pick a random gudang to make it show up in the filtered list.
+                    $randomGudangId = $gudangIds[array_rand($gudangIds)];
 
                     $retId = DB::table('retur_pembelian')->insertGetId([
                         'id_pembelian' => $purId,
                         'id_distributor' => $did,
-                        'id_gudang' => null, // Assume store return
+                        'id_gudang' => $randomGudangId, // FIXED: Now using a valid gudang ID
                         'tgl_retur' => $retDate->format('Y-m-d'),
                         'total_retur' => $retTotal,
                         'keterangan' => 'Retur Barang Rusak',
@@ -319,7 +327,7 @@ class MassiveDummySeeder extends Seeder
         $expenseCategories = ['Gaji', 'Listrik', 'Air', 'Sewa', 'ATK', 'Transportasi', 'Pemeliharaan', 'Lainnya'];
         $expenses = [];
         for ($i = 1; $i <= 300; $i++) {
-            $date = Carbon::create(2026, rand(1, 12), rand(1, 28)); // CHANGED TO 2026
+            $date = Carbon::create(2025, rand(1, 12), rand(1, 28)); 
             $expenses[] = [
                 'id_toko' => $id_toko,
                 'id_user' => $id_user,
@@ -338,7 +346,7 @@ class MassiveDummySeeder extends Seeder
         $incomeCategories = ['Bunga Bank', 'Sewa Aset', 'Komisi', 'Lainnya'];
         $incomes = [];
         for ($i = 1; $i <= 100; $i++) {
-            $date = Carbon::create(2026, rand(1, 12), rand(1, 28)); // CHANGED TO 2026
+            $date = Carbon::create(2025, rand(1, 12), rand(1, 28));
             $incomes[] = [
                 'id_toko' => $id_toko,
                 'id_user' => $id_user,
@@ -357,185 +365,188 @@ class MassiveDummySeeder extends Seeder
         // ----------------------------------------------------
         // 7. SALES (Penjualan)
         // ----------------------------------------------------
-        $this->command->info("Generating 20,000 Sales Transactions...");
+        $this->command->info("Generating Sales Transactions (4,000/day for 25 days = 100k)...");
         
-        $totalTransactions = 20000;
+        $daysToSeed = 25;
+        $dailyTransactions = 4000;
         $batchSize = 1000; 
-        $batches = ceil($totalTransactions / $batchSize);
         
-        for ($b = 1; $b <= $batches; $b++) {
-            $transData = [];
-            $batchFakturs = [];
-            $batchDetailsConfig = []; 
-            $piutangData = [];
+        for ($d = 0; $d < $daysToSeed; $d++) {
+            $currentDate = Carbon::today()->subDays($d);
+            $formattedDate = $currentDate->format('Y-m-d');
+            $this->command->info("Generating 4000 transactions for $formattedDate...");
 
-            for ($i = 0; $i < $batchSize; $i++) {
-                $transDate = Carbon::create(2026, rand(1, 12), rand(1, 28)); // CHANGED TO 2026
-                
-                $isCredit = (rand(1, 100) <= 10);
-                $customerId = $isCredit ? $customerIds[array_rand($customerIds)] : 
-                             ((rand(0, 10) > 7) ? $customerIds[array_rand($customerIds)] : null);
+            $batches = ceil($dailyTransactions / $batchSize);
 
-                $faktur = "TRX-S-" . $b . "-" . $i . "-" . rand(100,999);
-                $batchFakturs[] = $faktur;
+            for ($b = 1; $b <= $batches; $b++) {
+                $transData = [];
+                $batchFakturs = [];
+                $batchDetailsConfig = []; 
+                $piutangData = [];
 
-                $itemCount = rand(1, 5); 
-                $thisResTotal = 0;
-                $thisResItems = [];
+                for ($i = 0; $i < $batchSize; $i++) {
+                    $isCredit = (rand(1, 100) <= 10);
+                    $customerId = $isCredit ? $customerIds[array_rand($customerIds)] : 
+                                 ((rand(0, 10) > 7) ? $customerIds[array_rand($customerIds)] : null);
 
-                for ($k = 0; $k < $itemCount; $k++) {
-                    $prodId = $allProductIds[array_rand($allProductIds)];
-                    $dummyPrice = rand(10, 100) * 1000; 
-                    $qty = rand(1, 5);
-                    $subtotal = $dummyPrice * $qty;
-                    $thisResTotal += $subtotal;
+                    $faktur = "TRX-S-" . $formattedDate . "-" . $b . "-" . $i . "-" . rand(100,999);
+                    $batchFakturs[] = $faktur;
+
+                    $itemCount = rand(1, 5); 
+                    $thisResTotal = 0;
+                    $thisResItems = [];
+
+                    for ($k = 0; $k < $itemCount; $k++) {
+                        $prodId = $allProductIds[array_rand($allProductIds)];
+                        $dummyPrice = rand(10, 100) * 1000; 
+                        $qty = rand(1, 5);
+                        $subtotal = $dummyPrice * $qty;
+                        $thisResTotal += $subtotal;
+                        
+                        $thisResItems[] = [
+                            'id_produk' => $prodId,
+                            'qty' => $qty,
+                            'harga' => $dummyPrice,
+                            'subtotal' => $subtotal
+                        ];
+                    }
                     
-                    $thisResItems[] = [
-                        'id_produk' => $prodId,
-                        'qty' => $qty,
-                        'harga' => $dummyPrice,
-                        'subtotal' => $subtotal
-                    ];
-                }
-                
-                $batchDetailsConfig[$faktur] = $thisResItems; 
+                    $batchDetailsConfig[$faktur] = $thisResItems; 
 
-                $transData[] = [
-                    'id_toko' => $id_toko,
-                    'id_user' => $id_user,
-                    'id_pelanggan' => $customerId,
-                    'no_faktur' => $faktur,
-                    'tgl_transaksi' => $transDate,
-                    'status_bayar' => $isCredit ? 'Belum Lunas' : 'Lunas',
-                    'metode_bayar' => $isCredit ? 'Hutang' : 'Tunai',
-                    'total_bruto' => $thisResTotal,
-                    'total_netto' => $thisResTotal,
-                    'jumlah_bayar' => $isCredit ? 0 : $thisResTotal,
-                    'kembalian' => 0,
-                    'created_at' => $transDate,
-                    'updated_at' => $transDate,
-                ];
-
-                if ($isCredit && $customerId) {
-                    $piutangData[] = [
-                        'pelanggan_id' => $customerId,
-                        'tgl' => $transDate->format('Y-m-d'),
-                        'nominal' => $thisResTotal,
-                        'no_ref' => $faktur,
-                        'created_at' => $transDate
-                    ];
-                }
-            }
-
-            DB::table('penjualan')->insertOrIgnore($transData);
-
-            $insertedTrans = DB::table('penjualan')
-                                ->whereIn('no_faktur', $batchFakturs)
-                                ->select('id_penjualan', 'no_faktur', 'id_pelanggan', 'id_toko', 'tgl_transaksi', 'id_user')
-                                ->get();
-            $transMap = $insertedTrans->keyBy('no_faktur');
-
-            $detailData = [];
-            $dbSalesRiwayatInserts = [];
-            $returnCandidates = []; 
-
-            foreach ($batchDetailsConfig as $fkt => $items) {
-                if (!$transMap->has($fkt)) continue;
-                $trans = $transMap[$fkt];
-                $tid = $trans->id_penjualan;
-
-                foreach ($items as $item) {
-                     $detailData[] = [
-                        'id_penjualan' => $tid,
-                        'id_produk' => $item['id_produk'],
-                        'qty' => $item['qty'],
-                        'satuan_jual' => 'Pcs',
-                        'harga_modal_saat_jual' => $item['harga'] * 0.8,
-                        'harga_jual_satuan' => $item['harga'],
-                        'diskon_item' => 0,
-                        'subtotal' => $item['subtotal'],
-                    ];
-
-                    $dbSalesRiwayatInserts[] = [
-                        'id_produk' => $item['id_produk'],
+                    $transData[] = [
                         'id_toko' => $id_toko,
-                        'jenis' => 'keluar',
-                        'jumlah' => $item['qty'],
-                        'stok_akhir' => 0,
-                        'keterangan' => 'Penjualan ' . $fkt,
-                        'referensi' => $fkt,
-                        'tanggal' => $trans->tgl_transaksi,
-                        'created_at' => $trans->tgl_transaksi,
-                        'updated_at' => $trans->tgl_transaksi,
+                        'id_user' => $id_user,
+                        'id_pelanggan' => $customerId,
+                        'no_faktur' => $faktur,
+                        'tgl_transaksi' => $currentDate,
+                        'status_bayar' => $isCredit ? 'Belum Lunas' : 'Lunas',
+                        'metode_bayar' => $isCredit ? 'Hutang' : 'Tunai',
+                        'total_bruto' => $thisResTotal,
+                        'total_netto' => $thisResTotal,
+                        'jumlah_bayar' => $isCredit ? 0 : $thisResTotal,
+                        'kembalian' => 0,
+                        'created_at' => $currentDate,
+                        'updated_at' => $currentDate,
                     ];
+
+                    if ($isCredit && $customerId) {
+                        $piutangData[] = [
+                            'pelanggan_id' => $customerId,
+                            'tgl' => $formattedDate,
+                            'nominal' => $thisResTotal,
+                            'no_ref' => $faktur,
+                            'created_at' => $currentDate
+                        ];
+                    }
                 }
 
-                if (rand(1, 100) <= 3 && $trans->id_pelanggan) {
-                    $returnCandidates[] = [
-                        'trans' => $trans,
-                        'items' => $items
+                DB::table('penjualan')->insertOrIgnore($transData);
+
+                $insertedTrans = DB::table('penjualan')
+                                    ->whereIn('no_faktur', $batchFakturs)
+                                    ->select('id_penjualan', 'no_faktur', 'id_pelanggan', 'id_toko', 'tgl_transaksi', 'id_user')
+                                    ->get();
+                $transMap = $insertedTrans->keyBy('no_faktur');
+
+                $detailData = [];
+                $dbSalesRiwayatInserts = [];
+                $returnCandidates = []; 
+
+                foreach ($batchDetailsConfig as $fkt => $items) {
+                    if (!$transMap->has($fkt)) continue;
+                    $trans = $transMap[$fkt];
+                    $tid = $trans->id_penjualan;
+
+                    foreach ($items as $item) {
+                         $detailData[] = [
+                            'id_penjualan' => $tid,
+                            'id_produk' => $item['id_produk'],
+                            'qty' => $item['qty'],
+                            'satuan_jual' => 'Pcs',
+                            'harga_modal_saat_jual' => $item['harga'] * 0.8,
+                            'harga_jual_satuan' => $item['harga'],
+                            'diskon_item' => 0,
+                            'subtotal' => $item['subtotal'],
+                        ];
+
+                        $dbSalesRiwayatInserts[] = [
+                            'id_produk' => $item['id_produk'],
+                            'id_toko' => $id_toko,
+                            'jenis' => 'keluar',
+                            'jumlah' => $item['qty'],
+                            'stok_akhir' => 0,
+                            'keterangan' => 'Penjualan ' . $fkt,
+                            'referensi' => $fkt,
+                            'tanggal' => $trans->tgl_transaksi,
+                            'created_at' => $trans->tgl_transaksi,
+                            'updated_at' => $trans->tgl_transaksi,
+                        ];
+                    }
+
+                    if (rand(1, 100) <= 3 && $trans->id_pelanggan) {
+                        $returnCandidates[] = [
+                            'trans' => $trans,
+                            'items' => $items
+                        ];
+                    }
+                }
+
+                foreach(array_chunk($detailData, 1000) as $chunk) DB::table('penjualan_detail')->insertOrIgnore($chunk);
+                foreach(array_chunk($dbSalesRiwayatInserts, 1000) as $chunk) DB::table('riwayat_stok')->insertOrIgnore($chunk);
+
+                $realPiutangInserts = [];
+                foreach($piutangData as $pd) {
+                    $realPiutangInserts[] = [
+                        'id_pelanggan' => $pd['pelanggan_id'],
+                        'tanggal' => $pd['tgl'],
+                        'jenis_transaksi' => 'piutang',
+                        'nominal' => $pd['nominal'],
+                        'keterangan' => 'Penjualan Kredit',
+                        'no_referensi' => $pd['no_ref'],
+                        'saldo_piutang' => $pd['nominal'],
+                        'created_at' => $pd['created_at'],
+                        'updated_at' => $pd['created_at'],
                     ];
                 }
+                if(!empty($realPiutangInserts)) DB::table('utang_piutang_pelanggan')->insertOrIgnore($realPiutangInserts);
+
+                // Generate Returns
+                $returDetailData = [];
+                foreach ($returnCandidates as $rc) {
+                    $trans = $rc['trans'];
+                    $items = $rc['items'];
+                    $returnItem = $items[0]; 
+                    
+                    $tglRetur = Carbon::parse($trans->tgl_transaksi)->addDays(rand(1,5));
+                    
+                    $rid = DB::table('retur_penjualan')->insertGetId([
+                        'id_penjualan' => $trans->id_penjualan,
+                        'id_pelanggan' => $trans->id_pelanggan,
+                        'id_toko' => $trans->id_toko,
+                        'id_user' => $trans->id_user,
+                        'tgl_retur' => $tglRetur,
+                        'total_retur' => $returnItem['subtotal'],
+                        'status_retur' => 'Selesai',
+                        'keterangan' => 'Retur Dummy',
+                        'created_at' => $tglRetur,
+                        'updated_at' => $tglRetur,
+                    ]);
+
+                    $returDetailData[] = [
+                        'id_retur_penjualan' => $rid,
+                        'id_produk' => $returnItem['id_produk'],
+                        'qty' => $returnItem['qty'],
+                        'harga_satuan' => $returnItem['harga'],
+                        'subtotal' => $returnItem['subtotal'],
+                        'alasan' => 'Rusak/Cacat',
+                        'created_at' => $tglRetur,
+                        'updated_at' => $tglRetur,
+                    ];
+                }
+                if(!empty($returDetailData)) DB::table('retur_penjualan_detail')->insertOrIgnore($returDetailData);
             }
-
-            foreach(array_chunk($detailData, 1000) as $chunk) DB::table('penjualan_detail')->insertOrIgnore($chunk);
-            foreach(array_chunk($dbSalesRiwayatInserts, 1000) as $chunk) DB::table('riwayat_stok')->insertOrIgnore($chunk);
-
-            $realPiutangInserts = [];
-            foreach($piutangData as $pd) {
-                $realPiutangInserts[] = [
-                    'id_pelanggan' => $pd['pelanggan_id'],
-                    'tanggal' => $pd['tgl'],
-                    'jenis_transaksi' => 'piutang',
-                    'nominal' => $pd['nominal'],
-                    'keterangan' => 'Penjualan Kredit',
-                    'no_referensi' => $pd['no_ref'],
-                    'saldo_piutang' => $pd['nominal'],
-                    'created_at' => $pd['created_at'],
-                    'updated_at' => $pd['created_at'],
-                ];
-            }
-            if(!empty($realPiutangInserts)) DB::table('utang_piutang_pelanggan')->insertOrIgnore($realPiutangInserts);
-
-            // Generate Returns
-            $returDetailData = [];
-            foreach ($returnCandidates as $rc) {
-                $trans = $rc['trans'];
-                $items = $rc['items'];
-                $returnItem = $items[0]; 
-                
-                $tglRetur = Carbon::parse($trans->tgl_transaksi)->addDays(rand(1,5));
-                
-                $rid = DB::table('retur_penjualan')->insertGetId([
-                    'id_penjualan' => $trans->id_penjualan,
-                    'id_pelanggan' => $trans->id_pelanggan,
-                    'id_toko' => $trans->id_toko,
-                    'id_user' => $trans->id_user,
-                    'tgl_retur' => $tglRetur,
-                    'total_retur' => $returnItem['subtotal'],
-                    'status_retur' => 'Selesai',
-                    'keterangan' => 'Retur Dummy',
-                    'created_at' => $tglRetur,
-                    'updated_at' => $tglRetur,
-                ]);
-
-                $returDetailData[] = [
-                    'id_retur_penjualan' => $rid,
-                    'id_produk' => $returnItem['id_produk'],
-                    'qty' => $returnItem['qty'],
-                    'harga_satuan' => $returnItem['harga'],
-                    'subtotal' => $returnItem['subtotal'],
-                    'alasan' => 'Rusak/Cacat',
-                    'created_at' => $tglRetur,
-                    'updated_at' => $tglRetur,
-                ];
-            }
-            if(!empty($returDetailData)) DB::table('retur_penjualan_detail')->insertOrIgnore($returDetailData);
-
-
-            $this->command->info("Batch $b/$batches completed.");
         }
         
-        $this->command->info("Status: Massive Seeding V3 Finished! Corrected Year: 2026");
+        $this->command->info("Status: Massive Seeding V3.2 Finished! (4k/day for 25 days)");
     }
 }
