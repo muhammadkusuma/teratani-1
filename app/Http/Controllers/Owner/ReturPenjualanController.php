@@ -121,4 +121,52 @@ class ReturPenjualanController extends Controller
         $retur = ReturPenjualan::with(['details.produk', 'pelanggan', 'user'])->findOrFail($id);
         return view('owner.retur-penjualan.show', compact('retur'));
     }
+
+    public function destroy($id)
+    {
+        $retur = ReturPenjualan::with('details')->findOrFail($id);
+        $id_toko = session('toko_active_id');
+
+        // Check if retur belongs to active toko
+        if ($retur->id_toko != $id_toko) {
+            return redirect()->route('owner.retur-penjualan.index')
+                ->with('error', 'Anda tidak memiliki akses untuk menghapus retur ini');
+        }
+
+        DB::beginTransaction();
+        try {
+            // Rollback stock for each returned product
+            foreach ($retur->details as $detail) {
+                $stokToko = StokToko::where('id_toko', $id_toko)
+                    ->where('id_produk', $detail->id_produk)
+                    ->first();
+                
+                if ($stokToko) {
+                    // Decrease stock (rollback the increment from retur creation)
+                    $newStok = $stokToko->stok_fisik - $detail->qty;
+                    
+                    if ($newStok < 0) {
+                        throw new \Exception("Tidak dapat menghapus retur: Stok produk '{$detail->produk->nama_produk}' akan menjadi negatif");
+                    }
+                    
+                    $stokToko->update(['stok_fisik' => $newStok]);
+                }
+            }
+
+            // Delete retur details first (foreign key constraint)
+            $retur->details()->delete();
+            
+            // Delete retur header
+            $retur->delete();
+
+            DB::commit();
+            return redirect()->route('owner.retur-penjualan.index')
+                ->with('success', 'Retur penjualan berhasil dihapus dan stok telah disesuaikan');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('owner.retur-penjualan.index')
+                ->with('error', 'Gagal menghapus retur: ' . $e->getMessage());
+        }
+    }
 }

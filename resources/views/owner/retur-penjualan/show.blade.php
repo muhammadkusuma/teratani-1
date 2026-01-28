@@ -108,5 +108,19 @@
             </tfoot>
         </table>
     </div>
+
+    {{-- Action Buttons --}}
+    <div class="flex flex-col md:flex-row justify-end gap-2 mt-4 pt-4 border-t border-gray-200">
+        <a href="{{ route('owner.retur-penjualan.index') }}" class="w-full md:w-auto text-center px-6 py-2.5 md:py-2 bg-gray-100 text-gray-700 border border-gray-300 text-xs font-bold hover:bg-gray-200 transition-colors shadow-sm rounded-sm uppercase no-underline">
+            <i class="fa fa-arrow-left"></i> Kembali
+        </a>
+        <form action="{{ route('owner.retur-penjualan.destroy', $retur->id_retur_penjualan) }}" method="POST" class="w-full md:w-auto" onsubmit="return confirm('Apakah Anda yakin ingin menghapus retur ini? Stok produk akan dikurangi kembali.')">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="w-full px-6 py-2.5 md:py-2 bg-red-600 text-white border border-red-800 text-xs font-bold hover:bg-red-700 transition-colors shadow-sm rounded-sm uppercase">
+                <i class="fa fa-trash"></i> Hapus Retur
+            </button>
+        </form>
+    </div>
 </div>
 @endsection
