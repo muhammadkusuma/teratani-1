@@ -28,9 +28,22 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
 
-            if (Auth::user()->is_superadmin) {
+            $user = Auth::user();
+
+            if ($user->is_superadmin) {
                 return redirect()->intended('dashboard');
             } else {
+                // Get Jabatan from Accessor or Relation
+                $jabatan = $user->jabatan; // Assumes getJabatanAttribute logic handles logic
+
+                if (in_array($jabatan, ['Kasir', 'Sales'])) {
+                    return redirect()->intended(route('owner.kasir.index'));
+                }
+
+                if (in_array($jabatan, ['Staff Gudang'])) {
+                    return redirect()->intended(route('owner.stok.index'));
+                }
+
                 return redirect()->intended('owner/dashboard');
             }
         }
