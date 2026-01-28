@@ -16,15 +16,40 @@
         </a>
     </div>
 
+    {{-- Store Selector --}}
+    <div class="mb-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-600 p-4 rounded-sm shadow-sm">
+        <label class="block text-[10px] font-black text-gray-600 uppercase mb-2 tracking-wider">
+            <i class="fa fa-store text-blue-600"></i> Pilih Toko untuk Melihat Produk
+        </label>
+        <form action="{{ route('owner.toko.produk.index', $toko->id_toko) }}" method="GET" id="tokoSelectorForm">
+            <input type="hidden" name="search" value="{{ request('search') }}">
+            <select name="selected_toko" 
+                    class="w-full md:w-1/2 border-2 border-blue-300 p-2.5 text-sm font-bold shadow-inner bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all rounded-sm"
+                    onchange="this.form.submit()">
+                @foreach($allTokos as $t)
+                    <option value="{{ $t->id_toko }}" {{ $selectedToko->id_toko == $t->id_toko ? 'selected' : '' }}>
+                        {{ $t->nama_toko }} {{ $t->id_toko == $toko->id_toko ? '(Toko Aktif)' : '' }}
+                    </option>
+                @endforeach
+            </select>
+        </form>
+        @if($selectedToko->id_toko != $toko->id_toko)
+            <div class="mt-2 text-xs text-blue-700 font-bold">
+                <i class="fa fa-info-circle"></i> Sedang menampilkan produk dari: <span class="text-blue-900">{{ $selectedToko->nama_toko }}</span>
+            </div>
+        @endif
+    </div>
+
     {{-- Search Form --}}
     <form action="{{ route('owner.toko.produk.index', $toko->id_toko) }}" method="GET" class="mb-3 md:mb-4 flex flex-col sm:flex-row gap-2">
+        <input type="hidden" name="selected_toko" value="{{ request('selected_toko', $toko->id_toko) }}">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari Nama / SKU / Barcode..."
             class="flex-1 border border-gray-300 p-2.5 md:p-2 text-xs shadow-inner focus:border-blue-500 focus:ring-1 focus:ring-blue-200 outline-none transition-all rounded-sm">
         <button type="submit" class="px-4 py-2.5 md:py-2 bg-gray-600 text-white border border-gray-800 text-xs font-bold hover:bg-gray-500 transition-all shadow-md rounded-sm uppercase">
             <i class="fa fa-search"></i> Cari
         </button>
         @if (request('search'))
-            <a href="{{ route('owner.toko.produk.index', $toko->id_toko) }}"
+            <a href="{{ route('owner.toko.produk.index', $toko->id_toko) }}?selected_toko={{ request('selected_toko', $toko->id_toko) }}"
                 class="px-4 py-2.5 md:py-2 bg-red-600 text-white border border-red-800 text-xs font-bold hover:bg-red-500 transition-all shadow-md rounded-sm uppercase text-center">
                 <i class="fa fa-times"></i> Reset
             </a>
@@ -41,11 +66,12 @@
     <div class="block md:hidden space-y-3 mb-4">
         @forelse($produks as $index => $item)
             @php
-                $stokData = $item->stokTokos->first();
-                $stokToko = $stokData ? $stokData->stok_fisik : 0;
+                // Get current toko stock
+                $currentStokData = collect($item->stokTokos)->firstWhere('id_toko', $selectedToko->id_toko);
+                $stokToko = $currentStokData ? $currentStokData->stok_fisik : 0;
                 $stokGudangTotal = $item->total_stok_gudang ?? 0;
                 $jumlahStok = $stokToko + $stokGudangTotal;
-                $bgStok = $jumlahStok <= ($stokData->stok_minimal ?? 0) ? 'text-red-600 font-bold' : 'text-emerald-700';
+                $bgStok = $jumlahStok <= ($currentStokData->stok_minimal ?? 0) ? 'text-red-600 font-bold' : 'text-emerald-700';
                 $cardBg = $jumlahStok <= 0 ? 'from-red-50 to-white border-red-500' : 'from-white to-gray-50 border-blue-500';
             @endphp
             <div class="bg-gradient-to-br {{ $cardBg }} border-l-4 p-3 shadow-sm rounded-sm">
@@ -136,6 +162,8 @@
                     <th class="border border-blue-900 p-3">Nama Produk</th>
                     <th class="border border-blue-900 p-3">Kategori</th>
                     <th class="border border-blue-900 p-3 text-center">Stok</th>
+                    <th class="border border-blue-900 p-3 text-center">Toko Lain</th>
+                    <th class="border border-blue-900 p-3 text-center">Gudang</th>
                     <th class="border border-blue-900 p-3">Satuan</th>
                     <th class="border border-blue-900 p-3 text-right">Harga Jual</th>
                     <th class="border border-blue-900 p-3 text-center w-24">Status</th>
@@ -145,11 +173,12 @@
             <tbody>
                 @forelse($produks as $index => $item)
                     @php
-                        $stokData = $item->stokTokos->first();
-                        $stokToko = $stokData ? $stokData->stok_fisik : 0;
+                        // Get current toko stock
+                        $currentStokData = collect($item->stokTokos)->firstWhere('id_toko', $selectedToko->id_toko);
+                        $stokToko = $currentStokData ? $currentStokData->stok_fisik : 0;
                         $stokGudangTotal = $item->total_stok_gudang ?? 0;
                         $jumlahStok = $stokToko + $stokGudangTotal;
-                        $bgStok = $jumlahStok <= ($stokData->stok_minimal ?? 0) ? 'text-red-600 font-bold' : 'text-emerald-700';
+                        $bgStok = $jumlahStok <= ($currentStokData->stok_minimal ?? 0) ? 'text-red-600 font-bold' : 'text-emerald-700';
                         $rowClass = $jumlahStok <= 0 ? 'bg-red-50' : 'hover:bg-blue-50';
                     @endphp
                     <tr class="{{ $rowClass }} transition-colors text-xs border-b border-gray-200">
@@ -176,6 +205,47 @@
                             <div class="font-mono font-bold">{{ number_format($jumlahStok, 0, ',', '.') }}</div>
                             @if($stokGudangTotal > 0)
                                 <div class="text-[9px] text-gray-500">Toko: {{ $stokToko }} | Gudang: {{ $stokGudangTotal }}</div>
+                            @endif
+                        </td>
+
+                        {{-- Toko Lain Column --}}
+                        <td class="p-3 text-center">
+                            @php
+                                // Get stocks from other stores (excluding selected toko)
+                                $otherStores = collect($item->stokTokos)->filter(function($stock) use ($selectedToko) {
+                                    return $stock->id_toko != $selectedToko->id_toko;
+                                });
+                            @endphp
+                            @if($otherStores->isNotEmpty())
+                                @foreach($otherStores as $otherStock)
+                                    <div class="text-[9px] {{ $otherStock->stok_fisik > 0 ? 'text-blue-600 font-bold' : 'text-gray-400' }} mb-1">
+                                        <span class="inline-block px-1.5 py-0.5 bg-blue-50 border border-blue-200 rounded-sm">
+                                            {{ $otherStock->toko->nama_toko ?? 'N/A' }}: 
+                                            <span class="font-mono">{{ number_format($otherStock->stok_fisik, 0, ',', '.') }}</span>
+                                        </span>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="text-[9px] text-gray-400 italic">-</div>
+                            @endif
+                        </td>
+
+                        {{-- Gudang Column --}}
+                        <td class="p-3 text-center">
+                            @php
+                                $warehouses = collect($item->stokGudangs ?? []);
+                            @endphp
+                            @if($warehouses->isNotEmpty())
+                                @foreach($warehouses as $gudangStock)
+                                    <div class="text-[9px] {{ $gudangStock->stok_fisik > 0 ? 'text-green-600 font-bold' : 'text-gray-400' }} mb-1">
+                                        <span class="inline-block px-1.5 py-0.5 bg-green-50 border border-green-200 rounded-sm">
+                                            {{ $gudangStock->gudang->nama_gudang ?? 'N/A' }}: 
+                                            <span class="font-mono">{{ number_format($gudangStock->stok_fisik, 0, ',', '.') }}</span>
+                                        </span>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="text-[9px] text-gray-400 italic">-</div>
                             @endif
                         </td>
 
@@ -224,7 +294,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="9" class="p-8 text-center border border-gray-300">
+                        <td colspan="11" class="p-8 text-center border border-gray-300">
                             <i class="fa fa-box text-gray-200 text-5xl block mb-3"></i>
                             <p class="text-gray-400 italic text-sm">Belum ada data produk</p>
                         </td>
