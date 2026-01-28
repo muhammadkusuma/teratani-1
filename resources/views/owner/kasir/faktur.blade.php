@@ -5,18 +5,19 @@
     <title>Faktur Penjualan</title>
     <style>
         @page {
-            /* Standard continuous paper size ~ 9.5 x 5.5 inch or custom */
-            size: 241mm 140mm; 
+            /* Default to standard continuous form size but allow driver override if set to auto */
+            /* size: 241mm 140mm; */ 
             margin: 0;
         }
         body {
             font-family: 'Courier New', Courier, monospace;
             font-size: 11px;
-            color: #000080; /* Dark Blue from reference */
+            color: #000080; /* Dark Blue */
             margin: 0;
-            padding: 5mm 10mm;
-            width: 221mm; /* 241mm - 20mm padding */
-            height: 130mm;
+            padding: 5mm; /* Padding inside the paper */
+            width: 100%; /* Fluid width */
+            /* height: 100%; Remove fixed height to allow content to flow */
+            box-sizing: border-box;
         }
         .header-section {
             display: flex;
@@ -29,14 +30,14 @@
             width: 35%;
         }
         .header-center {
-            width: 15%;
+            width: 20%; /* Increased for better logo centering spacing */
             text-align: center;
             display: flex;
             justify-content: center;
             align-items: center;
         }
         .header-right {
-            width: 50%;
+            width: 45%;
             text-align: right;
         }
         
@@ -50,7 +51,7 @@
             margin: 0 auto;
         }
         .logo-img {
-            max-width: 50px;
+            max-width: 100%;
             max-height: 50px;
         }
 
@@ -63,6 +64,7 @@
         .shop-info, .cust-info {
             font-size: 10px;
             line-height: 1.3;
+            word-wrap: break-word;
         }
         
         .invoice-title {
@@ -80,6 +82,7 @@
             border-collapse: collapse;
             font-size: 11px;
             margin-top: 5px;
+            table-layout: fixed; /* Helps with responsiveness */
         }
         th {
             border-top: 1px solid #000080;
@@ -92,9 +95,10 @@
             padding: 2px 3px;
             vertical-align: top;
             color: #000080;
+            word-wrap: break-word;
         }
         tr.item-row td {
-            border-bottom: 1px dashed #ccc; /* Ligther dashed for rows */
+            border-bottom: 1px dashed #ccc; 
         }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
@@ -103,6 +107,7 @@
             display: flex;
             justify-content: space-between;
             margin-top: 5px;
+            width: 100%;
         }
         .footer-left {
             width: 30%;
@@ -134,8 +139,9 @@
 
         @media print {
             body { 
-                padding: 0 5mm; /* Adjust print padding */
                 width: 100%;
+                margin: 0;
+                padding: 5mm; 
             }
         }
     </style>
@@ -164,7 +170,7 @@
 
         <!-- Right: Cust & Invoice Info -->
         <div class="header-right">
-            <div class="invoice-title">FAKTUR PENJUALAN dibuat oleh ({{ $transaksi->user->name ?? 'Auliya' }})</div>
+            <div class="invoice-title">FAKTUR PENJUALAN dibuat oleh ({{ auth()->user()->nama_lengkap ?? '-' }})</div>
             <div class="cust-info">
                 <strong>Pelanggan : {{ $transaksi->pelanggan->nama_pelanggan ?? '-' }} - {{ $transaksi->pelanggan->toko ?? '' }}</strong><br>
                 HP / WA : ({{ $transaksi->pelanggan->no_hp ?? '-' }})<br>
