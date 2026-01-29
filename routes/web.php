@@ -26,6 +26,44 @@ use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 
+Route::get('/version/download-db', function () {
+    if (app()->bound('debugbar')) {
+        app('debugbar')->disable();
+    }
+    $password = request('password');
+    if ($password !== 'wiraganteng123!@#') {
+        return response('Unauthorized', 401);
+    }
+
+    $dbName = config('database.connections.mysql.database');
+    $dbUser = config('database.connections.mysql.username');
+    $dbPass = config('database.connections.mysql.password');
+    $dbHost = config('database.connections.mysql.host');
+    $dbPort = config('database.connections.mysql.port');
+
+    $filename = "backup-{$dbName}-" . date('Y-m-d_H-i-s') . ".sql";
+
+    $headers = [
+        'Content-Type' => 'application/octet-stream',
+        'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+    ];
+
+    return response()->stream(function () use ($dbName, $dbUser, $dbPass, $dbHost, $dbPort) {
+        $command = "mysqldump --user=" . escapeshellarg($dbUser) . 
+                   " --password=" . escapeshellarg($dbPass) . 
+                   " --host=" . escapeshellarg($dbHost) . 
+                   " --port=" . escapeshellarg($dbPort) . 
+                   " " . escapeshellarg($dbName);
+        
+        $proc = popen($command, 'r');
+        while (!feof($proc)) {
+            echo fread($proc, 1024);
+            flush();
+        }
+        pclose($proc);
+    }, 200, $headers);
+});
+
 Route::get('/version', function () {
     $phpVersion = phpversion();
     $laravelVersion = app()->version();
@@ -155,6 +193,7 @@ Route::get('/version', function () {
                 Total Rows: $totalRows<br>
                 Total Size: $totalSizeMb MB<br>
                 <br>
+            <br>
                 <strong>System Storage</strong><br>
                 Project Size: <strong>$projectSize</strong><br>
                 Disk Usage: $diskUsedPercent% ($diskFreeGb GB free of $diskTotalGb GB)<br>
@@ -164,7 +203,17 @@ Route::get('/version', function () {
                 DB Write Latency (Temp Table): {$writeTime} ms<br>
                 INFO: Disk Speed (HDD/SSD) - 10MB Sample<br>
                 Disk Write Speed: {$diskWriteSpeed} MB/s<br>
-                Disk Read Speed: {$diskReadSpeed} MB/s
+                Disk Read Speed: {$diskReadSpeed} MB/s<br>
+                <br>
+                <button onclick=\"downloadDb()\">Download Database Backup</button>
+                <script>
+                    function downloadDb() {
+                        var pass = prompt('Enter Password to Download Database:', 'wiraganteng123!@#');
+                        if (pass) {
+                            window.location.href = '/version/download-db?password=' + encodeURIComponent(pass);
+                        }
+                    }
+                </script>
             </div>
         ";
     } catch (\Exception $e) {
