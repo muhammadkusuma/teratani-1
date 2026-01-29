@@ -77,12 +77,79 @@ Route::get('/version', function () {
         $diskTotalGb = number_format(($diskTotal ?: 0) / 1024 / 1024 / 1024, 2);
         $diskUsedPercent = $diskTotal > 0 ? round((($diskTotal - $diskFree) / $diskTotal) * 100, 1) : 0;
 
+        // CPU & RAM Stats
+        $cpuCores = trim(shell_exec("nproc"));
+        $cpuLoad = sys_getloadavg();
+        $loadAvg = isset($cpuLoad[0]) ? $cpuLoad[0] : 'N/A';
+        
+        // RAM & Swap
+        $freeOut = shell_exec("free -m");
+        $lines = explode("\n", trim($freeOut));
+        $memTotal = $memUsed = '0';
+        $swapTotal = $swapUsed = '0';
+        
+        foreach ($lines as $line) {
+            if (strpos($line, 'Mem:') !== false) {
+                $parts = preg_split('/\s+/', $line);
+                $memTotal = $parts[1] ?? 0; 
+                $memUsed = $parts[2] ?? 0;
+            }
+            if (strpos($line, 'Swap:') !== false) {
+                $parts = preg_split('/\s+/', $line);
+                $swapTotal = $parts[1] ?? 0;
+                $swapUsed = $parts[2] ?? 0;
+            }
+        }
+        
+        $ramUsageMb = number_format((float)$memUsed);
+        $ramTotalMb = number_format((float)$memTotal);
+        $swapUsageMb = number_format((float)$swapUsed);
+        $swapTotalMb = number_format((float)$swapTotal);
+
+        // HDD/SSD Speed Benchmark (10MB Write/Read)
+        $benchFile = storage_path('app/disk_bench_' . uniqid() . '.tmp');
+        // Ensure directory exists
+        if (!file_exists(dirname($benchFile))) {
+            mkdir(dirname($benchFile), 0755, true);
+        }
+
+        $dataSizeMb = 10;
+        $data = str_repeat("0", $dataSizeMb * 1024 * 1024);
+
+        // Disk Write
+        $startDiskWrite = microtime(true);
+        file_put_contents($benchFile, $data);
+        $endDiskWrite = microtime(true);
+        $diskWriteTime = $endDiskWrite - $startDiskWrite;
+        $diskWriteSpeedVal = ($diskWriteTime > 0) ? ($dataSizeMb / $diskWriteTime) : 0;
+
+        // Disk Read
+        $startDiskRead = microtime(true);
+        file_get_contents($benchFile);
+        $endDiskRead = microtime(true);
+        $diskReadTime = $endDiskRead - $startDiskRead;
+        $diskReadSpeedVal = ($diskReadTime > 0) ? ($dataSizeMb / $diskReadTime) : 0;
+
+        // Cleanup
+        if (file_exists($benchFile)) {
+            unlink($benchFile);
+        }
+
+        $diskWriteSpeed = number_format($diskWriteSpeedVal, 2);
+        $diskReadSpeed = number_format($diskReadSpeedVal, 2);
+
         return "
             <div style='font-family: monospace; line-height: 1.5;'>
                 <strong>System Versions</strong><br>
                 PHP: $phpVersion<br>
                 Laravel: $laravelVersion<br>
                 Database: $dbVersion<br>
+                <br>
+                <strong>Hardware Resources</strong><br>
+                CPU Cores: $cpuCores<br>
+                CPU Load (1m): $loadAvg<br>
+                RAM Usage: $ramUsageMb MB / $ramTotalMb MB<br>
+                Swap Usage: $swapUsageMb MB / $swapTotalMb MB<br>
                 <br>
                 <strong>Database Stats ($dbName)</strong><br>
                 Total Rows: $totalRows<br>
@@ -93,8 +160,11 @@ Route::get('/version', function () {
                 Disk Usage: $diskUsedPercent% ($diskFreeGb GB free of $diskTotalGb GB)<br>
                 <br>
                 <strong>Performance Benchmarks</strong><br>
-                Read Latency (SELECT 1): {$readTime} ms<br>
-                Write Latency (Temp Table): {$writeTime} ms
+                DB Read Latency (SELECT 1): {$readTime} ms<br>
+                DB Write Latency (Temp Table): {$writeTime} ms<br>
+                INFO: Disk Speed (HDD/SSD) - 10MB Sample<br>
+                Disk Write Speed: {$diskWriteSpeed} MB/s<br>
+                Disk Read Speed: {$diskReadSpeed} MB/s
             </div>
         ";
     } catch (\Exception $e) {
