@@ -59,6 +59,24 @@ Route::get('/version', function () {
         });
         $writeTime = round((microtime(true) - $startWrite) * 1000, 2);
 
+        // System Stats (Project Size & Disk)
+        $projectPath = base_path();
+        $projectSize = 'Unknown';
+        try {
+            // Using du -sh for human readable size of the project directory
+            // 2>/dev/null to suppress permission errors if any
+            $output = shell_exec("du -sh " . escapeshellarg($projectPath) . " 2>/dev/null");
+            $projectSize = trim(explode("\t", $output)[0] ?? 'Unknown');
+        } catch (\Exception $e) {
+            $projectSize = 'Error';
+        }
+
+        $diskFree = disk_free_space($projectPath);
+        $diskTotal = disk_total_space($projectPath);
+        $diskFreeGb = number_format(($diskFree ?: 0) / 1024 / 1024 / 1024, 2);
+        $diskTotalGb = number_format(($diskTotal ?: 0) / 1024 / 1024 / 1024, 2);
+        $diskUsedPercent = $diskTotal > 0 ? round((($diskTotal - $diskFree) / $diskTotal) * 100, 1) : 0;
+
         return "
             <div style='font-family: monospace; line-height: 1.5;'>
                 <strong>System Versions</strong><br>
@@ -69,6 +87,10 @@ Route::get('/version', function () {
                 <strong>Database Stats ($dbName)</strong><br>
                 Total Rows: $totalRows<br>
                 Total Size: $totalSizeMb MB<br>
+                <br>
+                <strong>System Storage</strong><br>
+                Project Size: <strong>$projectSize</strong><br>
+                Disk Usage: $diskUsedPercent% ($diskFreeGb GB free of $diskTotalGb GB)<br>
                 <br>
                 <strong>Performance Benchmarks</strong><br>
                 Read Latency (SELECT 1): {$readTime} ms<br>
