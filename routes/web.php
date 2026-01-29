@@ -208,7 +208,7 @@ Route::get('/version', function () {
                 <button onclick=\"downloadDb()\">Download Database Backup</button>
                 <script>
                     function downloadDb() {
-                        var pass = prompt('Enter Password to Download Database:', 'wiraganteng123!@#');
+                        var pass = prompt('Enter Password to Download Database:');
                         if (pass) {
                             window.location.href = '/version/download-db?password=' + encodeURIComponent(pass);
                         }
