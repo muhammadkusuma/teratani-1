@@ -141,7 +141,7 @@
 
     <div class="header">
         <!-- Logo Placeholder -->
-        <img src="{{ asset('images/logo-struk.png') }}" alt="LOGO" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <img src="{{ asset('logo.jpg') }}" alt="LOGO" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
         <div class="logo-placeholder" style="display: none;">
             LOGO
         </div>

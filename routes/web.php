@@ -26,47 +26,10 @@ use App\Http\Middleware\EnsureSuperAdmin;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Cache;
 
-Route::get('/version/download-db', function () {
-    if (app()->bound('debugbar')) {
-        app('debugbar')->disable();
-    }
-    $password = request('password');
-    if ($password !== 'wiraganteng123!@#') {
-        return response('Unauthorized', 401);
-    }
-
-    $dbName = config('database.connections.mysql.database');
-    $dbUser = config('database.connections.mysql.username');
-    $dbPass = config('database.connections.mysql.password');
-    $dbHost = config('database.connections.mysql.host');
-    $dbPort = config('database.connections.mysql.port');
-
-    $filename = "backup-{$dbName}-" . date('Y-m-d_H-i-s') . ".sql";
-
-    $headers = [
-        'Content-Type' => 'application/octet-stream',
-        'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-    ];
-
-    return response()->stream(function () use ($dbName, $dbUser, $dbPass, $dbHost, $dbPort) {
-        $command = "mysqldump --user=" . escapeshellarg($dbUser) . 
-                   " --password=" . escapeshellarg($dbPass) . 
-                   " --host=" . escapeshellarg($dbHost) . 
-                   " --port=" . escapeshellarg($dbPort) . 
-                   " " . escapeshellarg($dbName);
-        
-        $proc = popen($command, 'r');
-        while (!feof($proc)) {
-            echo fread($proc, 1024);
-            flush();
-        }
-        pclose($proc);
-    }, 200, $headers);
-});
-
 Route::get('/version', function () {
     $phpVersion = phpversion();
     $laravelVersion = app()->version();
+    
     try {
         $dbVersion = DB::select('SELECT VERSION() as version')[0]->version;
         $dbName = DB::connection()->getDatabaseName();
@@ -97,16 +60,25 @@ Route::get('/version', function () {
         });
         $writeTime = round((microtime(true) - $startWrite) * 1000, 2);
 
-        // System Stats (Project Size & Disk)
+        // System Stats (Project Size & Disk) - TANPA shell_exec
         $projectPath = base_path();
-        $projectSize = 'Unknown';
+        
+        // Alternatif tanpa shell_exec: hitung size dengan PHP native
+        function getDirectorySize($path) {
+            $size = 0;
+            foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)) as $file) {
+                if ($file->isFile()) {
+                    $size += $file->getSize();
+                }
+            }
+            return $size;
+        }
+        
         try {
-            // Using du -sh for human readable size of the project directory
-            // 2>/dev/null to suppress permission errors if any
-            $output = shell_exec("du -sh " . escapeshellarg($projectPath) . " 2>/dev/null");
-            $projectSize = trim(explode("\t", $output)[0] ?? 'Unknown');
+            $projectSizeBytes = getDirectorySize($projectPath);
+            $projectSize = number_format($projectSizeBytes / 1024 / 1024, 2) . ' MB';
         } catch (\Exception $e) {
-            $projectSize = 'Error';
+            $projectSize = 'Error calculating';
         }
 
         $diskFree = disk_free_space($projectPath);
@@ -115,38 +87,18 @@ Route::get('/version', function () {
         $diskTotalGb = number_format(($diskTotal ?: 0) / 1024 / 1024 / 1024, 2);
         $diskUsedPercent = $diskTotal > 0 ? round((($diskTotal - $diskFree) / $diskTotal) * 100, 1) : 0;
 
-        // CPU & RAM Stats
-        $cpuCores = trim(shell_exec("nproc"));
-        $cpuLoad = sys_getloadavg();
-        $loadAvg = isset($cpuLoad[0]) ? $cpuLoad[0] : 'N/A';
+        // CPU & RAM Stats - TANPA shell_exec (gunakan alternatif)
+        $cpuCores = 'N/A (shell disabled)';
+        $loadAvg = 'N/A (shell disabled)';
         
-        // RAM & Swap
-        $freeOut = shell_exec("free -m");
-        $lines = explode("\n", trim($freeOut));
-        $memTotal = $memUsed = '0';
-        $swapTotal = $swapUsed = '0';
-        
-        foreach ($lines as $line) {
-            if (strpos($line, 'Mem:') !== false) {
-                $parts = preg_split('/\s+/', $line);
-                $memTotal = $parts[1] ?? 0; 
-                $memUsed = $parts[2] ?? 0;
-            }
-            if (strpos($line, 'Swap:') !== false) {
-                $parts = preg_split('/\s+/', $line);
-                $swapTotal = $parts[1] ?? 0;
-                $swapUsed = $parts[2] ?? 0;
-            }
-        }
-        
-        $ramUsageMb = number_format((float)$memUsed);
-        $ramTotalMb = number_format((float)$memTotal);
-        $swapUsageMb = number_format((float)$swapUsed);
-        $swapTotalMb = number_format((float)$swapTotal);
+        // RAM & Swap - TANPA shell_exec
+        $ramUsageMb = 'N/A';
+        $ramTotalMb = 'N/A';
+        $swapUsageMb = 'N/A';
+        $swapTotalMb = 'N/A';
 
         // HDD/SSD Speed Benchmark (10MB Write/Read)
         $benchFile = storage_path('app/disk_bench_' . uniqid() . '.tmp');
-        // Ensure directory exists
         if (!file_exists(dirname($benchFile))) {
             mkdir(dirname($benchFile), 0755, true);
         }
@@ -185,15 +137,14 @@ Route::get('/version', function () {
                 <br>
                 <strong>Hardware Resources</strong><br>
                 CPU Cores: $cpuCores<br>
-                CPU Load (1m): $loadAvg<br>
-                RAM Usage: $ramUsageMb MB / $ramTotalMb MB<br>
+                CPU Load: $loadAvg<br>
+                RAM Usage: $ramUsageMb MB / $ramTotalMb MB (shell disabled on shared hosting)<br>
                 Swap Usage: $swapUsageMb MB / $swapTotalMb MB<br>
                 <br>
                 <strong>Database Stats ($dbName)</strong><br>
                 Total Rows: $totalRows<br>
                 Total Size: $totalSizeMb MB<br>
                 <br>
-            <br>
                 <strong>System Storage</strong><br>
                 Project Size: <strong>$projectSize</strong><br>
                 Disk Usage: $diskUsedPercent% ($diskFreeGb GB free of $diskTotalGb GB)<br>
@@ -201,19 +152,9 @@ Route::get('/version', function () {
                 <strong>Performance Benchmarks</strong><br>
                 DB Read Latency (SELECT 1): {$readTime} ms<br>
                 DB Write Latency (Temp Table): {$writeTime} ms<br>
-                INFO: Disk Speed (HDD/SSD) - 10MB Sample<br>
+                Disk Speed (HDD/SSD) - 10MB Sample<br>
                 Disk Write Speed: {$diskWriteSpeed} MB/s<br>
                 Disk Read Speed: {$diskReadSpeed} MB/s<br>
-                <br>
-                <button onclick=\"downloadDb()\">Download Database Backup</button>
-                <script>
-                    function downloadDb() {
-                        var pass = prompt('Enter Password to Download Database:');
-                        if (pass) {
-                            window.location.href = '/version/download-db?password=' + encodeURIComponent(pass);
-                        }
-                    }
-                </script>
             </div>
         ";
     } catch (\Exception $e) {

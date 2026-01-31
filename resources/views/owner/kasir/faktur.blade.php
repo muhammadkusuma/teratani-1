@@ -162,7 +162,7 @@
 
         <!-- Center: Logo -->
         <div class="header-center">
-             <img src="{{ asset('images/logo-faktur.png') }}" alt="LOGO" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+             <img src="{{ asset('logo.jpg') }}" alt="LOGO" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
             <div class="logo-placeholder" style="display: none;">
                 LOGO
             </div>
