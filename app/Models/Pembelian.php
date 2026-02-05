@@ -15,6 +15,7 @@ class Pembelian extends Model
 
     protected $casts = [
         'tanggal' => 'date',
+        'tanggal_jatuh_tempo' => 'date',
         'total' => 'decimal:2',
     ];
 

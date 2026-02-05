@@ -3,13 +3,20 @@
 @section('title', 'Riwayat Pembelian')
 
 @section('content')
+@section('content')
 <div class="flex justify-between items-center mb-3">
     <h2 class="font-bold text-lg border-b-2 border-gray-500 pr-4">
         <i class="fa fa-shopping-basket"></i> RIWAYAT PEMBELIAN DISTRIBUTOR
     </h2>
+    @if($toko)
     <a href="{{ route('owner.toko.pembelian.create', $toko->id_toko) }}" class="px-3 py-1 bg-blue-700 text-white border border-blue-900 shadow hover:bg-blue-600 text-xs">
         <i class="fa fa-plus"></i> INPUT PEMBELIAN
     </a>
+    @else
+    <a href="{{ route('owner.distributor.index') }}" class="px-3 py-1 bg-gray-700 text-white border border-gray-900 shadow hover:bg-gray-600 text-xs">
+        <i class="fa fa-truck"></i> KE LIST DISTRIBUTOR
+    </a>
+    @endif
 </div>
 
 <div class="overflow-x-auto border border-gray-400 bg-white">
@@ -33,7 +40,10 @@
                 <td class="border border-gray-300 p-2">{{ $pembelian->distributor->nama_distributor }}</td>
                 <td class="border border-gray-300 p-2 text-right font-bold">Rp {{ number_format($pembelian->total, 0, ',', '.') }}</td>
                 <td class="border border-gray-300 p-2 text-center">
-                    <a href="{{ route('owner.toko.pembelian.show', [$toko->id_toko, $pembelian->id_pembelian]) }}" class="px-2 py-0.5 bg-blue-600 text-white border border-blue-800 rounded hover:bg-blue-500 text-[10px]">
+                    @php 
+                        $tokoId = $toko ? $toko->id_toko : $pembelian->distributor->id_toko;
+                    @endphp
+                    <a href="{{ route('owner.toko.pembelian.show', [$tokoId, $pembelian->id_pembelian]) }}" class="px-2 py-0.5 bg-blue-600 text-white border border-blue-800 rounded hover:bg-blue-500 text-[10px]">
                         DETAIL
                     </a>
                 </td>

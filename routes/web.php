@@ -83,6 +83,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/hutang/{id}/edit', [DistributorController::class, 'hutangEdit'])->name('hutang.edit');
             Route::put('/hutang/{id}', [DistributorController::class, 'hutangUpdate'])->name('hutang.update');
             Route::delete('/hutang/{id}', [DistributorController::class, 'hutangDestroy'])->name('hutang.destroy');
+            Route::get('/pembelian', [PembelianController::class, 'indexAll'])->name('pembelian.index');
         });
         
         // Distributor resource routes

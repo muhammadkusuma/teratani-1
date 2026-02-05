@@ -15,6 +15,7 @@ use App\Models\Toko;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use App\Models\UtangPiutangDistributor;
 
 class PembelianController extends Controller
 {
@@ -31,6 +32,25 @@ class PembelianController extends Controller
         }
 
         $pembelians = $query->paginate(15)->withQueryString();
+
+        return view('owner.pembelian.index', compact('toko', 'pembelians'));
+    }
+
+    public function indexAll(Request $request)
+    {
+        $query = Pembelian::whereHas('distributor.toko', function($q) {
+            $q->where('id_perusahaan', Auth::user()->id_perusahaan);
+        })->with(['distributor.toko'])->orderBy('tanggal', 'desc');
+
+        if ($request->has('start_date') && $request->start_date) {
+            $query->whereDate('tanggal', '>=', $request->start_date);
+        }
+        if ($request->has('end_date') && $request->end_date) {
+            $query->whereDate('tanggal', '<=', $request->end_date);
+        }
+
+        $pembelians = $query->paginate(15)->withQueryString();
+        $toko = null; // Flag for global view
 
         return view('owner.pembelian.index', compact('toko', 'pembelians'));
     }
@@ -59,7 +79,7 @@ class PembelianController extends Controller
             ->where('is_active', 1)
             ->where(function($q) use ($keyword) {
                 $q->where('nama_produk', 'like', "%{$keyword}%")
-                  ->orWhere('sku', 'like', "%{$keyword}%");
+                ->orWhere('sku', 'like', "%{$keyword}%");
             })
             ->limit(20)
             ->get();
@@ -82,6 +102,8 @@ class PembelianController extends Controller
             'items.*.harga_satuan' => 'required|numeric|min:0',
             'destination_type' => 'required|in:toko,gudang',
             'destination_id' => 'required',
+            'jenis_bayar' => 'required|in:cash,hutang',
+            'jatuh_tempo' => 'nullable|required_if:jenis_bayar,hutang|date|after_or_equal:tanggal',
         ]);
 
         // Validate destination
@@ -107,6 +129,8 @@ class PembelianController extends Controller
                 'tanggal' => $request->tanggal,
                 'total' => $total,
                 'keterangan' => $request->keterangan,
+                'jenis_bayar' => $request->jenis_bayar,
+                'tanggal_jatuh_tempo' => $request->jenis_bayar === 'hutang' ? $request->jatuh_tempo : null,
             ]);
 
             foreach ($request->items as $item) {
@@ -163,6 +187,28 @@ class PembelianController extends Controller
                         'tanggal' => $request->tanggal,
                     ]);
                 }
+            }
+
+            // --- DEBT LOGIC ---
+            if ($request->jenis_bayar === 'hutang') {
+                $lastTransaction = UtangPiutangDistributor::where('id_distributor', $request->id_distributor)
+                    ->orderBy('tanggal', 'desc')
+                    ->orderBy('id_utang_piutang', 'desc')
+                    ->first();
+
+                $saldoSebelumnya = $lastTransaction ? $lastTransaction->saldo_utang : 0;
+                $saldoBaru = $saldoSebelumnya + $total;
+
+                UtangPiutangDistributor::create([
+                    'id_distributor'      => $request->id_distributor,
+                    'tanggal'             => $request->tanggal,
+                    'tanggal_jatuh_tempo' => $request->jatuh_tempo,
+                    'jenis_transaksi'     => 'utang',
+                    'nominal'             => $total,
+                    'keterangan'          => 'Pembelian Faktur #' . ($request->no_faktur ?? $pembelian->id_pembelian),
+                    'no_referensi'        => 'BELI-' . $pembelian->id_pembelian,
+                    'saldo_utang'         => $saldoBaru,
+                ]);
             }
 
             DB::commit();

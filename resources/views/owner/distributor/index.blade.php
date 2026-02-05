@@ -179,6 +179,9 @@
                 </td>
                 <td class="p-3">
                     <div class="flex justify-center gap-1">
+                        <a href="{{ route('owner.toko.pembelian.create', ['toko' => $row->id_toko, 'distributor_id' => $row->id_distributor]) }}" class="bg-emerald-600 text-white px-2.5 py-1 text-[10px] font-black hover:bg-emerald-500 transition-colors shadow-sm rounded-sm uppercase tracking-tighter" title="Beli Barang">
+                            <i class="fa fa-shopping-cart"></i> Beli
+                        </a>
                         <a href="{{ route('owner.distributor.show', $row->id_distributor) }}" class="bg-blue-600 text-white px-2.5 py-1 text-[10px] font-black hover:bg-blue-500 transition-colors shadow-sm rounded-sm uppercase tracking-tighter">Lihat</a>
                         <a href="{{ route('owner.distributor.edit', $row->id_distributor) }}" class="bg-amber-400 border border-amber-500 text-amber-900 px-2.5 py-1 text-[10px] font-black hover:bg-amber-300 transition-colors shadow-sm rounded-sm uppercase tracking-tighter">Edit</a>
                         <form action="{{ route('owner.distributor.destroy', $row->id_distributor) }}" method="POST" class="inline" onsubmit="return confirm('Hapus distributor?')">

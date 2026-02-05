@@ -306,6 +306,7 @@
                                 <a href="{{ route('owner.retur-pembelian.index') }}">🔙 Retur Distributor</a>
                                 <a href="{{ route('owner.distributor.index') }}">🚚 Data Distributor</a>
                                 <a href="{{ route('owner.distributor.hutang.index') }}">💰 Kelola Hutang</a>
+                                <a href="{{ route('owner.distributor.pembelian.index') }}">📦 Riwayat Pembelian</a>
                             </div>
                         </div>
                     @endif
