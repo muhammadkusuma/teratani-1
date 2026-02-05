@@ -42,7 +42,7 @@
             </div>
 
             <div id="jatuh-tempo-wrapper" style="display: {{ old('jenis_transaksi', $transaksi->jenis_transaksi) == 'utang' ? 'block' : 'none' }};">
-                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Tanggal Jatuh Tempo</label>
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Tanggal Jatuh Tempo <span class="text-rose-600">*</span></label>
                 <input type="date" name="tanggal_jatuh_tempo" id="tanggal_jatuh_tempo" value="{{ old('tanggal_jatuh_tempo', $transaksi->tanggal_jatuh_tempo?->format('Y-m-d')) }}" class="w-full border p-2 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none @error('tanggal_jatuh_tempo') border-rose-500 @else border-gray-300 @enderror">
                 <p class="text-[9px] text-gray-500 mt-1 italic"><i class="fa fa-info-circle"></i> Tanggal jatuh tempo hanya untuk transaksi utang</p>
                 @error('tanggal_jatuh_tempo')
@@ -52,7 +52,7 @@
 
             <div>
                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Jenis Transaksi <span class="text-rose-600">*</span></label>
-                <select name="jenis_transaksi" id="jenis_transaksi" required class="w-full border p-2 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none @error('jenis_transaksi') border-rose-500 @else border-gray-300 @enderror">
+                <select name="jenis_transaksi" id="jenis_transaksi" required class="manual-select2 w-full border p-2 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none @error('jenis_transaksi') border-rose-500 @else border-gray-300 @enderror">
                     <option value="">-- Pilih Jenis --</option>
                     <option value="utang" {{ old('jenis_transaksi', $transaksi->jenis_transaksi) == 'utang' ? 'selected' : '' }}>Utang (Tambah Tagihan)</option>
                     <option value="pembayaran" {{ old('jenis_transaksi', $transaksi->jenis_transaksi) == 'pembayaran' ? 'selected' : '' }}>Pembayaran (Kurangi Tagihan)</option>
@@ -108,22 +108,39 @@
     </form>
 </div>
 
+@push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const jenisSelect = document.getElementById('jenis_transaksi');
-    const jatuhTempoWrapper = document.getElementById('jatuh-tempo-wrapper');
-    const jatuhTempoInput = document.getElementById('tanggal_jatuh_tempo');
+$(document).ready(function() {
+    const $jenisSelect = $('#jenis_transaksi');
+    const $jatuhTempoWrapper = $('#jatuh-tempo-wrapper');
+    const jatuhTempoInput = $('#tanggal_jatuh_tempo');
     
+    // Init manual select2
+    $jenisSelect.select2({
+        width: '100%',
+        placeholder: "-- Pilih Jenis --"
+    });
+
     function toggleJatuhTempo() {
-        if (jenisSelect.value === 'utang') {
-            jatuhTempoWrapper.style.display = 'block';
+        if ($jenisSelect.val() === 'utang') {
+            $jatuhTempoWrapper.slideDown();
+            jatuhTempoInput.prop('required', true);
         } else {
-            jatuhTempoWrapper.style.display = 'none';
-            jatuhTempoInput.value = '';
+            $jatuhTempoWrapper.slideUp();
+            jatuhTempoInput.val('');
+            jatuhTempoInput.prop('required', false);
         }
     }
     
-    jenisSelect.addEventListener('change', toggleJatuhTempo);
+    // Listen to Select2 events AND standard change
+    $jenisSelect.on('select2:select change', function(e) {
+        toggleJatuhTempo();
+    });
+    
+    // Run initial check
+    setTimeout(toggleJatuhTempo, 100);
 });
 </script>
+@endpush
+@endsection
 @endsection
