@@ -130,7 +130,8 @@ $(document).ready(function() {
 
     // Initialize display value if hidden input has numeric value (e.g. validasi error)
     if ($nominalInput.val()) {
-        $nominalDisplay.val(formatRupiah($nominalInput.val()));
+        let cleanVal = parseFloat($nominalInput.val()).toString();
+        $nominalDisplay.val(formatRupiah(cleanVal));
     }
 
     $nominalDisplay.on('keyup input', function(e) {

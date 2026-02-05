@@ -144,7 +144,9 @@ $(document).ready(function() {
 
     // Initialize display value
     if ($nominalInput.val()) {
-        $nominalDisplay.val(formatRupiah($nominalInput.val()));
+        // Parse as float then string to remove unnecessary decimal text (e.g. 10000.00 -> 10000)
+        let cleanVal = parseFloat($nominalInput.val()).toString();
+        $nominalDisplay.val(formatRupiah(cleanVal));
     }
 
     $nominalDisplay.on('keyup input', function(e) {
@@ -200,5 +202,4 @@ $(document).ready(function() {
 });
 </script>
 @endpush
-@endsection
 @endsection
