@@ -64,7 +64,11 @@
 
             <div>
                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Nominal (Rp) <span class="text-rose-600">*</span></label>
-                <input type="number" step="0.01" name="nominal" value="{{ old('nominal', $transaksi->nominal) }}" required placeholder="0.00" class="w-full border p-2 text-xs shadow-inner focus:border-blue-500 transition-all outline-none @error('nominal') border-rose-500 @else border-gray-300 @enderror">
+                <!-- Hidden input for the actual numeric value sent to server -->
+                <input type="hidden" name="nominal" id="nominal" value="{{ old('nominal', $transaksi->nominal) }}">
+                <!-- Visible input for user interaction with formatting -->
+                <input type="text" id="nominal_display" value="{{ old('nominal', $transaksi->nominal) }}" required placeholder="0" class="w-full border p-2 text-xs shadow-inner focus:border-blue-500 transition-all outline-none @error('nominal') border-rose-500 @else border-gray-300 @enderror">
+                
                 @error('nominal')
                     <span class="text-rose-600 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span>
                 @enderror
@@ -115,6 +119,60 @@ $(document).ready(function() {
     const $jatuhTempoWrapper = $('#jatuh-tempo-wrapper');
     const jatuhTempoInput = $('#tanggal_jatuh_tempo');
     
+    // --- Currency Formatting Logic ---
+    const $nominalInput = $('#nominal');
+    const $nominalDisplay = $('#nominal_display');
+
+    function formatRupiah(angka) {
+        if (!angka) return '';
+        let number_string = angka.toString().replace('.', ','); // Convert DB dot to comma
+        number_string = number_string.replace(/[^,\d]/g, '').toString();
+        
+        let split = number_string.split(',');
+        let sisa = split[0].length % 3;
+        let rupiah = split[0].substr(0, sisa);
+        let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+        if (ribuan) {
+            let separator = sisa ? '.' : '';
+            rupiah += separator + ribuan.join('.');
+        }
+
+        rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+        return rupiah;
+    }
+
+    // Initialize display value
+    if ($nominalInput.val()) {
+        $nominalDisplay.val(formatRupiah($nominalInput.val()));
+    }
+
+    $nominalDisplay.on('keyup input', function(e) {
+        // Strip non-numeric except comma
+        let val = $(this).val();
+        
+        // Re-format
+        let number_string = val.replace(/[^,\d]/g, '').toString();
+        let split = number_string.split(',');
+        let sisa = split[0].length % 3;
+        let rupiah = split[0].substr(0, sisa);
+        let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+        if (ribuan) {
+            let separator = sisa ? '.' : '';
+            rupiah += separator + ribuan.join('.');
+        }
+
+        rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+        
+        $(this).val(rupiah);
+        
+        // Update hidden input (Standardize to 10000.00)
+        let rawValue = rupiah.replace(/\./g, '').replace(/,/g, '.');
+        $nominalInput.val(rawValue);
+    });
+    // ---------------------------------
+
     // Init manual select2
     $jenisSelect.select2({
         width: '100%',
