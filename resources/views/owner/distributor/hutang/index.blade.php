@@ -101,6 +101,25 @@
                     Rp {{ number_format($row->saldo_utang, 0, ',', '.') }}
                 </div>
             </div>
+            
+            @if($row->jenis_transaksi == 'utang' && $row->tanggal_jatuh_tempo)
+            <div class="col-span-2 bg-gray-50 p-2 rounded-sm border border-gray-100">
+                <div class="text-[9px] text-gray-500 font-bold uppercase tracking-tight mb-1">Jatuh Tempo</div>
+                <div class="flex items-center gap-2">
+                    <div class="text-xs font-mono font-bold text-gray-700">{{ $row->tanggal_jatuh_tempo->format('d M Y') }}</div>
+                    @if($row->is_overdue)
+                        <div class="px-2 py-0.5 bg-red-100 text-red-700 text-[9px] font-bold rounded uppercase animate-pulse">
+                            <i class="fa fa-exclamation-triangle"></i> Terlambat {{ abs($row->days_until_due) }} Hari
+                        </div>
+                    @elseif($row->days_until_due >= 0 && $row->days_until_due <= 7)
+                        <div class="px-2 py-0.5 bg-orange-100 text-orange-700 text-[9px] font-bold rounded uppercase">
+                            <i class="fa fa-clock"></i> {{ $row->days_until_due }} Hari Lagi
+                        </div>
+                    @endif
+                </div>
+            </div>
+            @endif
+
             @if($row->keterangan)
             <div class="col-span-2 text-[10px] text-gray-600 bg-gray-50 p-2 rounded-sm italic border-l-2 border-gray-200">
                 "{{ $row->keterangan }}"
@@ -132,6 +151,7 @@
             <tr class="bg-blue-900 text-white text-[10px] font-black uppercase tracking-widest">
                 <th class="border border-blue-900 p-3 text-center w-12">No</th>
                 <th class="border border-blue-900 p-3">Tanggal</th>
+                <th class="border border-blue-900 p-3 text-center">Jatuh Tempo</th>
                 <th class="border border-blue-900 p-3">Distributor</th>
                 <th class="border border-blue-900 p-3 text-center w-24">Jenis</th>
                 <th class="border border-blue-900 p-3 text-right">Nominal</th>
@@ -145,6 +165,24 @@
             <tr class="hover:bg-blue-50 transition-colors text-xs border-b border-gray-200">
                 <td class="p-3 text-center font-bold text-gray-400">{{ $transaksi->firstItem() + $key }}</td>
                 <td class="p-3 font-mono text-xs font-bold text-gray-600">{{ $row->tanggal->format('d/m/Y') }}</td>
+                <td class="p-3 text-center">
+                    @if($row->jenis_transaksi == 'utang' && $row->tanggal_jatuh_tempo)
+                        <div class="font-mono text-[10px] {{ $row->is_overdue ? 'text-red-700 font-bold' : 'text-gray-700' }}">
+                            {{ $row->tanggal_jatuh_tempo->format('d/m/Y') }}
+                        </div>
+                        @if($row->is_overdue)
+                            <div class="text-[9px] text-red-600 font-bold mt-0.5">
+                                <i class="fa fa-exclamation-triangle"></i> {{ abs($row->days_until_due) }} hari terlambat
+                            </div>
+                        @elseif($row->days_until_due >= 0 && $row->days_until_due <= 7)
+                            <div class="text-[9px] text-orange-600 font-bold mt-0.5">
+                                <i class="fa fa-clock"></i> {{ $row->days_until_due }} hari lagi
+                            </div>
+                        @endif
+                    @else
+                        <span class="text-gray-400 text-[10px]">-</span>
+                    @endif
+                </td>
                 <td class="p-3">
                     <div class="font-black text-blue-900 uppercase tracking-tight leading-tight">{{ $row->distributor->nama_distributor }}</div>
                     @if($row->no_referensi)
