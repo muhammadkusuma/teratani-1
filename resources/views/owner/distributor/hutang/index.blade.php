@@ -28,10 +28,10 @@
 </div>
 
 <div class="bg-white border border-gray-300 p-4 mb-4 shadow-sm rounded-sm">
-    <form method="GET" action="{{ route('owner.distributor.hutang.index') }}" class="grid grid-cols-1 md:grid-cols-5 gap-3">
-        <div class="md:col-span-1">
+    <form method="GET" action="{{ route('owner.distributor.hutang.index') }}" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
             <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Distributor</label>
-            <select name="id_distributor" class="w-full border border-gray-300 p-1.5 text-xs shadow-inner focus:border-blue-500 outline-none transition-all bg-gray-50">
+            <select name="id_distributor" class="w-full border border-gray-300 p-2 text-xs shadow-inner focus:border-blue-500 outline-none transition-all bg-gray-50 rounded-sm">
                 <option value="">-- Semua Distributor --</option>
                 @foreach($distributors as $d)
                     <option value="{{ $d->id_distributor }}" {{ request('id_distributor') == $d->id_distributor ? 'selected' : '' }}>
@@ -41,30 +41,31 @@
             </select>
         </div>
         <div>
-            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Jenis</label>
-            <select name="jenis_transaksi" class="w-full border border-gray-300 p-1.5 text-xs shadow-inner focus:border-blue-500 outline-none transition-all bg-gray-50">
-                <option value="">-- Semua --</option>
+            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Jenis Transaksi</label>
+            <select name="jenis_transaksi" class="w-full border border-gray-300 p-2 text-xs shadow-inner focus:border-blue-500 outline-none transition-all bg-gray-50 rounded-sm">
+                <option value="">-- Semua Jenis --</option>
                 <option value="utang" {{ request('jenis_transaksi') == 'utang' ? 'selected' : '' }}>Utang</option>
                 <option value="pembayaran" {{ request('jenis_transaksi') == 'pembayaran' ? 'selected' : '' }}>Pembayaran</option>
             </select>
         </div>
         <div>
-            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Dari</label>
-            <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full border border-gray-300 p-1.5 text-xs shadow-inner focus:border-blue-500 outline-none transition-all">
+            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Dari Tanggal</label>
+            <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" class="w-full border border-gray-300 p-2 text-xs shadow-inner focus:border-blue-500 outline-none transition-all rounded-sm">
         </div>
         <div>
-            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Sampai</label>
-            <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full border border-gray-300 p-1.5 text-xs shadow-inner focus:border-blue-500 outline-none transition-all">
+            <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Sampai Tanggal</label>
+            <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full border border-gray-300 p-2 text-xs shadow-inner focus:border-blue-500 outline-none transition-all rounded-sm">
         </div>
-        <div class="md:col-span-4 flex items-end gap-2">
-            <button type="submit" name="action" value="filter" class="bg-blue-600 text-white px-5 py-2 text-xs font-bold uppercase rounded shadow hover:bg-blue-700 transition">
+        
+        <div class="md:col-span-4 flex flex-col md:flex-row gap-2 mt-2 pt-3 border-t border-gray-100">
+            <button type="submit" name="action" value="filter" class="w-full md:w-auto bg-blue-600 text-white px-6 py-2.5 text-xs font-bold uppercase rounded shadow hover:bg-blue-700 hover:scale-[1.02] transition-all">
                 <i class="fa fa-filter mr-1"></i> Filter Data
             </button>
-            <a href="{{ route('owner.distributor.hutang.index') }}" class="bg-gray-500 text-white px-5 py-2 text-xs font-bold uppercase rounded shadow hover:bg-gray-600 transition">
+            <a href="{{ route('owner.distributor.hutang.index') }}" class="w-full md:w-auto bg-gray-500 text-white px-6 py-2.5 text-xs font-bold uppercase rounded shadow hover:bg-gray-600 hover:scale-[1.02] transition-all text-center">
                 <i class="fa fa-refresh mr-1"></i> Reset
             </a>
             
-            <button type="submit" name="action" value="export" class="ml-auto bg-green-600 text-white px-5 py-2 text-xs font-bold uppercase rounded shadow hover:bg-green-700 transition" onclick="return confirmExport(this.form)">
+            <button type="submit" name="action" value="export" class="w-full md:w-auto md:ml-auto bg-emerald-600 text-white px-6 py-2.5 text-xs font-bold uppercase rounded shadow hover:bg-emerald-700 hover:scale-[1.02] transition-all" onclick="return confirmExport(this.form)">
                 <i class="fa fa-file-excel-o mr-1"></i> Export Excel
             </button>
         </div>
