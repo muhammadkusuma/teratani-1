@@ -155,7 +155,7 @@
                 <th class="border border-blue-900 p-3">Distributor</th>
                 <th class="border border-blue-900 p-3 text-center w-24">Jenis</th>
                 <th class="border border-blue-900 p-3 text-right">Nominal</th>
-                <th class="border border-blue-900 p-3 text-right bg-amber-400/20 text-blue-900">Saldo Akhir</th>
+                <th class="border border-blue-900 p-3 text-right">Saldo Akhir</th>
                 <th class="border border-blue-900 p-3">Keterangan</th>
                 <th class="border border-blue-900 p-3 text-center w-36">Aksi</th>
             </tr>
