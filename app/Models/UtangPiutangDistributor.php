@@ -83,6 +83,6 @@ class UtangPiutangDistributor extends Model
             return null;
         }
         
-        return now()->diffInDays($this->tanggal_jatuh_tempo, false);
+        return now()->startOfDay()->diffInDays($this->tanggal_jatuh_tempo->startOfDay(), false);
     }
 }

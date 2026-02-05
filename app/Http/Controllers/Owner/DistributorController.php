@@ -358,6 +358,57 @@ class DistributorController extends Controller
             $summaryQuery->where('tanggal', '<=', $request->tanggal_sampai);
         }
 
+    // --- Export Logic ---
+    if ($request->action === 'export') {
+        // Enforce "Must filter first" rule
+        if (!$request->filled('id_distributor') && !$request->filled('tanggal_dari') && !$request->filled('tanggal_sampai') && !$request->filled('jenis_transaksi')) {
+            return redirect()->back()->with('error', 'Harap isi setidaknya satu filter (Distributor, Tanggal, atau Jenis) sebelum melakukan export excel.');
+        }
+
+        $filename = 'laporan-hutang-distributor-' . date('Y-m-d-H-i-s') . '.csv';
+
+        return response()->stream(function() use ($summaryQuery) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, ['Tanggal', 'Distributor', 'Jenis', 'Nominal', 'Jatuh Tempo', 'Status', 'Referensi', 'Keterangan']);
+
+            (clone $summaryQuery)
+                ->with(['distributor'])
+                ->orderBy('tanggal', 'desc')
+                ->orderBy('id_utang_piutang', 'desc')
+                ->chunk(500, function($rows) use ($handle) {
+                    foreach ($rows as $row) {
+                        $status = '';
+                        if ($row->jenis_transaksi == 'utang' && $row->tanggal_jatuh_tempo) {
+                            $days = $row->days_until_due;
+                            if ($days < 0) {
+                                $status = "Telat " . abs($days) . " hari";
+                            } elseif ($days == 0) {
+                                $status = "Hari ini";
+                            } else {
+                                $status = "$days hari lagi";
+                            }
+                        }
+
+                        fputcsv($handle, [
+                            $row->tanggal,
+                            $row->distributor->nama_distributor ?? '-',
+                            ucfirst($row->jenis_transaksi),
+                            $row->nominal,
+                            $row->tanggal_jatuh_tempo ?? '-',
+                            $status,
+                            $row->no_referensi,
+                            $row->keterangan
+                        ]);
+                    }
+                });
+                
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=\"$filename\"",
+        ]);
+    }
+
         $summary = [
             'total_utang' => (clone $summaryQuery)->where('jenis_transaksi', 'utang')->sum('nominal'),
             'total_bayar' => (clone $summaryQuery)->where('jenis_transaksi', 'pembayaran')->sum('nominal'),

@@ -56,13 +56,17 @@
             <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Sampai</label>
             <input type="date" name="tanggal_sampai" value="{{ request('tanggal_sampai') }}" class="w-full border border-gray-300 p-1.5 text-xs shadow-inner focus:border-blue-500 outline-none transition-all">
         </div>
-        <div class="flex items-end gap-2">
-            <button type="submit" class="flex-1 bg-blue-600 text-white border border-blue-800 px-4 py-1.5 text-xs font-bold hover:bg-blue-500 transition-colors shadow-sm uppercase">
-                <i class="fa fa-filter"></i> Filter
+        <div class="md:col-span-4 flex items-end gap-2">
+            <button type="submit" name="action" value="filter" class="bg-blue-600 text-white px-5 py-2 text-xs font-bold uppercase rounded shadow hover:bg-blue-700 transition">
+                <i class="fa fa-filter mr-1"></i> Filter Data
             </button>
-            <a href="{{ route('owner.distributor.hutang.index') }}" class="bg-gray-100 text-gray-700 border border-gray-300 px-4 py-1.5 text-xs font-bold hover:bg-gray-200 transition-colors text-center shadow-sm uppercase">
-                <i class="fa fa-sync-alt"></i> Reset
+            <a href="{{ route('owner.distributor.hutang.index') }}" class="bg-gray-500 text-white px-5 py-2 text-xs font-bold uppercase rounded shadow hover:bg-gray-600 transition">
+                <i class="fa fa-refresh mr-1"></i> Reset
             </a>
+            
+            <button type="submit" name="action" value="export" class="ml-auto bg-green-600 text-white px-5 py-2 text-xs font-bold uppercase rounded shadow hover:bg-green-700 transition" onclick="return confirmExport(this.form)">
+                <i class="fa fa-file-excel-o mr-1"></i> Export Excel
+            </button>
         </div>
     </form>
 </div>
