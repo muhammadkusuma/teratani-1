@@ -40,9 +40,18 @@
                 @enderror
             </div>
 
+            <div id="jatuh-tempo-wrapper" style="display: none;">
+                <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Tanggal Jatuh Tempo</label>
+                <input type="date" name="tanggal_jatuh_tempo" id="tanggal_jatuh_tempo" value="{{ old('tanggal_jatuh_tempo') }}" class="w-full border p-2 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none @error('tanggal_jatuh_tempo') border-rose-500 @else border-gray-300 @enderror">
+                <p class="text-[9px] text-gray-500 mt-1 italic"><i class="fa fa-info-circle"></i> Tanggal jatuh tempo hanya untuk transaksi utang</p>
+                @error('tanggal_jatuh_tempo')
+                    <span class="text-rose-600 text-[10px] font-bold mt-1 block uppercase">{{ $message }}</span>
+                @enderror
+            </div>
+
             <div>
                 <label class="block text-[10px] font-black text-gray-500 uppercase mb-1 tracking-wider">Jenis Transaksi <span class="text-rose-600">*</span></label>
-                <select name="jenis_transaksi" required class="w-full border p-2 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none @error('jenis_transaksi') border-rose-500 @else border-gray-300 @enderror">
+                <select name="jenis_transaksi" id="jenis_transaksi" required class="w-full border p-2 text-xs shadow-inner bg-gray-50 focus:bg-white focus:border-blue-500 transition-all outline-none @error('jenis_transaksi') border-rose-500 @else border-gray-300 @enderror">
                     <option value="">-- Pilih Jenis --</option>
                     <option value="utang" {{ old('jenis_transaksi') == 'utang' ? 'selected' : '' }}>Utang (Tambah Tagihan)</option>
                     <option value="pembayaran" {{ old('jenis_transaksi') == 'pembayaran' ? 'selected' : '' }}>Pembayaran (Kurangi Tagihan)</option>
@@ -87,6 +96,24 @@
         </div>
     </form>
 </div>
-    </form>
-</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const jenisSelect = document.getElementById('jenis_transaksi');
+    const jatuhTempoWrapper = document.getElementById('jatuh-tempo-wrapper');
+    const jatuhTempoInput = document.getElementById('tanggal_jatuh_tempo');
+    
+    function toggleJatuhTempo() {
+        if (jenisSelect.value === 'utang') {
+            jatuhTempoWrapper.style.display = 'block';
+        } else {
+            jatuhTempoWrapper.style.display = 'none';
+            jatuhTempoInput.value = '';
+        }
+    }
+    
+    jenisSelect.addEventListener('change', toggleJatuhTempo);
+    toggleJatuhTempo(); // Initial check
+});
+</script>
 @endsection

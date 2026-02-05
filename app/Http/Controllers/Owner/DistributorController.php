@@ -389,12 +389,13 @@ class DistributorController extends Controller
     public function hutangStore(Request $request)
     {
         $request->validate([
-            'id_distributor'   => 'required|exists:distributor,id_distributor',
-            'tanggal'          => 'required|date',
-            'jenis_transaksi'  => 'required|in:utang,pembayaran',
-            'nominal'          => 'required|numeric|min:0',
-            'keterangan'       => 'nullable',
-            'no_referensi'     => 'nullable|max:50',
+            'id_distributor'       => 'required|exists:distributor,id_distributor',
+            'tanggal'              => 'required|date',
+            'tanggal_jatuh_tempo'  => 'nullable|date|after_or_equal:tanggal',
+            'jenis_transaksi'      => 'required|in:utang,pembayaran',
+            'nominal'              => 'required|numeric|min:0',
+            'keterangan'           => 'nullable',
+            'no_referensi'         => 'nullable|max:50',
         ]);
 
         DB::beginTransaction();
@@ -420,13 +421,14 @@ class DistributorController extends Controller
             
 
             UtangPiutangDistributor::create([
-                'id_distributor'  => $request->id_distributor,
-                'tanggal'         => $request->tanggal,
-                'jenis_transaksi' => $request->jenis_transaksi,
-                'nominal'         => $request->nominal,
-                'keterangan'      => $request->keterangan,
-                'no_referensi'    => $request->no_referensi,
-                'saldo_utang'     => $saldoBaru,
+                'id_distributor'      => $request->id_distributor,
+                'tanggal'             => $request->tanggal,
+                'tanggal_jatuh_tempo' => $request->jenis_transaksi == 'utang' ? $request->tanggal_jatuh_tempo : null,
+                'jenis_transaksi'     => $request->jenis_transaksi,
+                'nominal'             => $request->nominal,
+                'keterangan'          => $request->keterangan,
+                'no_referensi'        => $request->no_referensi,
+                'saldo_utang'         => $saldoBaru,
             ]);
 
             DB::commit();
@@ -475,28 +477,28 @@ class DistributorController extends Controller
         }
 
         $request->validate([
-            'id_distributor'   => 'required|exists:distributor,id_distributor',
-            'tanggal'          => 'required|date',
-            'jenis_transaksi'  => 'required|in:utang,pembayaran',
-            'nominal'          => 'required|numeric|min:0',
-            'keterangan'       => 'nullable',
-            'no_referensi'     => 'nullable|max:50',
+            'id_distributor'       => 'required|exists:distributor,id_distributor',
+            'tanggal'              => 'required|date',
+            'tanggal_jatuh_tempo'  => 'nullable|date|after_or_equal:tanggal',
+            'jenis_transaksi'      => 'required|in:utang,pembayaran',
+            'nominal'              => 'required|numeric|min:0',
+            'keterangan'           => 'nullable',
+            'no_referensi'         => 'nullable|max:50',
         ]);
 
         DB::beginTransaction();
         try {
-            
+
 
             $transaksi->update([
-                'id_distributor'  => $request->id_distributor,
-                'tanggal'         => $request->tanggal,
-                'jenis_transaksi' => $request->jenis_transaksi,
-                'nominal'         => $request->nominal,
-                'keterangan'      => $request->keterangan,
-                'no_referensi'    => $request->no_referensi,
+                'id_distributor'      => $request->id_distributor,
+                'tanggal'             => $request->tanggal,
+                'tanggal_jatuh_tempo' => $request->jenis_transaksi == 'utang' ? $request->tanggal_jatuh_tempo : null,
+                'jenis_transaksi'     => $request->jenis_transaksi,
+                'nominal'             => $request->nominal,
+                'keterangan'          => $request->keterangan,
+                'no_referensi'        => $request->no_referensi,
             ]);
-
-            
 
             $this->recalculateSaldo($request->id_distributor);
 

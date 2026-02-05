@@ -137,7 +137,7 @@
     {{-- Mobile History View --}}
     <div class="block md:hidden space-y-3">
         @forelse($utangPiutang as $key => $row)
-        <div class="bg-gray-50 border border-gray-300 p-3 relative overflow-hidden">
+        <div class="bg-gray-50 border border-gray-300 p-3 relative overflow-hidden {{ $row->is_overdue ? 'bg-red-50 border-red-300' : '' }}">
             <div class="absolute top-0 right-0">
                 @if($row->jenis_transaksi == 'utang')
                     <div class="bg-red-500 text-white px-3 py-0.5 text-[9px] font-bold uppercase">UTANG</div>
@@ -147,6 +147,22 @@
             </div>
 
             <div class="text-[10px] text-gray-500 font-bold mb-1">{{ $row->tanggal->format('d/m/Y') }}</div>
+            
+            @if($row->jenis_transaksi == 'utang' && $row->tanggal_jatuh_tempo)
+                <div class="text-[10px] mb-2 {{ $row->is_overdue ? 'text-red-700 font-bold' : 'text-gray-600' }}">
+                    <i class="fa fa-calendar"></i> Jatuh Tempo: {{ $row->tanggal_jatuh_tempo->format('d/m/Y') }}
+                    @if($row->is_overdue)
+                        <span class="text-red-600 font-bold ml-1">
+                            <i class="fa fa-exclamation-triangle"></i> {{ abs($row->days_until_due) }} hari terlambat
+                        </span>
+                    @elseif($row->days_until_due >= 0 && $row->days_until_due <= 7)
+                        <span class="text-orange-600 font-bold ml-1">
+                            <i class="fa fa-clock"></i> {{ $row->days_until_due }} hari lagi
+                        </span>
+                    @endif
+                </div>
+            @endif
+            
             <div class="text-[10px] font-mono mb-2">REF: {{ $row->no_referensi ?? '-' }}</div>
             
             <div class="text-xs italic text-gray-700 mb-3 border-l-2 border-gray-300 pl-2">
@@ -180,6 +196,7 @@
                 <tr class="bg-gray-200 text-gray-700 text-xs uppercase">
                     <th class="border border-gray-400 p-2 text-center w-10">No</th>
                     <th class="border border-gray-400 p-2 text-center">Tanggal</th>
+                    <th class="border border-gray-400 p-2 text-center">Jatuh Tempo</th>
                     <th class="border border-gray-400 p-2 text-center">Jenis</th>
                     <th class="border border-gray-400 p-2">No. Referensi</th>
                     <th class="border border-gray-400 p-2">Keterangan</th>
@@ -189,9 +206,27 @@
             </thead>
             <tbody>
                 @forelse($utangPiutang as $key => $row)
-                <tr class="hover:bg-yellow-50 text-xs">
+                <tr class="hover:bg-yellow-50 text-xs {{ $row->is_overdue ? 'bg-red-50' : '' }}">
                     <td class="border border-gray-300 p-2 text-center font-bold text-gray-500">{{ $key + 1 }}</td>
                     <td class="border border-gray-300 p-2 text-center font-mono">{{ $row->tanggal->format('d/m/Y') }}</td>
+                    <td class="border border-gray-300 p-2 text-center">
+                        @if($row->jenis_transaksi == 'utang' && $row->tanggal_jatuh_tempo)
+                            <div class="font-mono text-[10px] {{ $row->is_overdue ? 'text-red-700 font-bold' : 'text-gray-700' }}">
+                                {{ $row->tanggal_jatuh_tempo->format('d/m/Y') }}
+                            </div>
+                            @if($row->is_overdue)
+                                <div class="text-[9px] text-red-600 font-bold mt-0.5">
+                                    <i class="fa fa-exclamation-triangle"></i> {{ abs($row->days_until_due) }} hari terlambat
+                                </div>
+                            @elseif($row->days_until_due >= 0 && $row->days_until_due <= 7)
+                                <div class="text-[9px] text-orange-600 font-bold mt-0.5">
+                                    <i class="fa fa-clock"></i> {{ $row->days_until_due }} hari lagi
+                                </div>
+                            @endif
+                        @else
+                            <span class="text-gray-400 text-[10px]">-</span>
+                        @endif
+                    </td>
                     <td class="border border-gray-300 p-2 text-center">
                         @if($row->jenis_transaksi == 'utang')
                             <span class="px-2 py-0.5 rounded bg-red-100 text-red-700 text-[10px] font-bold border border-red-200 uppercase">UTANG</span>
@@ -210,7 +245,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="p-4 text-center text-gray-500 italic border border-gray-300 bg-gray-50">
+                    <td colspan="8" class="p-4 text-center text-gray-500 italic border border-gray-300 bg-gray-50">
                         Belum ada transaksi hutang/piutang
                     </td>
                 </tr>
