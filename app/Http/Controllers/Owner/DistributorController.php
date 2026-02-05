@@ -42,6 +42,38 @@ class DistributorController extends Controller
             });
         }
 
+        // --- Export Logic ---
+        if ($request->action === 'export') {
+            $filename = 'data-distributor-' . date('Y-m-d-H-i-s') . '.csv';
+            
+            return response()->stream(function() use ($query) {
+                $handle = fopen('php://output', 'w');
+                fputcsv($handle, ['Kode', 'Nama Distributor', 'Perusahaan', 'Toko', 'Kontak', 'No HP', 'Alamat', 'Kota', 'Status']);
+
+                (clone $query)->orderBy('nama_distributor')
+                    ->chunk(500, function($rows) use ($handle) {
+                        foreach ($rows as $row) {
+                            fputcsv($handle, [
+                                $row->kode_distributor,
+                                $row->nama_distributor,
+                                $row->nama_perusahaan ?? '-',
+                                $row->toko->nama_toko ?? '-',
+                                $row->nama_kontak ?? '-',
+                                $row->no_hp_kontak ? "'".$row->no_hp_kontak : '-', // Force string check
+                                $row->alamat ?? '-',
+                                $row->kota ?? '-',
+                                $row->is_active ? 'Aktif' : 'Non-Aktif'
+                            ]);
+                        }
+                    });
+                    
+                fclose($handle);
+            }, 200, [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\"",
+            ]);
+        }
+
         $distributors = $query->orderBy('nama_distributor')->paginate(20);
 
         // Calculate statistics based on current query (filtered)

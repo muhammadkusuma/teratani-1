@@ -34,13 +34,16 @@
                 @endforeach
             </select>
         </div>
-        <div class="flex items-end gap-2">
-            <button type="submit" class="flex-1 md:flex-none bg-blue-600 text-white border border-blue-800 px-6 py-1.5 text-xs font-bold hover:bg-blue-500 transition-colors shadow-sm uppercase">
-                <i class="fa fa-filter"></i> Filter
+        <div class="flex flex-col md:flex-row items-center gap-2 mt-2 md:mt-0">
+            <button type="submit" name="action" value="filter" class="w-full md:w-auto flex-1 bg-blue-600 text-white border border-blue-800 px-6 py-2 text-xs font-bold hover:bg-blue-500 transition-colors shadow-sm uppercase rounded-sm">
+                <i class="fa fa-filter mr-1"></i> Filter
             </button>
-            <a href="{{ route('owner.distributor.index') }}" class="flex-1 md:flex-none bg-gray-100 text-gray-700 border border-gray-300 px-6 py-1.5 text-xs font-bold hover:bg-gray-200 transition-colors text-center shadow-sm uppercase">
-                <i class="fa fa-sync-alt"></i> Reset
+            <a href="{{ route('owner.distributor.index') }}" class="w-full md:w-auto flex-1 bg-gray-100 text-gray-700 border border-gray-300 px-6 py-2 text-xs font-bold hover:bg-gray-200 transition-colors text-center shadow-sm uppercase rounded-sm">
+                <i class="fa fa-sync-alt mr-1"></i> Reset
             </a>
+            <button type="submit" name="action" value="export" class="w-full md:w-auto flex-1 bg-emerald-600 text-white border border-emerald-800 px-6 py-2 text-xs font-bold hover:bg-emerald-500 transition-colors shadow-sm uppercase rounded-sm">
+                <i class="fa fa-file-excel-o mr-1"></i> Export
+            </button>
         </div>
     </form>
 </div>
